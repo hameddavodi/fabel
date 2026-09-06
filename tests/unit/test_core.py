@@ -267,6 +267,25 @@ def test_product_of_two_functions_is_exact() -> None:
     np.testing.assert_allclose((a * b)(t), a(t) * b(t), rtol=1e-9, atol=1e-11)
 
 
+@pytest.mark.parametrize(
+    ("left", "right"),
+    [
+        (BSpline(domain=(0.0, 1.0), n_basis=10), Fourier(domain=(0.0, 1.0), n_basis=9)),
+        (
+            Fourier(domain=(0.0, 1.0), n_basis=9, period=1.0),
+            Fourier(domain=(0.0, 1.0), n_basis=9, period=2.0),
+        ),
+        (Monomial(domain=(0.0, 1.0), exponents=[0, 1, 2]), Fourier(domain=(0.0, 1.0), n_basis=5)),
+    ],
+)
+def test_product_across_basis_families_is_accurate(left: Any, right: Any) -> None:
+    a = FData(RNG.normal(size=(left.n_basis, 2)), left)
+    b = FData(RNG.normal(size=(right.n_basis, 2)), right)
+    t = np.linspace(0.0, 1.0, 401)
+    want = a(t) * b(t)
+    np.testing.assert_allclose((a * b)(t), want, rtol=1e-8, atol=1e-8 * np.max(np.abs(want)))
+
+
 def test_integer_power_is_exact() -> None:
     a = make_fd(n_curves=2, n_basis=6, seed=6)
     t = np.linspace(0.0, 1.0, 101)

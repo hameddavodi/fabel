@@ -25,6 +25,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from dataclasses import dataclass
+from functools import cache
 from itertools import pairwise
 from math import isclose, pi, sqrt
 from types import ModuleType
@@ -53,6 +54,17 @@ _TOL = 1e-10
 
 #: Order of the B-spline used when a basis product has no exact closed form.
 _FALLBACK_PRODUCT_ORDER = 8
+
+#: Largest relative residual accepted from the fallback product basis.
+_PRODUCT_TOL = 1e-9
+
+#: Refinements of the shared break points tried when building that basis.
+_PRODUCT_REFINEMENTS = (1, 2, 4, 8, 16, 32, 64, 128)
+
+#: Orders tried at each refinement.  Raising the order buys accuracy far more
+#: cheaply than refining, and 12 is the largest order whose products the
+#: degree-12 Gauss-Legendre rule used for projections still integrates exactly.
+_PRODUCT_ORDERS = (8, 10, 12)
 
 #: Gauss-Legendre nodes per panel for penalties without a closed form.
 _NUMERIC_QUAD_DEGREE = 12
@@ -1547,5 +1559,96 @@ def _product_basis(left: Basis, right: Basis) -> Basis:
     if isinstance(left, Exponential) and isinstance(right, Exponential):
         rates = sorted({a + b for a in left.rates for b in right.rates})
         return Exponential(domain=left.domain, rates=rates)
-    size = max(left.n_basis + right.n_basis, _FALLBACK_PRODUCT_ORDER)
-    return BSpline(domain=left.domain, n_basis=size, order=_FALLBACK_PRODUCT_ORDER)
+    return _fallback_product(left, right)
+
+
+def _fallback_multiplicity(
+    spec: tuple[int, tuple[float, ...]] | None, point: float, order: int
+) -> int:
+    """Return the knot multiplicity ``point`` needs in an order-``order`` product space.
+
+    A factor that is not a spline, or that has no break at ``point``, is a
+    polynomial across it and imposes nothing; a spline with a break there is
+    only ``C^s`` and the product space must be too, which costs multiplicity
+    ``order - 1 - s``.
+    """
+    if spec is None or spec[1][1:-1].count(point) == 0:
+        return 1
+    return max(1, min(order - 1, order - 1 - _smoothness(spec, point)))
+
+
+def _fallback_knots(
+    grid: Sequence[float],
+    specs: tuple[tuple[int, tuple[float, ...]] | None, ...],
+    order: int,
+) -> tuple[float, ...]:
+    """Repeat each interior point of ``grid`` as often as the product space needs."""
+    out: list[float] = [grid[0]]
+    for point in grid[1:-1]:
+        out += [point] * max(_fallback_multiplicity(spec, point, order) for spec in specs)
+    out.append(grid[-1])
+    return tuple(out)
+
+
+def _refined_breaks(natural: Sequence[float], splits: int) -> tuple[float, ...]:
+    """Return ``natural`` with every interval cut into ``splits`` equal pieces."""
+    xp = default_namespace()
+    pieces = [
+        xp.linspace(natural[i], natural[i + 1], splits + 1, dtype=xp.float64)[:-1]
+        for i in range(len(natural) - 1)
+    ]
+    pieces.append(xp.asarray([natural[-1]], dtype=xp.float64))
+    return tuple(float(value) for value in xp.concat(pieces))
+
+
+def _product_residual(candidate: Basis, left: Basis, right: Basis, nodes: Array) -> float:
+    """Return the largest relative residual of a product ``phi_i psi_j`` in ``candidate``.
+
+    Every product of an expansion in ``left`` with one in ``right`` is a linear
+    combination of the pairwise products, so bounding the residual over the
+    pairs bounds it for any pair of curves.
+    """
+    xp = default_namespace()
+    a = left(nodes)
+    b = right(nodes)
+    products = xp.reshape(a[:, :, None] * b[:, None, :], (nodes.shape[0], -1))
+    design = candidate(nodes)
+    residual = products - xp.matmul(design, _linalg.lstsq(design, products))
+    scale = xp.max(xp.abs(products), axis=0)
+    return float(xp.max(xp.max(xp.abs(residual), axis=0) / xp.where(scale > 0.0, scale, 1.0)))
+
+
+@cache
+def _fallback_product(left: Basis, right: Basis) -> Basis:
+    """Return a spline rich enough to hold every product of ``left`` and ``right``.
+
+    The two bases belong to different families, so their product space has no
+    exact finite basis.  A spline of order ``_FALLBACK_PRODUCT_ORDER`` on the
+    union of both factors' break points is refined until it reproduces every
+    pairwise product to ``_PRODUCT_TOL``.
+
+    Raises
+    ------
+    ValueError
+        If the finest refinement still misses the product space, which means
+        the product is not a piecewise polynomial to that accuracy.
+    """
+    specs = (_spline_spec(left), _spline_spec(right))
+    natural = sorted(set(left._natural_breaks()) | set(right._natural_breaks()))
+    worst = float("inf")
+    for splits in _PRODUCT_REFINEMENTS:
+        grid = _refined_breaks(natural, splits)
+        nodes, _ = _linalg.composite_gauss_legendre(
+            asarray(_refined_breaks(grid, 2)), _NUMERIC_QUAD_DEGREE
+        )
+        for order in _PRODUCT_ORDERS:
+            breaks = _fallback_knots(grid, specs, order)
+            candidate = BSpline(domain=left.domain, order=order, breaks=breaks)
+            worst = _product_residual(candidate, left, right, nodes)
+            if worst <= _PRODUCT_TOL:
+                return candidate
+    raise ValueError(
+        f"no spline of order {_PRODUCT_ORDERS[-1]} on {_PRODUCT_REFINEMENTS[-1]} refinements of "
+        f"the shared breaks holds the product of {type(left).__name__} and "
+        f"{type(right).__name__} (residual {worst:.2e}); project onto an explicit basis instead"
+    )
