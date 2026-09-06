@@ -28,3 +28,17 @@ def golden_cases(module: str) -> list[dict[str, Any]]:
     """Return the ``cases`` list from ``tests/golden/<module>.json``."""
     cases: list[dict[str, Any]] = golden(module)["cases"]
     return cases
+
+
+def case_rtol(module: str, case: dict[str, Any]) -> float:
+    """Return the tolerance to use for one case.
+
+    Honours a per-case ``"rtol"`` override (e.g. iterative fits like
+    ``smooth.monotone``/``smooth.pos`` need a looser tolerance than the
+    module default); falls back to ``meta["rtol"]`` when absent.
+    """
+    if "rtol" in case:
+        rtol: float = case["rtol"]
+        return rtol
+    meta_rtol: float = golden(module)["meta"]["rtol"]
+    return meta_rtol

@@ -75,6 +75,11 @@ def test_cases_schema(golden_path: Path) -> None:
         assert isinstance(case["input"], dict)
         assert isinstance(case["output"], dict)
         assert case["output"], f"{golden_path.name}: empty output in case {case['name']}"
+        if "rtol" in case:
+            assert isinstance(case["rtol"], float), (
+                f"{golden_path.name}: case {case['name']} rtol must be a float"
+            )
+            assert case["rtol"] > 0, f"{golden_path.name}: case {case['name']} rtol must be > 0"
         names.append(case["name"])
 
     dupes = {n for n in names if names.count(n) > 1}

@@ -1,11 +1,12 @@
 # PROGRESS
-## Status: Phase 0 harness + Phase 1 golden files done (basis, core)
+## Status: Phase 0 harness + Phase 1 (basis, core) + Phase 2 (smoothing, stats, datasets) golden files done
 ## Done
-- `tools/make_golden.py` + `tools/golden_r/{common,basis,core}.R`: golden-file generator, rpy2-first with `Rscript` fallback.
-- `tests/golden/basis.json` (256 cases), `tests/golden/core.json` (28 cases).
-- `tests/parity/__init__.py`, `tests/parity/conftest.py` (`golden`/`golden_cases` helpers).
-- `tests/unit/test_golden_schema.py`: schema validation for every `tests/golden/*.json`.
+- `tools/make_golden.py` + `tools/golden_r/{common,basis,core,smoothing,stats,datasets}.R`: golden-file generator, rpy2-first with `Rscript` fallback.
+- `tests/golden/basis.json` (256 cases), `tests/golden/core.json` (28 cases), `tests/golden/smoothing.json` (42 cases), `tests/golden/stats.json` (7 cases), `tests/golden/datasets.json` (11 cases).
+- `tests/parity/__init__.py`, `tests/parity/conftest.py` (`golden`/`golden_cases`/`case_rtol` helpers).
+- `tests/unit/test_golden_schema.py`: schema validation for every `tests/golden/*.json`, including the optional per-case `rtol` override.
 - `.github/workflows/ci.yml`, `.github/dependabot.yml`, `.github/PULL_REQUEST_TEMPLATE.md`, `Makefile`.
+- `tools/export_datasets.R`: dumps each real fda dataset to `data_export/<name>.json` (gitignored, full precision) for the datasets-loader agent.
 ## Decisions
 - 2026-09-06 Python env managed with `uv` (AISMA §5.1: one package manager). Local dev on Python 3.12; Docker image on 3.11 per CLAUDE.md.
 - 2026-09-06 Golden files: `tools/make_golden.py` drives R through rpy2 when importable, else falls back to `Rscript` subprocess with the same seeded R scripts. Output format identical.
@@ -17,7 +18,17 @@
 - 2026-09-06 fda 6.3.0's `bifd()` is unconditionally broken for a 3-D coef array (`ndim == 3`, reps dim with no vars dim): its body sets `defaultnames` only in `if (ndim == 2)`/`if (ndim == 4)` branches (copy-paste bug omits `ndim == 3`) but then unconditionally runs `names(defaultnames) <- c(...)`, throwing "object 'defaultnames' not found" even when `fdnames` is passed explicitly (that line never references the `fdnames` arg). Worked around in `tools/golden_r/core.R` by using a 4-D array (`dim = c(nbasis_s, nbasis_t, nrep, nvar=1)`) instead, which hits the working `ndim == 4` branch and still exercises the reps dimension.
 - 2026-09-06 GitHub Actions in `.github/workflows/ci.yml` pinned to full commit SHAs verified via `gh api repos/<owner>/<repo>/tags` (actions/checkout v7.0.1, astral-sh/setup-uv v10.0.1, actions/upload-artifact v7.0.1), each with a `# vX.Y.Z` comment.
 - 2026-09-06 `parity` CI job runs on plain Python (uv-managed), no R/Docker: golden JSON files are pre-generated and committed, so parity tests only need `fabel` + the JSON, not R/rpy2. R is only needed to regenerate golden files via `make golden` / `tools/make_golden.py`.
+- 2026-09-06 **JSON precision bug found by parity agent, fixed same day**: `jsonlite::toJSON(..., digits = NA)` looks like "full round-trip precision" but is actually only ~15 significant digits, which can silently move a value across a float boundary (e.g. a B-spline breakpoint at `0.30000000000000004` serialized as bare `0.3`, a *different* double). `tools/golden_r/common.R::finalize()` now uses `digits = 17` (jsonlite's documented round-trip setting); `basis.json`/`core.json` regenerated (case counts unchanged, only literal precision changed).
+- 2026-09-06 Golden schema extended with an optional per-case `"rtol"` field (overrides `meta.rtol` for one case) for iterative fits (`smooth.monotone`, `smooth.pos`) that need a looser tolerance (1e-5) than the module default (1e-8). `tools/golden_r/common.R::add_case()`, `tests/parity/conftest.py::case_rtol()`, `tests/unit/test_golden_schema.py`, and `docs/dev/conventions.md` all updated to support it.
+- 2026-09-06 `lambda2gcv(log10lambda, ...)` takes **log10-scale** lambda; `lambda2df(..., lambda)`/`df2lambda(..., df)` take **linear-scale** lambda/df. Asymmetric across three closely related fda functions — `tools/golden_r/smoothing.R` passes `seq(-4,8,by=0.25)` directly (not exponentiated) to `lambda2gcv` for the GCV grid.
+- 2026-09-06 `Data2fd()`'s 4th positional argument is `nderiv`, not `lambda` (despite the task's `Data2fd(argvals, y, basis, lambda)` shorthand) — `lambda` must be passed by name in `tools/golden_r/smoothing.R`.
+- 2026-09-06 Task spec for `smooth.monotone` on growth `hgtf` asked for "B-spline order 6, 13 basis (knots at ages)", but `create.bspline.basis(breaks=growth$age, norder=6)` with all 31 raw ages gives `nbasis=35` (`nbreaks + norder - 2`), not 13. Resolved with an independent design choice: a reduced 9-point break sequence (`seq(min(age), max(age), length.out=9)`) correctly yields `nbasis=13`. Not derived from any source.
+- 2026-09-06 `fdepth()` requires its `data` argument shaped as `list(y = <matrix>)` (or `list(argvals=, y=)`) — passing a bare numeric matrix fails inside `fdepth()` with `"$ operator is invalid for atomic vectors"`.
+- 2026-09-06 `Fperm.fd(yfdPar, xfdlist, betalist, ...)` produces `Fobs`/`Fvals`/`Fnull` identically `0` at every permutation when **every** `betalist` entry uses a constant basis (time-constant scalar coefficients) for a functional response with strong day-of-year structure — a degenerate result masquerading as "no effect" (the underlying model residual is actually large, `resid_norm ~1446` over 365x35 points). Using a genuine functional basis for `betalist` (same Fourier(25) basis as the response, matching every `fRegress` example in the public docs) gives a well-behaved, non-degenerate `Fobs` (0.4426). `tools/golden_r/stats.R`'s `fperm_case()` uses the latter design (intercept + Atlantic-region dummy, both with functional Fourier betas).
+- 2026-09-06 fda 6.3.0's dataset catalog (`data(package="fda")$results[, "Item"]`) has no `CSTR` dataset and no separate "Chinese script" dataset — the task spec's request for both was based on a mistaken assumption. Full catalog (29 items) recorded in `tests/golden/datasets.json`'s `dataset_catalog` case. The handwriting-related dataset that does exist, `handwrit` (+ `handwritTime`), is covered instead.
 ## Failed approaches (do not retry)
 - Naive B-spline penalty Lfdobj bound `Lfdobj < norder` (from initial task heuristic): fails for e.g. order 3, Lfdobj 2. Correct bound is `Lfdobj <= norder - 2`.
 - Passing `fdnames` explicitly to `bifd()` to work around its 3-D `defaultnames` bug: does not help, since the crashing line (`names(defaultnames) <- ...`) never reads the `fdnames` argument. Must avoid ndim==3 arrays entirely (use ndim==2 or ndim==4).
+- `jsonlite::toJSON(..., digits = NA)` as "full precision" for golden files: it is not (see Decisions above). Always use `digits = 17`.
+- Representing scalar/dummy covariates in `fRegress`/`Fperm.fd`'s `xfdlist` as constant-basis `fd` objects with an all-constant `betalist`: produces a degenerate zero `Fobs` for a functional response (see Decisions above). Use a real functional basis for `betalist` instead.
 ## Blocked

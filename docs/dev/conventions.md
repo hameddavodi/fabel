@@ -21,14 +21,16 @@ Read `CLAUDE.md`, `SPEC.md`, `WORKFLOW.md` first. This file adds the concrete me
     {"name": "bspline_eval_k4_n10_d0",
      "r_call": "eval.basis(t, create.bspline.basis(c(0,1), 10, 4), 0)",
      "input": {"domain": [0, 1], "n_basis": 10, "order": 4, "t": [...]} ,
-     "output": {"values": [[...], ...]}}
+     "output": {"values": [[...], ...]},
+     "rtol": 1e-5}
   ]
 }
 ```
-- Matrices are JSON row-major nested lists (`jsonlite::toJSON(x, digits = NA)` — full double precision, `matrix = "rowmajor"`).
+- Matrices are JSON row-major nested lists (`jsonlite::toJSON(x, digits = 17)` — full round-trip double precision, `matrix = "rowmajor"`). Note: `digits = NA` looks like "full precision" but is actually only ~15 significant digits and can silently truncate a value across a float boundary; always use `digits = 17`.
 - Vectors are flat lists. Scalars are scalars. `NA`/`NaN` → `null`.
+- `"rtol"` on a case is OPTIONAL: a per-case override of `meta.rtol`, for cases whose reference values come from an iterative fit (e.g. `smooth.monotone`, `smooth.pos`) and need a looser tolerance than the module default. Omitted when the module default applies.
 - Golden files are generated ONLY by `tools/make_golden.py <module>`; never hand-edited. Never delete.
-- Parity tests in `tests/parity/test_<module>.py` load via `tests/parity/conftest.py::golden("<module>")` and compare with `numpy.testing.assert_allclose(actual, expected, rtol=case_rtol, atol=1e-12)`.
+- Parity tests in `tests/parity/test_<module>.py` load via `tests/parity/conftest.py::golden("<module>")` / `golden_cases("<module>")` and compare with `numpy.testing.assert_allclose(actual, expected, rtol=case_rtol(module, case), atol=1e-12)`, where `case_rtol` honours the per-case `"rtol"` override and falls back to `meta["rtol"]`.
 
 ## Testing
 - Tests first. `tests/unit/` (pure Python behaviour, hypothesis property tests), `tests/parity/` (golden), `tests/sklearn_compat/`, `tests/torch/` (skip if torch absent).
