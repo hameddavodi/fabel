@@ -24,13 +24,21 @@ set.seed(GOLDEN_SEED)
 CASES <- list()
 
 #' Append one golden case to the module-level CASES accumulator.
-add_case <- function(name, r_call, input, output) {
-  CASES[[length(CASES) + 1]] <<- list(
+#'
+#' `rtol`, if given, overrides `meta$rtol` for this case only (e.g. iterative
+#' fits like smooth.monotone/smooth.pos need a looser tolerance than the
+#' module default). Omitted when NULL so the case falls back to `meta$rtol`.
+add_case <- function(name, r_call, input, output, rtol = NULL) {
+  case <- list(
     name = name,
     r_call = r_call,
     input = input,
     output = output
   )
+  if (!is.null(rtol)) {
+    case$rtol <- rtol
+  }
+  CASES[[length(CASES) + 1]] <<- case
 }
 
 #' 41 equally spaced points across rangeval, plus a few interior points,
@@ -71,7 +79,7 @@ finalize <- function(module_name, rtol) {
   json <- jsonlite::toJSON(
     obj,
     auto_unbox = TRUE,
-    digits = NA,
+    digits = 17,  # full round-trip precision; digits=NA is only 15 sig figs (loses last bits)
     matrix = "rowmajor",
     na = "null",
     null = "null",
