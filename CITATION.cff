@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use Fabel, please cite it as below, together with Ramsay & Silverman (2005)."
+title: "Fabel: functional data analysis for Python"
+version: 1.0.0
+date-released: 2026-09-06
+license: BSD-3-Clause
+authors:
+  - name: "AISMA S.r.l."
+    email: hamed.davoodi@aisma.it
+repository-code: "https://github.com/AISMAsrl/fabel"
+references:
+  - type: book
+    title: "Functional Data Analysis"
+    authors:
+      - family-names: Ramsay
+        given-names: J. O.
+      - family-names: Silverman
+        given-names: B. W.
+    year: 2005
+    publisher:
+      name: Springer
+  - type: book
+    title: "Functional Data Analysis with R and MATLAB"
+    authors:
+      - family-names: Ramsay
+        given-names: J. O.
+      - family-names: Hooker
+        given-names: Giles
+      - family-names: Graves
+        given-names: Spencer
+    year: 2009
+    publisher:
+      name: Springer
