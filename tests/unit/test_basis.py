@@ -552,10 +552,39 @@ def test_exponential_product_sums_rates() -> None:
 
 
 def test_mixed_product_falls_back_to_a_rich_spline() -> None:
-    product = Fourier(domain=(0.0, 1.0), n_basis=5) * Monomial(domain=(0.0, 1.0), n_basis=3)
+    left = Fourier(domain=(0.0, 1.0), n_basis=5)
+    right = Monomial(domain=(0.0, 1.0), n_basis=3)
+    product = left * right
     assert isinstance(product, BSpline)
-    assert product.order == 8
+    assert product.order >= 8
     assert product.n_basis >= 8
+
+
+def test_fallback_product_reproduces_every_pairwise_product() -> None:
+    """The fallback basis must hold each phi_i psi_j, not merely resemble it."""
+    pairs = [
+        (Fourier(domain=(0.0, 1.0), n_basis=5), Monomial(domain=(0.0, 1.0), n_basis=3)),
+        (BSpline(domain=(0.0, 1.0), n_basis=10), Fourier(domain=(0.0, 1.0), n_basis=9)),
+        (
+            Fourier(domain=(0.0, 1.0), n_basis=7, period=1.0),
+            Fourier(domain=(0.0, 1.0), n_basis=7, period=2.0),
+        ),
+    ]
+    t = np.linspace(0.0, 1.0, 501)
+    for left, right in pairs:
+        product = left * right
+        columns = (left(t)[:, :, None] * right(t)[:, None, :]).reshape(t.size, -1)
+        residual = columns - product(t) @ np.linalg.lstsq(product(t), columns, rcond=None)[0]
+        relative = np.max(np.abs(residual), axis=0) / np.max(np.abs(columns), axis=0)
+        assert np.max(relative) <= 1e-8, (type(left).__name__, type(right).__name__)
+
+
+def test_fallback_product_carries_the_spline_factor_knot_multiplicity() -> None:
+    """A C^2 spline factor forces repeated knots, or the kink cannot be held."""
+    spline = BSpline(domain=(0.0, 1.0), order=4, breaks=[0.0, 0.5, 1.0])
+    product = spline * Fourier(domain=(0.0, 1.0), n_basis=5)
+    assert isinstance(product, BSpline)
+    assert product.breaks.count(0.5) == product.order - 3
 
 
 @pytest.mark.parametrize(
