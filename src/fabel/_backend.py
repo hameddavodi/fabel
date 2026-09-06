@@ -18,7 +18,7 @@ dtype('float64')
 from __future__ import annotations
 
 from types import ModuleType
-from typing import Any
+from typing import Any, cast
 
 import array_api_compat
 import numpy as np
@@ -28,6 +28,7 @@ __all__ = [
     "asarray",
     "default_namespace",
     "is_torch",
+    "result_namespace",
     "to_numpy",
 ]
 
@@ -88,6 +89,47 @@ def array_namespace(*xs: Any) -> ModuleType:
     return namespace
 
 
+def result_namespace(*xs: Any) -> ModuleType:
+    """Return the namespace an operation over ``xs`` should compute in.
+
+    Unlike :func:`array_namespace`, a NumPy operand does not conflict with a
+    third-party one: NumPy data is promotable, so mixing NumPy coefficients with
+    a PyTorch argument gives the PyTorch namespace (and a differentiable
+    result).  Two different non-NumPy libraries still conflict.
+
+    Parameters
+    ----------
+    *xs : object
+        Candidate arrays, scalars or ``None``.
+
+    Returns
+    -------
+    module
+        An array-API compatible namespace.
+
+    Raises
+    ------
+    TypeError
+        If ``xs`` mixes arrays from two different non-NumPy libraries.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from fabel._backend import result_namespace
+    >>> result_namespace(np.zeros(2), None).__name__.endswith("numpy")
+    True
+    """
+    spaces = [
+        array_api_compat.array_namespace(x) for x in xs if array_api_compat.is_array_api_obj(x)
+    ]
+    foreign = [space for space in spaces if space is not _DEFAULT_NAMESPACE]
+    if not foreign:
+        return _DEFAULT_NAMESPACE
+    if any(space is not foreign[0] for space in foreign[1:]):
+        raise TypeError(f"cannot mix array namespaces {sorted({s.__name__ for s in foreign})}")
+    return cast("ModuleType", foreign[0])
+
+
 def asarray(x: Any, xp: ModuleType | None = None, dtype: Any = float) -> Any:
     """Convert ``x`` to an array in namespace ``xp``.
 
@@ -116,6 +158,10 @@ def asarray(x: Any, xp: ModuleType | None = None, dtype: Any = float) -> Any:
     if xp is None:
         xp = array_namespace(x)
     resolved = xp.float64 if dtype is float else dtype
+    if array_api_compat.is_array_api_obj(x) and array_namespace(x) is xp:
+        if resolved is None or x.dtype == resolved:
+            return x
+        return xp.astype(x, resolved)
     if resolved is None:
         return xp.asarray(x)
     return xp.asarray(x, dtype=resolved)
