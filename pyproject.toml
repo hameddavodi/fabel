@@ -109,6 +109,7 @@ markers = [
   "parity: golden-file parity tests against R fda 6.3.0",
   "slow: long-running tests",
   "gpu: requires CUDA",
+  "network: hits the real network, skipped by default",
 ]
 filterwarnings = ["error::DeprecationWarning:fabel.*"]
 
