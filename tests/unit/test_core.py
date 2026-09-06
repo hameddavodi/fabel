@@ -317,6 +317,43 @@ def test_indexing_selects_curves() -> None:
     assert len(fd[1:4]) == 3
 
 
+def test_indexing_accepts_negative_positions() -> None:
+    fd = make_fd(n_curves=5)
+    t = np.linspace(0.0, 1.0, 6)
+    np.testing.assert_allclose(fd[-1](t), fd(t)[:, [4]], atol=1e-15)
+    np.testing.assert_allclose(fd[-5](t), fd(t)[:, [0]], atol=1e-15)
+    np.testing.assert_allclose(fd[[-1, -2]](t), fd(t)[:, [4, 3]], atol=1e-15)
+
+
+def test_indexing_accepts_numpy_integers() -> None:
+    fd = make_fd(n_curves=5)
+    t = np.linspace(0.0, 1.0, 6)
+    np.testing.assert_allclose(fd[np.int64(1)](t), fd(t)[:, [1]], atol=1e-15)
+    np.testing.assert_allclose(fd[np.int64(-1)](t), fd(t)[:, [4]], atol=1e-15)
+
+
+def test_indexing_accepts_arrays_and_boolean_masks() -> None:
+    fd = make_fd(n_curves=5)
+    t = np.linspace(0.0, 1.0, 6)
+    np.testing.assert_allclose(fd[np.array([0, 3])](t), fd(t)[:, [0, 3]], atol=1e-15)
+    mask = np.array([True, False, False, True, False])
+    np.testing.assert_allclose(fd[mask](t), fd(t)[:, [0, 3]], atol=1e-15)
+    assert len(fd[np.zeros(5, dtype=bool)]) == 0
+
+
+@pytest.mark.parametrize("index", [5, -6, [0, 5], [-6]])
+def test_indexing_out_of_range_raises_index_error(index: Any) -> None:
+    fd = make_fd(n_curves=5)
+    with pytest.raises(IndexError):
+        fd[index]
+
+
+def test_indexing_rejects_a_wrong_length_mask() -> None:
+    fd = make_fd(n_curves=5)
+    with pytest.raises(IndexError):
+        fd[np.array([True, False])]
+
+
 def test_iteration_yields_single_curves() -> None:
     fd = make_fd(n_curves=3)
     curves = list(fd)

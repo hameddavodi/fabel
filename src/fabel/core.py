@@ -9,7 +9,8 @@ tensors give differentiable PyTorch results.
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+import operator
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 
@@ -81,6 +82,35 @@ def _project(basis: Basis, nodes: NDArray, weights: NDArray, values: NDArray) ->
     rhs = xp.matmul(xp.matrix_transpose(mat), weights[:, None] * flat)
     coefs = _linalg.solve_spd(basis.gram(), rhs)
     return cast("NDArray", xp.reshape(coefs, (basis.n_basis, *values.shape[1:])))
+
+
+def _curve_positions(index: Any, n_curves: int) -> list[int] | None:
+    """Resolve a curve selector to a list of positions, or ``None`` for a scalar.
+
+    Accepts Python and NumPy integers, sequences and arrays of integers, and
+    boolean masks.  Negative positions count from the end.
+
+    Raises
+    ------
+    IndexError
+        If a position is out of range, or a boolean mask has the wrong length.
+    """
+    try:
+        operator.index(index)
+    except TypeError:
+        pass
+    else:
+        return None
+    entries = [entry.item() if hasattr(entry, "item") else entry for entry in index]
+    if entries and all(isinstance(entry, bool) for entry in entries):
+        if len(entries) != n_curves:
+            raise IndexError(f"mask of length {len(entries)} for {n_curves} curves")
+        return [i for i, keep in enumerate(entries) if keep]
+    positions = [operator.index(entry) for entry in entries]
+    resolved = [place + n_curves if place < 0 else place for place in positions]
+    if any(not 0 <= place < n_curves for place in resolved):
+        raise IndexError(f"curves {positions} out of range for {n_curves} curves")
+    return resolved
 
 
 def _as_operator(op: int | LDO) -> LDO:
@@ -229,18 +259,26 @@ class FData(PlotMixin):
             f"basis={type(self.basis).__name__}(n_basis={self.basis.n_basis}))"
         )
 
-    def __getitem__(self, index: int | slice | Sequence[int]) -> FData:
+    def __getitem__(self, index: Any) -> FData:
         """Select curves by position.
 
         Parameters
         ----------
-        index : int, slice or sequence of int
-            Curve selector applied to the second axis of ``coefs``.
+        index : int, slice, sequence of int, array or boolean mask
+            Curve selector applied to the second axis of ``coefs``.  Negative
+            positions count from the end.  A boolean mask must have one entry
+            per curve.
 
         Returns
         -------
         FData
             The selected curves, always with a curve axis.
+
+        Raises
+        ------
+        IndexError
+            If a position is out of range, or a boolean mask has the wrong
+            length.
 
         Examples
         --------
@@ -249,15 +287,23 @@ class FData(PlotMixin):
         >>> fd = fb.FData(np.eye(4), fb.BSpline(n_basis=4))
         >>> len(fd[1:3])
         2
+        >>> len(fd[-1])
+        1
         """
         xp = array_namespace(self.coefs)
-        if isinstance(index, int):
-            picked = self.coefs[:, index : index + 1, ...]
-        elif isinstance(index, slice):
-            picked = self.coefs[:, index, ...]
-        else:
-            picked = xp.take(self.coefs, xp.asarray(list(index)), axis=1)
-        return FData(picked, self.basis)
+        if isinstance(index, slice):
+            return FData(self.coefs[:, index, ...], self.basis)
+        positions = _curve_positions(index, self.n_curves)
+        if positions is None:
+            # A single curve: slice rather than take, so the curve axis is kept
+            # without a copy.
+            place = operator.index(index)
+            place += self.n_curves if place < 0 else 0
+            if not 0 <= place < self.n_curves:
+                raise IndexError(f"curve {index} is out of range for {self.n_curves} curves")
+            return FData(self.coefs[:, place : place + 1, ...], self.basis)
+        chosen = xp.asarray(positions, dtype=xp.int64)
+        return FData(xp.take(self.coefs, chosen, axis=1), self.basis)
 
     # ------------------------------------------------------------ evaluation
 
@@ -386,9 +432,9 @@ class FData(PlotMixin):
             raise ValueError(f"derivative order must be non-negative, got {n}")
         basis, matrix = self.basis._derivative_map(int(n))
         xp = array_namespace(self.coefs)
-        operator = asarray(matrix, xp=xp)
+        derivative_map = asarray(matrix, xp=xp)
         flat = xp.reshape(self.coefs, (self.coefs.shape[0], -1))
-        coefs = xp.matmul(operator, flat)
+        coefs = xp.matmul(derivative_map, flat)
         return FData(xp.reshape(coefs, (basis.n_basis, *self.coefs.shape[1:])), basis)
 
     # ------------------------------------------------------------ statistics
