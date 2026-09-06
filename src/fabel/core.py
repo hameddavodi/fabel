@@ -18,7 +18,7 @@ from fabel import _linalg
 from fabel._backend import array_namespace, asarray, default_namespace, result_namespace, to_numpy
 from fabel._operator import LDO
 from fabel._plot import PlotMixin
-from fabel.basis import Basis, Constant
+from fabel.basis import Basis, Constant, _same_domain
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import numpy as np
@@ -74,14 +74,21 @@ def _cross_gram(left: Basis, right: Basis, op1: LDO, op2: LDO) -> NDArray:
     return cast("NDArray", xp.matmul(xp.matrix_transpose(a), weights[:, None] * b))
 
 
-def _project(basis: Basis, nodes: NDArray, weights: NDArray, values: NDArray) -> NDArray:
-    """Return the coefficients of the L2 projection of ``values`` onto ``basis``."""
-    xp = default_namespace()
-    mat = basis(nodes)
+def _project(basis: Basis, nodes: NDArray, weights: NDArray, values: Array) -> Array:
+    """Return the coefficients of the L2 projection of ``values`` onto ``basis``.
+
+    The design matrix, quadrature weights and Gram matrix depend only on the
+    basis, so they are built once in NumPy and converted into the namespace of
+    ``values``.  Every step that touches ``values`` then stays in that
+    namespace, which keeps a torch autograd graph intact.
+    """
+    xp = array_namespace(values)
+    mat = asarray(basis(nodes), xp=xp)
+    quad = asarray(weights, xp=xp)
     flat = xp.reshape(values, (values.shape[0], -1))
-    rhs = xp.matmul(xp.matrix_transpose(mat), weights[:, None] * flat)
-    coefs = _linalg.solve_spd(basis.gram(), rhs)
-    return cast("NDArray", xp.reshape(coefs, (basis.n_basis, *values.shape[1:])))
+    rhs = xp.matmul(xp.matrix_transpose(mat), quad[:, None] * flat)
+    coefs = _linalg.solve_spd(asarray(basis.gram(), xp=xp), rhs)
+    return xp.reshape(coefs, (basis.n_basis, *values.shape[1:]))
 
 
 def _curve_positions(index: Any, n_curves: int) -> list[int] | None:
@@ -111,6 +118,24 @@ def _curve_positions(index: Any, n_curves: int) -> list[int] | None:
     if any(not 0 <= place < n_curves for place in resolved):
         raise IndexError(f"curves {positions} out of range for {n_curves} curves")
     return resolved
+
+
+def _promote(coefs: Array, value: Any) -> tuple[Array, Any]:
+    """Return ``coefs`` and ``value`` in one namespace, ready to combine.
+
+    An array scalar keeps its identity -- and so its autograd graph -- and the
+    coefficients move to the promoted namespace to meet it; anything else
+    becomes a plain float and leaves the coefficients untouched.
+    """
+    if not _is_array(value):
+        return coefs, float(value)
+    xp = result_namespace(coefs, value)
+    return asarray(coefs, xp=xp), asarray(value, xp=xp)
+
+
+def _is_array(value: Any) -> bool:
+    """Return whether ``value`` is an array API object."""
+    return hasattr(value, "__array_namespace__") or hasattr(value, "__array__")
 
 
 def _as_operator(op: int | LDO) -> LDO:
@@ -501,14 +526,14 @@ class FData(PlotMixin):
         """
         if self.n_curves < 2:
             raise ValueError("a standard deviation needs at least two curves")
-        xp = default_namespace()
         size = max(201, 10 * self.basis.n_basis)
         lower, upper = self.domain
-        grid = xp.linspace(lower, upper, size, dtype=xp.float64)
-        values = to_numpy(self(grid))
+        grid = default_namespace().linspace(lower, upper, size, dtype=default_namespace().float64)
+        xp = array_namespace(self.coefs)
+        values = self(asarray(grid, xp=xp))
         deviation = xp.std(values, axis=1, correction=1)
         target = deviation[:, None] if len(deviation.shape) == 1 else deviation
-        return FData(_linalg.lstsq(self.basis(grid), target), self.basis)
+        return FData(_linalg.lstsq(asarray(self.basis(grid), xp=xp), target), self.basis)
 
     def cov(self) -> BiFData:
         """Return the sample covariance surface.
@@ -547,21 +572,24 @@ class FData(PlotMixin):
             raise ValueError("adding two FData objects requires the same basis")
         if self.n_curves != other.n_curves and 1 not in (self.n_curves, other.n_curves):
             raise ValueError(f"cannot combine {self.n_curves} curves with {other.n_curves} curves")
-        return FData(self.coefs + sign * other.coefs, self.basis)
+        xp = result_namespace(self.coefs, other.coefs)
+        left = asarray(self.coefs, xp=xp)
+        right = asarray(other.coefs, xp=xp)
+        return FData(left + sign * right, self.basis)
 
-    def _constant(self, value: float) -> FData:
+    def _constant(self, value: Any) -> FData:
         """Return the constant function ``value`` expanded in this basis."""
-        xp = default_namespace()
         nodes, weights = _quadrature(self.basis)
-        ones = xp.full((nodes.shape[0], 1), float(value), dtype=xp.float64)
-        coefs = _project(self.basis, nodes, weights, ones)
-        return FData(asarray(coefs, xp=array_namespace(self.coefs)), self.basis)
+        coefs, scalar = _promote(self.coefs, value)
+        xp = array_namespace(coefs)
+        ones = xp.ones((nodes.shape[0], 1), dtype=coefs.dtype)
+        return FData(_project(self.basis, nodes, weights, ones * scalar), self.basis)
 
     def __add__(self, other: FData | float) -> FData:
         """Add another function on the same basis, or a scalar."""
         if isinstance(other, FData):
             return self._combine(other, 1.0)
-        return self._combine(self._constant(float(other)), 1.0)
+        return self._combine(self._constant(other), 1.0)
 
     __radd__ = __add__
 
@@ -573,7 +601,7 @@ class FData(PlotMixin):
         """Subtract another function on the same basis, or a scalar."""
         if isinstance(other, FData):
             return self._combine(other, -1.0)
-        return self._combine(self._constant(float(other)), -1.0)
+        return self._combine(self._constant(other), -1.0)
 
     def __rsub__(self, other: float) -> FData:
         """Subtract this function from a scalar."""
@@ -586,16 +614,17 @@ class FData(PlotMixin):
         for splines carries the knot multiplicities that make the product exact.
         """
         if not isinstance(other, FData):
-            return FData(self.coefs * float(other), self.basis)
-        if self.basis.domain != other.basis.domain:
+            coefs, scalar = _promote(self.coefs, other)
+            return FData(coefs * scalar, self.basis)
+        if not _same_domain(self.basis.domain, other.basis.domain):
             raise ValueError("multiplying two FData objects requires the same domain")
         if self.n_curves != other.n_curves and 1 not in (self.n_curves, other.n_curves):
             raise ValueError(f"cannot combine {self.n_curves} curves with {other.n_curves} curves")
         product = self.basis * other.basis
         nodes, weights = _quadrature(self.basis, other.basis, product)
-        values = to_numpy(self(nodes)) * to_numpy(other(nodes))
-        coefs = _project(product, nodes, weights, values)
-        return FData(asarray(coefs, xp=array_namespace(self.coefs)), product)
+        xp = result_namespace(self.coefs, other.coefs)
+        values = self(asarray(nodes, xp=xp)) * other(asarray(nodes, xp=xp))
+        return FData(_project(product, nodes, weights, values), product)
 
     __rmul__ = __mul__
 
@@ -610,7 +639,8 @@ class FData(PlotMixin):
         """
         if isinstance(other, FData):
             raise TypeError("division of two FData objects is not closed in a basis expansion")
-        return FData(self.coefs / float(other), self.basis)
+        coefs, scalar = _promote(self.coefs, other)
+        return FData(coefs / scalar, self.basis)
 
     def __pow__(self, power: float) -> FData:
         """Raise the curves to a power.
@@ -650,9 +680,9 @@ class FData(PlotMixin):
                 return out
         target = _refined_spline(self.basis)
         nodes, weights = _quadrature(target)
-        values = to_numpy(self(nodes)) ** float(power)
-        coefs = _project(target, nodes, weights, values)
-        return FData(asarray(coefs, xp=array_namespace(self.coefs)), target)
+        xp = array_namespace(self.coefs)
+        values = self(asarray(nodes, xp=xp)) ** float(power)
+        return FData(_project(target, nodes, weights, values), target)
 
     def __matmul__(self, other: FData) -> Array:
         """Return the matrix of inner products with ``other``.
@@ -676,6 +706,63 @@ class FData(PlotMixin):
         (4, 4)
         """
         return inprod(self, other)
+
+    def to_pandas(self, t: Any) -> Any:
+        """Evaluate on ``t`` and return a long-format :class:`pandas.DataFrame`.
+
+        Thin delegation to :func:`fabel.io.to_pandas`; requires the ``pandas``
+        extra.
+
+        Parameters
+        ----------
+        t : array_like
+            Argument values to evaluate at.
+
+        Returns
+        -------
+        pandas.DataFrame
+            One row per (t, curve[, var]) combination.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import fabel as fb
+        >>> fd = fb.FData(np.eye(4), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
+        >>> list(fd.to_pandas(np.array([0.0, 1.0])).columns)
+        ['t', 'curve', 'value']
+        """
+        from fabel.io import to_pandas as _to_pandas
+
+        return _to_pandas(self, t)
+
+    def to_xarray(self, t: Any) -> Any:
+        """Evaluate on ``t`` and return an :class:`xarray.DataArray`.
+
+        Thin delegation to :func:`fabel.io.to_xarray`; requires the ``pandas``
+        extra (which pulls in ``xarray``).
+
+        Parameters
+        ----------
+        t : array_like
+            Argument values to evaluate at.
+
+        Returns
+        -------
+        xarray.DataArray
+            Dims ``("t", "curve")``, or ``("t", "curve", "var")`` when
+            ``self.n_vars > 1``.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import fabel as fb
+        >>> fd = fb.FData(np.eye(4), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
+        >>> fd.to_xarray(np.array([0.0, 1.0])).dims
+        ('t', 'curve')
+        """
+        from fabel.io import to_xarray as _to_xarray
+
+        return _to_xarray(self, t)
 
 
 def inprod(
@@ -717,19 +804,22 @@ def inprod(
     """
     left = first.basis if isinstance(first, FData) else first
     right = second.basis if isinstance(second, FData) else second
-    if left.domain != right.domain:
+    if not _same_domain(left.domain, right.domain):
         raise ValueError(f"inner products need one domain, got {left.domain} and {right.domain}")
-    xp = default_namespace()
-    matrix = _cross_gram(left, right, _as_operator(lfd1), _as_operator(lfd2))
     for side in (first, second):
         if isinstance(side, FData) and len(side.coefs.shape) != 2:
             raise ValueError("inner products are defined for coefficients without a variable axis")
+    # The cross-Gram matrix depends only on the two bases, so it is built in
+    # NumPy once and then converted; the contractions with the coefficients run
+    # in the coefficients' namespace so that gradients survive.
+    sides = [side.coefs for side in (first, second) if isinstance(side, FData)]
+    xp = result_namespace(*sides) if sides else default_namespace()
+    matrix = asarray(_cross_gram(left, right, _as_operator(lfd1), _as_operator(lfd2)), xp=xp)
     if isinstance(first, FData):
-        matrix = xp.matmul(xp.matrix_transpose(to_numpy(first.coefs)), matrix)
+        matrix = xp.matmul(xp.matrix_transpose(asarray(first.coefs, xp=xp)), matrix)
     if isinstance(second, FData):
-        matrix = xp.matmul(matrix, to_numpy(second.coefs))
-    like = first.coefs if isinstance(first, FData) else None
-    return _linalg.as_backend(matrix, like) if like is not None else matrix
+        matrix = xp.matmul(matrix, asarray(second.coefs, xp=xp))
+    return matrix
 
 
 @dataclass(frozen=True, eq=False, init=False)

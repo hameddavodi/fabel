@@ -25,7 +25,7 @@ import scipy.linalg as sla
 import scipy.sparse as sp
 from numpy.polynomial.legendre import leggauss
 
-from fabel._backend import array_namespace, is_torch, to_numpy
+from fabel._backend import array_namespace, asarray, is_torch, to_numpy
 
 __all__ = [
     "bandwidth_of",
@@ -479,4 +479,4 @@ def as_backend(values: NDArray, like: Any) -> Any:
     (2, 2)
     """
     xp = like if hasattr(like, "asarray") else array_namespace(like)
-    return xp.asarray(to_numpy(values), dtype=xp.float64)
+    return asarray(to_numpy(values), xp=xp)
