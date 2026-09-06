@@ -12,6 +12,7 @@ Examples
 (3, 5)
 """
 
+from fabel import datasets
 from fabel.basis import (
     Basis,
     BSpline,
@@ -23,6 +24,7 @@ from fabel.basis import (
     Power,
 )
 from fabel.core import LDO, BiFData, FData, inprod
+from fabel.io import from_pandas, read_rds, to_pandas, to_xarray
 
 __all__ = [
     "LDO",
@@ -37,7 +39,12 @@ __all__ = [
     "Polygonal",
     "Power",
     "__version__",
+    "datasets",
+    "from_pandas",
     "inprod",
+    "read_rds",
+    "to_pandas",
+    "to_xarray",
 ]
 
 __version__ = "1.0.0"

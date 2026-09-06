@@ -41,8 +41,8 @@ Order matters: `_backend` → `basis` → `core`.
   - Golden: vs `smooth.basis`, `smooth.basisPar`, `Data2fd`, `smooth.monotone`, `smooth.pos` on CanadianWeather + growth
   - GCV grid must reuse one factorization (see CLAUDE.md perf rules); benchmark ≥10× R timing recorded in `benchmarks/baseline_r.json`
 - [ ] `stats.py`: `cov`, `cor`, functional boxplot (fbplot), depth, `f_test` (Fperm), `t_test` (tperm)
-- [ ] `datasets.py`: all 11 loaders, lazy-download + local cache + checksum; ship growth/gait/pinch in-package
-- [ ] I/O: `from_pandas`, `to_pandas`, `to_xarray`, `read_rds`
+- [x] `datasets.py`: all 11 loaders, lazy-download + local cache + checksum; ship growth/gait/pinch in-package
+- [x] I/O: `from_pandas`, `to_pandas`, `to_xarray`, `read_rds`
 
 **GATE 2:** `pytest tests/parity/test_smoothing.py --cov=fabel --cov-fail-under=90 && pytest benchmarks -k smooth --benchmark-only`
 
