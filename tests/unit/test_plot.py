@@ -65,3 +65,23 @@ def test_plot_fit_accepts_one_dimensional_data() -> None:
     t = np.linspace(0.0, 1.0, 9)
     ax = curve.plot_fit(curve(t)[:, 0], t)
     assert len(ax.lines) == 2
+
+
+def test_plot_line_data_are_the_curve_values(fd: FData) -> None:
+    """The drawn vertices reproduce the curve exactly.
+
+    A stable substitute for an image hash: it pins the data the renderer is
+    given without depending on the matplotlib version, fonts or the platform.
+    """
+    ax = fd.plot()
+    for index, line in enumerate(ax.lines):
+        t, values = line.get_xydata().T
+        np.testing.assert_allclose(values, fd(t)[:, index], rtol=1e-12, atol=1e-12)
+
+
+def test_plot_deriv_line_data_are_the_derivative_values(fd: FData) -> None:
+    ax = fd.plot(deriv=2)
+    t = ax.lines[0].get_xydata()[:, 0]
+    expected = fd(t, 2)
+    for index, line in enumerate(ax.lines):
+        np.testing.assert_allclose(line.get_ydata(), expected[:, index], rtol=1e-12, atol=1e-12)
