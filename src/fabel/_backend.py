@@ -162,6 +162,8 @@ def asarray(x: Any, xp: ModuleType | None = None, dtype: Any = float) -> Any:
         if resolved is None or x.dtype == resolved:
             return x
         return xp.astype(x, resolved)
+    if isinstance(x, np.ndarray) and not x.flags.writeable:
+        x = np.array(x)
     if resolved is None:
         return xp.asarray(x)
     return xp.asarray(x, dtype=resolved)
