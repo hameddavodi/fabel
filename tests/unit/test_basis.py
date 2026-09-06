@@ -551,6 +551,18 @@ def test_exponential_product_sums_rates() -> None:
     assert product.rates == (2.0, 3.0)
 
 
+def test_evaluation_rejects_a_two_dimensional_argument() -> None:
+    """A grid of points used to be silently flattened, hiding the caller's mistake."""
+    basis = BSpline(domain=(0.0, 1.0), n_basis=5)
+    with pytest.raises(ValueError, match="one-dimensional"):
+        basis(np.linspace(0.0, 1.0, 6).reshape(3, 2))
+
+
+def test_evaluation_accepts_a_scalar_argument() -> None:
+    basis = BSpline(domain=(0.0, 1.0), n_basis=5)
+    np.testing.assert_allclose(basis(np.float64(0.5)), basis(np.array([0.5])), atol=1e-14)
+
+
 def test_mixed_product_falls_back_to_a_rich_spline() -> None:
     left = Fourier(domain=(0.0, 1.0), n_basis=5)
     right = Monomial(domain=(0.0, 1.0), n_basis=3)
@@ -577,6 +589,23 @@ def test_fallback_product_reproduces_every_pairwise_product() -> None:
         residual = columns - product(t) @ np.linalg.lstsq(product(t), columns, rcond=None)[0]
         relative = np.max(np.abs(residual), axis=0) / np.max(np.abs(columns), axis=0)
         assert np.max(relative) <= 1e-8, (type(left).__name__, type(right).__name__)
+
+
+def test_fallback_product_raises_when_the_product_is_not_a_spline() -> None:
+    """sqrt(t) has an unbounded derivative at 0; no polynomial mesh resolves it."""
+    left = Power(domain=(0.0, 1.0), exponents=[0.5])
+    right = Fourier(domain=(0.0, 1.0), n_basis=3)
+    with pytest.raises(ValueError, match="holds the product of Power and Fourier"):
+        _ = left * right
+
+
+def test_penalty_of_a_constant_non_derivative_operator_is_cached() -> None:
+    basis = BSpline(domain=(0.0, 1.0), n_basis=5)
+    la.clear_gram_cache()
+    first = basis.penalty(LDO(weights=[1.0, 0.0]))
+    assert len(la._GRAM_CACHE) == 1
+    np.testing.assert_allclose(basis.penalty(LDO(weights=[1.0, 0.0])), first, atol=1e-14)
+    assert len(la._GRAM_CACHE) == 1
 
 
 def test_fallback_product_carries_the_spline_factor_knot_multiplicity() -> None:

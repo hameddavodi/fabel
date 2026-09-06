@@ -133,6 +133,24 @@ class LDO:
         """
         return all(isinstance(w, (int, float)) and w == 0.0 for w in self.weights)
 
+    @property
+    def is_constant(self) -> bool:
+        """Whether every weight is a plain number rather than a functional weight.
+
+        Returns
+        -------
+        bool
+            ``True`` when the operator is fully described by its numeric
+            weights, and so compares and hashes by value.
+
+        Examples
+        --------
+        >>> from fabel import LDO
+        >>> LDO(weights=[1.0, 2.0]).is_constant
+        True
+        """
+        return all(isinstance(w, (int, float)) for w in self.weights)
+
     def apply(
         self,
         evaluate: Callable[[int], Any],
