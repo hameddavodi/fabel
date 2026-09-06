@@ -25,9 +25,9 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "numpy>=1.26",
-  "scipy>=1.12",
-  "array-api-compat>=1.9",
+  "numpy>=2.1",
+  "scipy>=1.14",
+  "array-api-compat>=1.11",
   "scikit-learn>=1.4",
 ]
 
@@ -70,6 +70,9 @@ include = ["src/fabel", "README.md", "LICENSE", "CHANGELOG.md", "CITATION.cff"]
 line-length = 100
 target-version = "py310"
 src = ["src", "tests", "tools", "benchmarks"]
+# Markdown is documentation, not source: SPEC.md/WORKFLOW.md snippets are illustrative
+# API sketches and must not be rewritten by the formatter.
+extend-exclude = ["*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RUF", "D", "ANN", "S", "PT", "NPY"]
@@ -88,10 +91,12 @@ convention = "numpy"
 docstring-code-format = true
 
 [tool.mypy]
-python_version = "3.10"
+# 3.12 because numpy >= 2.3 ships stubs written with PEP 695 `type` statements that
+# mypy refuses to parse under an older target. Runtime support stays >= 3.10; ruff
+# target-version = "py310" is what guards against newer syntax in our own sources.
+python_version = "3.12"
 strict = true
 warn_unreachable = true
-plugins = ["numpy.typing.mypy_plugin"]
 
 [[tool.mypy.overrides]]
 module = ["array_api_compat.*", "sklearn.*", "matplotlib.*", "torch.*", "rdata.*", "xarray.*", "hypothesis.*", "rpy2.*"]
