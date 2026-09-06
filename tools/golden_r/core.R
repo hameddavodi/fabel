@@ -53,12 +53,19 @@ for (d in 0:2) {
 }
 
 # ---- inprod: fd x fd, bspline, various Lfd on each side --------------------
+# Uses inprod.bspline() (exact quadrature, integer nderiv only) rather than
+# the general inprod() (Richardson/Romberg approximation, ~1e-4 relative
+# accuracy per its own help text) -- for plain-derivative Lfdobj on a
+# B-spline basis the two compute the same quantity, but inprod.bspline is
+# exact (matches t(coefs) %*% eval.penalty(basis, Lfd) %*% coefs to ~1e-14
+# for the same-order pairs, vs ~2e-5 to ~2.6e-1 for inprod()). See
+# PROGRESS.md.
 lfd_pairs <- list(c(0, 0), c(1, 1), c(2, 0), c(0, 2))
 for (pair in lfd_pairs) {
-  M <- inprod(fd_bsA_3, fd_bsA_3, int2Lfd(pair[1]), int2Lfd(pair[2]))
+  M <- inprod.bspline(fd_bsA_3, fd_bsA_3, pair[1], pair[2])
   add_case(
     name = sprintf("inprod_bspline_L%d_%d", pair[1], pair[2]),
-    r_call = sprintf("inprod(fdobj, fdobj, int2Lfd(%d), int2Lfd(%d))", pair[1], pair[2]),
+    r_call = sprintf("inprod.bspline(fdobj, fdobj, %d, %d)  # exact; see comment above", pair[1], pair[2]),
     input = list(
       basis = basis_info(bsA), coefs = unname(fd_bsA_3$coefs),
       lfd1 = pair[1], lfd2 = pair[2]
