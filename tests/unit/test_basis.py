@@ -224,7 +224,7 @@ def test_bspline_defaults_to_equally_spaced_breaks() -> None:
         ({"n_basis": 2, "order": 4}, "n_basis must be at least order"),
         ({"breaks": [0.0], "order": 2}, "at least the two endpoints"),
         ({"breaks": [0.0, 0.6, 0.5, 1.0]}, "non-decreasing"),
-        ({"breaks": [0.0, 0.5, 0.5, 0.5, 0.5, 1.0]}, "exceeds the limit"),
+        ({"breaks": [0.0, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0]}, "exceeds the order"),
         ({"breaks": [0.0, 0.0, 1.0]}, "end breaks must not repeat"),
         ({"breaks": [0.1, 0.5, 1.0]}, "must span the domain"),
         ({"breaks": [0.0, 0.5, 1.0], "n_basis": 99}, "conflicts with"),

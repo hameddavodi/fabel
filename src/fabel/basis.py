@@ -181,6 +181,26 @@ class Basis(ABC):
         """Human-readable name of each basis function."""
 
     @abstractmethod
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        """Return ``(basis, matrix)`` representing the ``n``-th derivative exactly.
+
+        For an expansion ``x = self @ c`` the identity
+        ``D^n x = basis @ (matrix @ c)`` holds exactly, so differentiation never
+        needs a numerical projection.
+
+        Parameters
+        ----------
+        n : int
+            Derivative order, ``n >= 0``.
+
+        Returns
+        -------
+        tuple
+            The basis spanning the derivative and the coefficient map, a NumPy
+            array of shape ``(basis.n_basis, self.n_basis)``.
+        """
+
+    @abstractmethod
     def _evaluate(self, t: Array, deriv: int, xp: ModuleType) -> Array:
         """Evaluate the ``deriv``-th derivative at the validated points ``t``."""
 
@@ -500,6 +520,24 @@ class BSpline(Basis):
     def _natural_breaks(self) -> tuple[float, ...]:
         return self.breaks
 
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        xp = default_namespace()
+        if n == 0:
+            return self, xp.eye(self.n_basis, dtype=xp.float64)
+        if n >= self.order:
+            return Constant(self.domain), xp.zeros((1, self.n_basis), dtype=xp.float64)
+        knots = xp.asarray(self.knots, dtype=xp.float64)
+        operator = _bspline_derivative_operator(knots, self.order, n, xp)
+        # The reduced-degree basis lives on the *same* knot vector, whose end
+        # knots are repeated `order` times.  The outermost n functions of that
+        # basis sit on degenerate knot spans and vanish identically, so dropping
+        # their rows leaves the order-(order - n) basis on the same breaks.
+        lower = self.order - n
+        return (
+            BSpline(domain=self.domain, order=lower, breaks=self.breaks),
+            operator[n : operator.shape[0] - n, :],
+        )
+
     def _derivative_penalty(self, deriv: int) -> Array:
         # The integrand is a polynomial of degree 2 * (order - 1 - deriv) on each
         # knot interval, so an `order`-point Gauss-Legendre rule per interval is
@@ -648,6 +686,22 @@ class Fourier(Basis):
         is_sin = xp.asarray(sines)
         arg = t[:, None] * freq[None, :]
         return amp[None, :] * xp.where(is_sin[None, :], xp.sin(arg), xp.cos(arg))
+
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        xp = default_namespace()
+        size = self.n_basis
+        step = xp.zeros((size, size), dtype=xp.float64)
+        omega = 2.0 * pi / self.period
+        # D sin_h = h omega cos_h and D cos_h = -h omega sin_h, so one derivative
+        # rotates each harmonic pair; the constant differentiates to zero.
+        for h in range(1, self.n_harmonics + 1):
+            sin_row, cos_row = 2 * h - 1, 2 * h
+            step[cos_row, sin_row] = h * omega
+            step[sin_row, cos_row] = -h * omega
+        out = xp.eye(size, dtype=xp.float64)
+        for _ in range(n):
+            out = xp.matmul(step, out)
+        return self, out
 
     def _derivative_penalty(self, deriv: int) -> Array:
         xp = default_namespace()
@@ -849,6 +903,9 @@ class Monomial(Basis):
         power = asarray(powers, xp=xp)
         return coef[None, :] * xp.pow(t[:, None], power[None, :])
 
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        return _shifted_power_map(self, n)
+
     def _derivative_penalty(self, deriv: int) -> Array:
         xp = default_namespace()
         coefs, powers = self._terms(deriv)
@@ -958,6 +1015,9 @@ class Power(Basis):
         coef = asarray(coefs, xp=xp)
         power = asarray(powers, xp=xp)
         return coef[None, :] * xp.pow(t[:, None], power[None, :])
+
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        return _shifted_power_map(self, n)
 
     def _derivative_penalty(self, deriv: int) -> Array:
         xp = default_namespace()
@@ -1079,6 +1139,11 @@ class Exponential(Basis):
         scale = asarray([r**deriv for r in self.rates], xp=xp)
         return scale[None, :] * xp.exp(t[:, None] * rate[None, :])
 
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        xp = default_namespace()
+        rates = xp.asarray(self.rates, dtype=xp.float64)
+        return self, xp.eye(self.n_basis, dtype=xp.float64) * (rates**n)[None, :]
+
     def _derivative_penalty(self, deriv: int) -> Array:
         xp = default_namespace()
         rate = xp.asarray(self.rates, dtype=xp.float64)
@@ -1161,6 +1226,11 @@ class Constant(Basis):
         if deriv == 0:
             return xp.ones((t.shape[0], 1), dtype=t.dtype)
         return xp.zeros((t.shape[0], 1), dtype=t.dtype)
+
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        xp = default_namespace()
+        scale = 1.0 if n == 0 else 0.0
+        return self, xp.full((1, 1), scale, dtype=xp.float64)
 
     def _derivative_penalty(self, deriv: int) -> Array:
         xp = default_namespace()
@@ -1271,6 +1341,12 @@ class Polygonal(Basis):
     def _natural_breaks(self) -> tuple[float, ...]:
         return self.argvals
 
+    def _derivative_map(self, n: int) -> tuple[Basis, Array]:
+        if n == 0:
+            return self, default_namespace().eye(self.n_basis, dtype=default_namespace().float64)
+        # A polygonal basis is exactly the order-2 B-spline basis on its vertices.
+        return BSpline(domain=self.domain, order=2, breaks=self.argvals)._derivative_map(n)
+
     def _derivative_penalty(self, deriv: int) -> Array:
         xp = default_namespace()
         panels = xp.asarray(self.argvals, dtype=xp.float64)
@@ -1281,6 +1357,33 @@ class Polygonal(Basis):
 # --------------------------------------------------------------------------- #
 # helpers
 # --------------------------------------------------------------------------- #
+
+
+def _shifted_power_map(basis: Monomial | Power, n: int) -> tuple[Basis, Array]:
+    r"""Coefficient map for ``D^n`` on a basis of powers ``t^e``.
+
+    ``D^n t^e = (e)_n t^{e - n}`` with the falling factorial ``(e)_n``, so the
+    derivative lives in the basis of the shifted exponents.  Terms whose falling
+    factorial vanishes disappear; if all of them do, the derivative is zero.
+    """
+    xp = default_namespace()
+    exponents = basis.exponents
+    if n == 0:
+        return basis, xp.eye(len(exponents), dtype=xp.float64)
+    scales = [_falling_factorial(e, n) for e in exponents]
+    kept = [i for i, scale in enumerate(scales) if scale != 0.0]
+    if not kept:
+        return Constant(basis.domain), xp.zeros((1, len(exponents)), dtype=xp.float64)
+    shifted = sorted({exponents[i] - n for i in kept})
+    matrix = xp.zeros((len(shifted), len(exponents)), dtype=xp.float64)
+    for i in kept:
+        matrix[shifted.index(exponents[i] - n), i] = scales[i]
+    derived: Basis = (
+        Monomial(domain=basis.domain, exponents=[int(e) for e in shifted])
+        if isinstance(basis, Monomial)
+        else Power(domain=basis.domain, exponents=shifted)
+    )
+    return derived, matrix
 
 
 def _band_mask(a: Array, bandwidth: int, xp: ModuleType) -> Array:
@@ -1313,7 +1416,8 @@ def _clean_breaks(
 
     Interior breaks may repeat: a break of multiplicity ``m`` drops the spline's
     smoothness there to ``C^(order - 1 - m)``, which is how the exact product of
-    two spline spaces is expressed.  The two endpoints must each appear once.
+    two spline spaces is expressed; ``m = order`` breaks the curve apart
+    entirely.  The two endpoints must each appear once.
     """
     values = tuple(float(v) for v in breaks)
     if len(values) < 2:
@@ -1323,10 +1427,10 @@ def _clean_breaks(
     if values[0] == values[1] or values[-2] == values[-1]:
         raise ValueError(f"the end breaks must not repeat, got {values}")
     for value in set(values[1:-1]):
-        if values.count(value) > order - 1:
+        if values.count(value) > order:
             raise ValueError(
                 f"break {value} repeats {values.count(value)} times, "
-                f"which exceeds the limit of order - 1 = {order - 1}"
+                f"which exceeds the order {order}"
             )
     if not isclose(values[0], domain[0], rel_tol=_TOL, abs_tol=_TOL) or not isclose(
         values[-1], domain[1], rel_tol=_TOL, abs_tol=_TOL
