@@ -45,6 +45,9 @@ _POWER_REFINEMENT = 8
 #: Order of the spline used to hold a fractional power.
 _POWER_ORDER = 6
 
+#: Largest projection residual accepted when a scalar is expanded in a basis.
+_CONSTANT_TOL = 1e-8
+
 
 def _quadrature(*bases: Basis) -> tuple[NDArray, NDArray]:
     """Return composite Gauss-Legendre nodes and weights for ``bases``.
@@ -578,12 +581,36 @@ class FData(PlotMixin):
         return FData(left + sign * right, self.basis)
 
     def _constant(self, value: Any) -> FData:
-        """Return the constant function ``value`` expanded in this basis."""
+        """Return the constant function ``value`` expanded in this basis.
+
+        Adding a scalar is only meaningful if the basis spans the constants.
+        Most do -- splines and polygonals through the partition of unity,
+        Fourier through its first harmonic, monomials and powers through the
+        zero exponent, exponentials through the zero rate -- but a basis such as
+        ``Monomial(exponents=[1, 2])`` does not, and the L2 projection would
+        silently return a different function.
+
+        Raises
+        ------
+        ValueError
+            If the basis cannot reproduce the constant.
+        """
         nodes, weights = _quadrature(self.basis)
         coefs, scalar = _promote(self.coefs, value)
         xp = array_namespace(coefs)
-        ones = xp.ones((nodes.shape[0], 1), dtype=coefs.dtype)
-        return FData(_project(self.basis, nodes, weights, ones * scalar), self.basis)
+        target = xp.ones((nodes.shape[0], 1), dtype=coefs.dtype) * scalar
+        fitted = _project(self.basis, nodes, weights, target)
+        nxp = default_namespace()
+        wanted = to_numpy(target)
+        residual = nxp.matmul(self.basis(nodes), to_numpy(fitted)) - wanted
+        size = float(nxp.max(nxp.abs(wanted)))
+        if float(nxp.max(nxp.abs(residual))) > _CONSTANT_TOL * max(1.0, size):
+            raise ValueError(
+                f"{type(self.basis).__name__} cannot represent the constant {size:g}; "
+                "add an FData on the same basis instead, or use a basis that spans "
+                "the constants (a spline, a Fourier basis, or a zero exponent or rate)"
+            )
+        return FData(fitted, self.basis)
 
     def __add__(self, other: FData | float) -> FData:
         """Add another function on the same basis, or a scalar."""

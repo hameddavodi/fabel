@@ -225,6 +225,42 @@ def test_scalar_arithmetic_is_pointwise() -> None:
     np.testing.assert_allclose((1.5 - a)(t), 1.5 - a(t), atol=1e-12)
 
 
+@pytest.mark.parametrize(
+    "basis",
+    [
+        BSpline(domain=(0.0, 1.0), n_basis=6),
+        Fourier(domain=(0.0, 1.0), n_basis=5),
+        Monomial(domain=(0.0, 1.0), exponents=[0, 1, 2]),
+        Exponential(domain=(0.0, 1.0), rates=[0.0, 1.0]),
+        Constant(domain=(0.0, 1.0)),
+    ],
+)
+def test_scalar_addition_is_exact_when_the_basis_holds_a_constant(basis: Any) -> None:
+    fd = FData(np.zeros((basis.n_basis, 1)), basis)
+    t = np.linspace(0.0, 1.0, 11)
+    np.testing.assert_allclose((fd + 1.5)(t), np.full((11, 1), 1.5), rtol=1e-10, atol=1e-12)
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        Monomial(domain=(0.0, 1.0), exponents=[1, 2]),
+        Exponential(domain=(0.0, 1.0), rates=[1.0, 2.0]),
+    ],
+)
+def test_scalar_addition_rejects_a_basis_without_a_constant(basis: Any) -> None:
+    fd = FData(np.zeros((basis.n_basis, 1)), basis)
+    with pytest.raises(ValueError, match="cannot represent the constant"):
+        _ = fd + 1.5
+
+
+def test_scalar_addition_of_zero_is_allowed_on_any_basis() -> None:
+    basis = Monomial(domain=(0.0, 1.0), exponents=[1, 2])
+    fd = FData(np.ones((2, 1)), basis)
+    t = np.linspace(0.0, 1.0, 11)
+    np.testing.assert_allclose((fd + 0.0)(t), fd(t), atol=1e-12)
+
+
 def test_product_of_two_functions_is_exact() -> None:
     a, b = make_fd(n_curves=2, seed=4), make_fd(n_curves=2, seed=5)
     t = np.linspace(0.0, 1.0, 101)
