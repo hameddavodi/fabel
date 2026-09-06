@@ -22,14 +22,14 @@ Check off tasks here as you complete them. Track details in `PROGRESS.md`.
 
 Order matters: `_backend` → `basis` → `core`.
 
-- [ ] `_backend.py`: array-api dispatch (numpy default; torch/jax if input is tensor). Property test: same result numpy vs torch, rtol 1e-10
-- [ ] `_linalg.py`: banded Cholesky, sparse penalty assembly, LRU cache for basis Gram matrices
-- [ ] `basis.py`: `Basis` ABC + `BSpline, Fourier, Monomial, Exponential, Power, Constant, Polygonal`
+- [x] `_backend.py`: array-api dispatch (numpy default; torch/jax if input is tensor). Property test: same result numpy vs torch, rtol 1e-10
+- [x] `_linalg.py`: banded Cholesky, sparse penalty assembly, LRU cache for basis Gram matrices
+- [x] `basis.py`: `Basis` ABC + `BSpline, Fourier, Monomial, Exponential, Power, Constant, Polygonal`
   - callable eval with `deriv=`, `.penalty(op)`, `.gram()`, `b1 * b2`
   - Golden: eval + penalty matrices vs R `eval.basis` / `getbasispenalty` for 25 parameter combos
-- [ ] `core.py`: `FData` (callable, arithmetic, `@` inner product, `.derivative()`, `.mean()`, `.cov()`, indexing), `BiFData`, `LDO`
+- [x] `core.py`: `FData` (callable, arithmetic, `@` inner product, `.derivative()`, `.mean()`, `.cov()`, indexing), `BiFData`, `LDO`
   - Golden: vs R `eval.fd`, `inprod`, `mean.fd`, `var.fd`, `deriv.fd`
-- [ ] Plotting mixin (matplotlib): `.plot()`, `.plot_fit()` — smoke-tested, image-hash tested
+- [x] Plotting mixin (matplotlib): `.plot()`, `.plot_fit()` — smoke-tested, image-hash tested
 
 **GATE 1:** `pytest tests/unit tests/parity/test_basis.py tests/parity/test_core.py --cov=fabel --cov-fail-under=90`
 
