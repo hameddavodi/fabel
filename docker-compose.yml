@@ -1,0 +1,10 @@
+services:
+  dev:
+    build: .
+    image: fabel-dev:latest
+    working_dir: /work
+    volumes:
+      - .:/work
+    environment:
+      - PYTHONPATH=/work/src
+    command: bash

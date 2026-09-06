@@ -1,0 +1,116 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fabel"
+version = "1.0.0"
+description = "Functional data analysis for Python: a clean-room rewrite of R's fda package."
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Hamed Davodi", email = "hamed.davodi94@gmail.com" }]
+keywords = ["functional data analysis", "fda", "splines", "smoothing", "fpca"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Typing :: Typed",
+]
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.12",
+  "array-api-compat>=1.9",
+  "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+torch = ["torch>=2.2"]
+pandas = ["pandas>=2.2", "xarray>=2024.1"]
+plot = ["matplotlib>=3.8"]
+io = ["rdata>=0.11"]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-benchmark>=4.0",
+  "hypothesis>=6.100",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "rpy2>=3.5",
+  "nbmake>=1.5",
+  "jupyter>=1.0",
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.25",
+  "build>=1.2",
+  "twine>=5.0",
+  "pip-audit>=2.7",
+  "pandas-stubs>=2.2",
+  "scipy-stubs>=1.14; python_version >= '3.10'",
+]
+
+[project.urls]
+Homepage = "https://github.com/hameddavodi/fabel"
+Documentation = "https://hameddavodi.github.io/fabel"
+Changelog = "https://github.com/hameddavodi/fabel/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fabel"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/fabel", "README.md", "LICENSE", "CHANGELOG.md", "CITATION.cff"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "tools", "benchmarks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RUF", "D", "ANN", "S", "PT", "NPY"]
+ignore = ["D203", "D213", "ANN401", "S101", "D105", "D107"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN", "S", "PT011"]
+"benchmarks/**" = ["D", "ANN"]
+"tools/**" = ["S603", "S607"]
+"notebooks/**" = ["D", "ANN", "E402"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unreachable = true
+plugins = ["numpy.typing.mypy_plugin"]
+
+[[tool.mypy.overrides]]
+module = ["array_api_compat.*", "sklearn.*", "matplotlib.*", "torch.*", "rdata.*", "xarray.*", "hypothesis.*", "rpy2.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "parity: golden-file parity tests against R fda 6.3.0",
+  "slow: long-running tests",
+  "gpu: requires CUDA",
+]
+filterwarnings = ["error::DeprecationWarning:fabel.*"]
+
+[tool.coverage.run]
+source = ["fabel"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "@overload"]
