@@ -1,0 +1,40 @@
+site_name: Fabel
+site_description: Functional data analysis for Python — a clean-room rewrite of R's fda.
+repo_url: https://github.com/hameddavodi/fabel
+docs_dir: docs
+strict: true
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - content.code.copy
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: false
+markdown_extensions:
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.superfences
+  - tables
+extra_javascript:
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Migrating from R fda: r-migration.md
+  - Tutorials:
+      - Basis systems and FData: tutorials/01-basis-fdata.md
+      - Smoothing and lambda selection: tutorials/02-smoothing.md
+      - Functional PCA and CCA: tutorials/03-decomposition.md
+      - Functional regression: tutorials/04-regression.md
+      - Registration: tutorials/05-registration.md
+      - Dynamics and PDA: tutorials/06-dynamics.md
+  - API reference: api.md
+  - Developer conventions: dev/conventions.md
