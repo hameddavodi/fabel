@@ -69,6 +69,28 @@ def _knot_vector(breaks: tuple[float, ...], order: int) -> tuple[float, ...]:
     return (breaks[0],) * pad + breaks + (breaks[-1],) * pad
 
 
+def _capped_breaks(breaks: tuple[float, ...], order: int) -> tuple[float, ...]:
+    """Return ``breaks`` with every interior multiplicity capped at ``order``.
+
+    Differentiating a spline keeps the interior knot multiplicities but lowers
+    the order.  Once a multiplicity would exceed the reduced order the function
+    itself already jumps, so the next derivative carries a Dirac delta there.
+    Capping the multiplicity keeps the almost-everywhere derivative -- the
+    piecewise polynomial that evaluation returns -- and drops the singular part,
+    which no basis expansion can hold.
+    """
+    counts: dict[float, int] = {}
+    kept: list[float] = []
+    for i, value in enumerate(breaks):
+        if i in (0, len(breaks) - 1):
+            kept.append(value)
+            continue
+        counts[value] = counts.get(value, 0) + 1
+        if counts[value] <= order:
+            kept.append(value)
+    return tuple(kept)
+
+
 def _bspline_matrix(
     t: Array, knots: Array, order: int, xp: ModuleType, *, closed_right: bool = True
 ) -> Array:
@@ -527,15 +549,18 @@ class BSpline(Basis):
         if n >= self.order:
             return Constant(self.domain), xp.zeros((1, self.n_basis), dtype=xp.float64)
         knots = xp.asarray(self.knots, dtype=xp.float64)
-        operator = _bspline_derivative_operator(knots, self.order, n, xp)
-        # The reduced-degree basis lives on the *same* knot vector, whose end
-        # knots are repeated `order` times.  The outermost n functions of that
-        # basis sit on degenerate knot spans and vanish identically, so dropping
-        # their rows leaves the order-(order - n) basis on the same breaks.
+        matrix = _bspline_derivative_operator(knots, self.order, n, xp)
+        # The reduced-degree basis lives on the knot vector with n knots dropped
+        # from each end, so its end knots repeat `order - n` times.  Interior
+        # multiplicities carry over, and any basis function left on a fully
+        # degenerate span vanishes identically -- those rows are dropped.
         lower = self.order - n
+        reduced = self.knots[n : len(self.knots) - n]
+        keep = [i for i in range(len(reduced) - lower) if reduced[i] < reduced[i + lower]]
+        breaks = _capped_breaks(self.breaks, lower)
         return (
-            BSpline(domain=self.domain, order=lower, breaks=self.breaks),
-            operator[n : operator.shape[0] - n, :],
+            BSpline(domain=self.domain, order=lower, breaks=breaks),
+            xp.take(matrix, xp.asarray([n + i for i in keep]), axis=0),
         )
 
     def _derivative_penalty(self, deriv: int) -> Array:
