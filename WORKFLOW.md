@@ -10,9 +10,9 @@ Check off tasks here as you complete them. Track details in `PROGRESS.md`.
 - [ ] `src/fabel` layout, `pyproject.toml` (hatchling, extras: `torch`, `pandas`, `plot`, `dev`)
 - [ ] `Dockerfile` + `docker-compose.yml`: Python 3.11, R 4.x, R `fda` 6.3.0 pinned, `rpy2`
 - [ ] Tooling config: ruff (strict), mypy (strict), pytest + pytest-cov + hypothesis + pytest-benchmark
-- [ ] CI (GitHub Actions): lint → type → test → parity → bench (regression alert) → docs → build
+- [x] CI (GitHub Actions): lint → type → test → parity → bench (regression alert) → docs → build
 - [ ] `PROGRESS.md` created from template
-- [ ] `tools/make_golden.py`: runs R via rpy2 on seeded inputs → `tests/golden/*.json` (input, output, R version, tolerance)
+- [x] `tools/make_golden.py`: runs R via rpy2 on seeded inputs → `tests/golden/*.json` (input, output, R version, tolerance)
 
 **GATE 0:** `docker compose run dev pytest --collect-only && ruff check .`
 
