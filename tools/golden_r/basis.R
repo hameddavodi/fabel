@@ -1,12 +1,12 @@
 # tools/golden_r/basis.R
 #
-# Golden cases for the `basis` module: eval.basis / getbasispenalty for every
+# Golden cases for the `basis` module: eval.basis / eval.penalty for every
 # fda basis type (bspline, fourier, monomial, exponential, power, constant,
 # polygonal). Driven by tools/make_golden.py, which sources common.R first
 # (defines add_case, eval_points, basis_info, finalize, GOLDEN_OUT, GOLDEN_SEED).
 #
 # Clean-room note: only the public fda API is called (create.*.basis,
-# eval.basis, getbasispenalty). No fda source is read or copied.
+# eval.basis, eval.penalty). No fda source is read or copied.
 
 bspline_cases <- function() {
   orders <- c(1, 2, 3, 4, 6)
@@ -29,16 +29,16 @@ bspline_cases <- function() {
           output = list(values = unname(V), nbasis = b$nbasis, params = as.numeric(b$params))
         )
       }
-      # getbasispenalty needs norder - Lfdobj >= 2 (empirically verified against
-      # R fda 6.3.0; the naive "Lfdobj < norder" bound errors for e.g. order 3,
-      # Lfdobj 2). Recorded in PROGRESS.md.
+      # eval.penalty needs norder - Lfdobj >= 2 for B-splines (empirically verified
+      # against R fda 6.3.0; the naive "Lfdobj < norder" bound errors for e.g.
+      # order 3, Lfdobj 2). Recorded in PROGRESS.md.
       lfds <- Filter(function(l) l <= norder - 2, c(0, 1, 2))
       for (L in lfds) {
-        P <- getbasispenalty(b, int2Lfd(L))
+        P <- eval.penalty(b, int2Lfd(L))
         add_case(
           name = sprintf("bspline_penalty_k%d_n%d_dom0_1_L%d", norder, nb, L),
           r_call = sprintf(
-            "getbasispenalty(create.bspline.basis(c(0,1), %d, %d), int2Lfd(%d))", nb, norder, L
+            "eval.penalty(create.bspline.basis(c(0,1), %d, %d), int2Lfd(%d))", nb, norder, L
           ),
           input = list(domain = dom, n_basis = nb, order = norder, lfd = L),
           output = list(penalty = unname(P), nbasis = b$nbasis)
@@ -68,11 +68,11 @@ bspline_extra_domains <- function() {
       )
     }
     for (L in c(0, 1, 2)) {
-      P <- getbasispenalty(b, int2Lfd(L))
+      P <- eval.penalty(b, int2Lfd(L))
       add_case(
         name = sprintf("bspline_penalty_k%d_n%d_dom%g_%g_L%d", norder, nb, dom[1], dom[2], L),
         r_call = sprintf(
-          "getbasispenalty(create.bspline.basis(c(%g,%g), %d, %d), int2Lfd(%d))",
+          "eval.penalty(create.bspline.basis(c(%g,%g), %d, %d), int2Lfd(%d))",
           dom[1], dom[2], nb, norder, L
         ),
         input = list(domain = dom, n_basis = nb, order = norder, lfd = L),
@@ -107,11 +107,11 @@ bspline_explicit_breaks <- function() {
       )
     }
     for (L in c(0, 1, 2)) {
-      P <- getbasispenalty(b, int2Lfd(L))
+      P <- eval.penalty(b, int2Lfd(L))
       add_case(
         name = sprintf("bspline_breaks%d_penalty_L%d", i, L),
         r_call = sprintf(
-          "getbasispenalty(create.bspline.basis(breaks=c(%s), norder=%d), int2Lfd(%d))",
+          "eval.penalty(create.bspline.basis(breaks=c(%s), norder=%d), int2Lfd(%d))",
           paste(breaks, collapse = ","), norder, L
         ),
         input = list(domain = dom, breaks = breaks, order = norder, lfd = L),
@@ -139,11 +139,11 @@ fourier_cases <- function() {
       )
     }
     for (L in 0:2) {
-      P <- getbasispenalty(b, int2Lfd(L))
+      P <- eval.penalty(b, int2Lfd(L))
       add_case(
         name = sprintf("fourier_penalty_n%d_L%d", nb, L),
         r_call = sprintf(
-          "getbasispenalty(create.fourier.basis(c(0,1), %d, 1), int2Lfd(%d))", nb, L
+          "eval.penalty(create.fourier.basis(c(0,1), %d, 1), int2Lfd(%d))", nb, L
         ),
         input = list(domain = dom, n_basis = nb, period = diff(dom), lfd = L),
         output = list(penalty = unname(P), nbasis = b$nbasis)
@@ -163,10 +163,10 @@ fourier_cases <- function() {
     )
   }
   for (L in 0:2) {
-    P <- getbasispenalty(b_pm, int2Lfd(L))
+    P <- eval.penalty(b_pm, int2Lfd(L))
     add_case(
       name = sprintf("fourier_periodmismatch_penalty_L%d", L),
-      r_call = sprintf("getbasispenalty(create.fourier.basis(c(0,1), 9, 2), int2Lfd(%d))", L),
+      r_call = sprintf("eval.penalty(create.fourier.basis(c(0,1), 9, 2), int2Lfd(%d))", L),
       input = list(domain = dom, n_basis = 9, period = 2, lfd = L),
       output = list(penalty = unname(P), nbasis = b_pm$nbasis)
     )
@@ -196,10 +196,10 @@ fourier_cases <- function() {
     )
   }
   for (L in 0:2) {
-    P <- getbasispenalty(b365, int2Lfd(L))
+    P <- eval.penalty(b365, int2Lfd(L))
     add_case(
       name = sprintf("fourier_penalty_dom365_n65_L%d", L),
-      r_call = sprintf("getbasispenalty(create.fourier.basis(c(0,365), 65, 365), int2Lfd(%d))", L),
+      r_call = sprintf("eval.penalty(create.fourier.basis(c(0,365), 65, 365), int2Lfd(%d))", L),
       input = list(domain = dom365, n_basis = 65, period = 365, lfd = L),
       output = list(penalty = unname(P), nbasis = b365$nbasis)
     )
@@ -221,10 +221,10 @@ monomial_cases <- function() {
       )
     }
     for (L in 0:2) {
-      P <- getbasispenalty(b, int2Lfd(L))
+      P <- eval.penalty(b, int2Lfd(L))
       add_case(
         name = sprintf("monomial_penalty_n%d_L%d", nb, L),
-        r_call = sprintf("getbasispenalty(create.monomial.basis(c(0,1), %d), int2Lfd(%d))", nb, L),
+        r_call = sprintf("eval.penalty(create.monomial.basis(c(0,1), %d), int2Lfd(%d))", nb, L),
         input = list(domain = dom, n_basis = nb, lfd = L),
         output = list(penalty = unname(P), nbasis = b$nbasis)
       )
@@ -244,11 +244,11 @@ monomial_cases <- function() {
     )
   }
   for (L in 0:2) {
-    P <- getbasispenalty(b, int2Lfd(L))
+    P <- eval.penalty(b, int2Lfd(L))
     add_case(
       name = sprintf("monomial_customexp_penalty_L%d", L),
       r_call = sprintf(
-        "getbasispenalty(create.monomial.basis(c(0,1), exponents=c(0,2,3,5)), int2Lfd(%d))", L
+        "eval.penalty(create.monomial.basis(c(0,1), exponents=c(0,2,3,5)), int2Lfd(%d))", L
       ),
       input = list(domain = dom, exponents = exps, lfd = L),
       output = list(penalty = unname(P), nbasis = b$nbasis)
@@ -281,11 +281,11 @@ exponential_cases <- function() {
       )
     }
     for (L in 0:2) {
-      P <- getbasispenalty(b, int2Lfd(L))
+      P <- eval.penalty(b, int2Lfd(L))
       add_case(
         name = sprintf("exponential_cfg%d_penalty_L%d", i, L),
         r_call = sprintf(
-          "getbasispenalty(create.exponential.basis(c(%g,%g), %d, c(%s)), int2Lfd(%d))",
+          "eval.penalty(create.exponential.basis(c(%g,%g), %d, c(%s)), int2Lfd(%d))",
           dom[1], dom[2], length(rv), paste(rv, collapse = ","), L
         ),
         input = list(domain = dom, ratevec = rv, lfd = L),
@@ -319,11 +319,11 @@ power_cases <- function() {
       )
     }
     for (L in 0:1) {
-      P <- getbasispenalty(b, int2Lfd(L))
+      P <- eval.penalty(b, int2Lfd(L))
       add_case(
         name = sprintf("power_cfg%d_penalty_L%d", i, L),
         r_call = sprintf(
-          "getbasispenalty(create.power.basis(c(%g,%g), %d, c(%s)), int2Lfd(%d))",
+          "eval.penalty(create.power.basis(c(%g,%g), %d, c(%s)), int2Lfd(%d))",
           dom[1], dom[2], length(exps), paste(exps, collapse = ","), L
         ),
         input = list(domain = dom, exponents = exps, lfd = L),
@@ -344,11 +344,11 @@ constant_cases <- function() {
       input = list(domain = dom, t = t, deriv = 0),
       output = list(values = unname(V), nbasis = b$nbasis)
     )
-    P <- getbasispenalty(b, int2Lfd(0))
+    P <- eval.penalty(b, int2Lfd(0))
     add_case(
       name = sprintf("constant_penalty_dom%g_%g_L0", dom[1], dom[2]),
       r_call = sprintf(
-        "getbasispenalty(create.constant.basis(c(%g,%g)), int2Lfd(0))", dom[1], dom[2]
+        "eval.penalty(create.constant.basis(c(%g,%g)), int2Lfd(0))", dom[1], dom[2]
       ),
       input = list(domain = dom, lfd = 0),
       output = list(penalty = unname(P), nbasis = b$nbasis)
@@ -379,11 +379,11 @@ polygonal_cases <- function() {
       )
     }
     for (L in 0:1) {
-      P <- getbasispenalty(b, int2Lfd(L))
+      P <- eval.penalty(b, int2Lfd(L))
       add_case(
         name = sprintf("polygonal_n%d_penalty_L%d", length(av), L),
         r_call = sprintf(
-          "getbasispenalty(create.polygonal.basis(argvals=c(%s)), int2Lfd(%d))",
+          "eval.penalty(create.polygonal.basis(argvals=c(%s)), int2Lfd(%d))",
           paste(av, collapse = ","), L
         ),
         input = list(argvals = av, lfd = L),

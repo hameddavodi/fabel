@@ -218,17 +218,27 @@ add_case(
   output = list(values = unname(V_harm))
 )
 
-# ---- bifd: explicit construction from a 3-D coefficient array -----------------
+# ---- bifd: explicit construction from a multi-dim coefficient array ----------
+# Note: fda 6.3.0's bifd() is unconditionally broken for a 3-D coef array
+# (ndim == 3, i.e. a "reps" dimension with no "vars" dimension): its body sets
+# `defaultnames` only inside `if (ndim == 2)` / `if (ndim == 4)` branches (a
+# copy-paste bug -- ndim == 3 is never handled), but then unconditionally runs
+# `names(defaultnames) <- c(...)`, so a 3-D array throws "object 'defaultnames'
+# not found" no matter what -- even when `fdnames` is supplied explicitly,
+# since that line does not reference the `fdnames` argument at all. Worked
+# around by using a 4-D array (dim = c(nbasis_s, nbasis_t, nrep, nvar=1))
+# instead, which hits the working ndim == 4 branch and still exercises the
+# reps dimension the original 3-D case intended. Recorded in PROGRESS.md.
 sbf <- create.bspline.basis(c(0, 1), nbasis = 4, norder = 3)
 tbf <- create.bspline.basis(c(0, 1), nbasis = 3, norder = 2)
-coef3d <- array(rnorm(4 * 3 * 2), dim = c(4, 3, 2))
-bf <- bifd(coef = coef3d, sbasisobj = sbf, tbasisobj = tbf)
+coef4d <- array(rnorm(4 * 3 * 2 * 1), dim = c(4, 3, 2, 1))
+bf <- bifd(coef = coef4d, sbasisobj = sbf, tbasisobj = tbf)
 add_case(
-  name = "bifd_construct_3d_coef",
-  r_call = "bifd(coef=array(rnorm(24), dim=c(4,3,2)), sbasisobj, tbasisobj)",
+  name = "bifd_construct_4d_coef",
+  r_call = "bifd(coef=array(rnorm(24), dim=c(4,3,2,1)), sbasisobj, tbasisobj)",
   input = list(
     sbasis = basis_info(sbf), tbasis = basis_info(tbf),
-    coef = coef3d, coef_dim = dim(coef3d)
+    coef = coef4d, coef_dim = dim(coef4d)
   ),
   output = list(coefs = bf$coefs, sbasis = basis_info(bf$sbasis), tbasis = basis_info(bf$tbasis))
 )
