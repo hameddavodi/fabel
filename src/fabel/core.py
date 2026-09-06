@@ -513,7 +513,10 @@ class FData(PlotMixin):
         Returns
         -------
         FData
-            A single curve in the same basis.
+            A single curve in the same basis, keeping this object's variables:
+            coefficients of shape ``(n_basis, 1)``, or ``(n_basis, 1, n_vars)``
+            when several variables are present.  The deviation is taken over
+            the replications only, never across variables.
 
         Raises
         ------
@@ -536,7 +539,10 @@ class FData(PlotMixin):
         values = self(asarray(grid, xp=xp))
         deviation = xp.std(values, axis=1, correction=1)
         target = deviation[:, None] if len(deviation.shape) == 1 else deviation
-        return FData(_linalg.lstsq(asarray(self.basis(grid), xp=xp), target), self.basis)
+        fitted = _linalg.lstsq(asarray(self.basis(grid), xp=xp), target)
+        if len(values.shape) == 3:
+            fitted = xp.reshape(fitted, (self.basis.n_basis, 1, self.n_vars))
+        return FData(fitted, self.basis)
 
     def cov(self) -> BiFData:
         """Return the sample covariance surface.
@@ -545,7 +551,12 @@ class FData(PlotMixin):
         -------
         BiFData
             The bivariate function ``c(s, t)`` estimating
-            ``Cov(x(s), x(t))`` with denominator ``n_curves - 1``.
+            ``Cov(x(s), x(t))`` with denominator ``n_curves - 1``.  With several
+            variables each gets its own surface and they are stacked on a
+            trailing axis, so the coefficients have shape
+            ``(n_basis, n_basis, n_vars)`` and evaluation returns
+            ``(len(s), len(t), n_vars)``.  Variables are never pooled as extra
+            replications, and cross-variable covariances are not formed.
 
         Raises
         ------
@@ -563,8 +574,12 @@ class FData(PlotMixin):
             raise ValueError("a covariance needs at least two curves")
         xp = array_namespace(self.coefs)
         centred = self.center().coefs
-        flat = xp.reshape(centred, (centred.shape[0], -1))
-        coefs = xp.matmul(flat, xp.matrix_transpose(flat)) / (self.n_curves - 1)
+        if len(centred.shape) == 2:
+            coefs = xp.matmul(centred, xp.matrix_transpose(centred)) / (self.n_curves - 1)
+            return BiFData(coefs, self.basis, self.basis)
+        per_variable = xp.permute_dims(centred, (2, 0, 1))
+        gram = xp.matmul(per_variable, xp.matrix_transpose(per_variable))
+        coefs = xp.permute_dims(gram, (1, 2, 0)) / (self.n_curves - 1)
         return BiFData(coefs, self.basis, self.basis)
 
     # ------------------------------------------------------------ arithmetic

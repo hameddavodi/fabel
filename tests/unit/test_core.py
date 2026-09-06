@@ -187,6 +187,31 @@ def test_std_tracks_the_pointwise_sample_standard_deviation() -> None:
     np.testing.assert_allclose(fd.std()(t), want, rtol=0.2, atol=0.02)
 
 
+def test_std_keeps_variables_apart() -> None:
+    """Variables are not replications: the deviation is taken per variable."""
+    basis = BSpline(domain=(0.0, 1.0), n_basis=6)
+    coefs = RNG.normal(size=(6, 9, 3))
+    fd = FData(coefs, basis)
+    t = np.linspace(0.0, 1.0, 60)
+    assert fd.std().coefs.shape == (6, 1, 3)
+    assert fd.std().n_curves == 1
+    assert fd.std().n_vars == 3
+    want = fd(t).std(axis=1, ddof=1)
+    np.testing.assert_allclose(fd.std()(t)[:, 0, :], want, rtol=0.2, atol=0.02)
+
+
+def test_cov_keeps_variables_apart() -> None:
+    """Each variable gets its own covariance surface, stacked on a trailing axis."""
+    basis = BSpline(domain=(0.0, 1.0), n_basis=6)
+    fd = FData(RNG.normal(size=(6, 12, 3)), basis)
+    s = np.linspace(0.0, 1.0, 7)
+    surface = fd.cov()
+    assert surface.coefs.shape == (6, 6, 3)
+    values = surface(s, s)
+    for k in range(3):
+        np.testing.assert_allclose(values[:, :, k], np.cov(fd(s)[:, :, k], ddof=1), atol=1e-12)
+
+
 def test_std_needs_at_least_two_curves() -> None:
     with pytest.raises(ValueError, match="at least two curves"):
         make_fd(n_curves=1).std()
