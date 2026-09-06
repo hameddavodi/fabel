@@ -12,7 +12,6 @@ Examples
 (3, 5)
 """
 
-from fabel._operator import LDO
 from fabel.basis import (
     Basis,
     BSpline,
@@ -23,18 +22,22 @@ from fabel.basis import (
     Polygonal,
     Power,
 )
+from fabel.core import LDO, BiFData, FData, inprod
 
 __all__ = [
     "LDO",
     "BSpline",
     "Basis",
+    "BiFData",
     "Constant",
     "Exponential",
+    "FData",
     "Fourier",
     "Monomial",
     "Polygonal",
     "Power",
     "__version__",
+    "inprod",
 ]
 
 __version__ = "1.0.0"
