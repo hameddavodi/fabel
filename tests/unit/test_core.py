@@ -187,6 +187,18 @@ def test_std_tracks_the_pointwise_sample_standard_deviation() -> None:
     np.testing.assert_allclose(fd.std()(t), want, rtol=0.2, atol=0.02)
 
 
+def test_functional_weight_penalty_is_not_cached() -> None:
+    """An FData weight hashes by identity, so caching it would only fill the cache."""
+    basis = BSpline(domain=(0.0, 1.0), n_basis=5)
+    weight = FData(np.ones((5, 1)), basis)
+    la.clear_gram_cache()
+    first = basis.penalty(LDO(weights=[weight]))
+    assert not la._GRAM_CACHE
+    np.testing.assert_allclose(basis.penalty(LDO(weights=[weight])), first, atol=1e-12)
+    basis.penalty(2)
+    assert len(la._GRAM_CACHE) == 1
+
+
 def test_std_keeps_variables_apart() -> None:
     """Variables are not replications: the deviation is taken per variable."""
     basis = BSpline(domain=(0.0, 1.0), n_basis=6)
@@ -215,6 +227,11 @@ def test_cov_keeps_variables_apart() -> None:
 def test_std_needs_at_least_two_curves() -> None:
     with pytest.raises(ValueError, match="at least two curves"):
         make_fd(n_curves=1).std()
+
+
+def test_cov_needs_at_least_two_curves() -> None:
+    with pytest.raises(ValueError, match="at least two curves"):
+        make_fd(n_curves=1).cov()
 
 
 def test_cov_is_the_pointwise_covariance_surface() -> None:

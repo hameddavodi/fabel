@@ -246,7 +246,7 @@ class Basis(ABC):
         Parameters
         ----------
         t : array_like
-            Evaluation points, shape ``(n_t,)``.
+            Evaluation points, shape ``(n_t,)``; a scalar is read as one point.
         deriv : int or LDO, optional
             Derivative order, or a linear differential operator to apply.
 
@@ -258,8 +258,9 @@ class Basis(ABC):
         Raises
         ------
         ValueError
-            If ``deriv`` is negative, or if ``t`` leaves the domain of a
-            piecewise-defined basis (B-spline, polygonal).
+            If ``t`` has more than one axis, if ``deriv`` is negative, or if
+            ``t`` leaves the domain of a piecewise-defined basis (B-spline,
+            polygonal).
 
         Examples
         --------
@@ -270,8 +271,12 @@ class Basis(ABC):
         """
         xp = array_namespace(t)
         points = asarray(t, xp=xp)
-        if len(points.shape) != 1:
-            points = xp.reshape(points, (-1,))
+        if len(points.shape) == 0:
+            points = xp.reshape(points, (1,))
+        elif len(points.shape) != 1:
+            raise ValueError(
+                f"evaluation points must be one-dimensional, got shape {tuple(points.shape)}"
+            )
         points = self._validate_points(points, xp)
         if isinstance(deriv, LDO):
             return deriv.apply(lambda j: self._evaluate(points, j, xp), points, xp)
@@ -308,6 +313,10 @@ class Basis(ABC):
         """
         target = default_namespace() if xp is None else xp
         operator = op if isinstance(op, LDO) else LDO(int(op))
+        if not operator.is_constant:
+            # A functional weight is an FData, which hashes by identity: caching
+            # it could never hit again and would only evict useful entries.
+            return _linalg.as_backend(self._penalty_matrix(operator), target)
         if operator.is_derivative:
             key: Any = (type(self).__name__, self)
             slot = operator.order

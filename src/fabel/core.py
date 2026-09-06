@@ -18,7 +18,7 @@ from fabel import _linalg
 from fabel._backend import array_namespace, asarray, default_namespace, result_namespace, to_numpy
 from fabel._operator import LDO
 from fabel._plot import PlotMixin
-from fabel.basis import Basis, Constant, _same_domain
+from fabel.basis import Basis, BSpline, Constant, _same_domain
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import numpy as np
@@ -148,8 +148,6 @@ def _as_operator(op: int | LDO) -> LDO:
 
 def _refined_spline(basis: Basis) -> Basis:
     """Return a spline basis fine enough to hold a nonlinear function of ``basis``."""
-    from fabel.basis import BSpline
-
     xp = default_namespace()
     natural = sorted(set(basis._natural_breaks()))
     pieces = [
