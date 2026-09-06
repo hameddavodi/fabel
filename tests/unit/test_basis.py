@@ -198,6 +198,37 @@ def test_bspline_derivative_matches_finite_differences() -> None:
     np.testing.assert_allclose(basis(t, deriv=1), want, rtol=1e-6, atol=1e-7)
 
 
+@pytest.mark.parametrize("n", [1, 2, 3, 4, 5, 6])
+def test_bspline_derivative_map_handles_repeated_interior_knots(n: int) -> None:
+    """D^n of a spline with multiple knots is the a.e. derivative, off the breaks."""
+    basis = BSpline(domain=(0.0, 1.0), order=7, breaks=[0.0, *([0.4] * 4), *([0.7] * 2), 1.0])
+    derived, matrix = basis._derivative_map(n)
+    t = np.linspace(0.02, 0.98, 61)
+    t = t[np.min(np.abs(t[:, None] - np.array([0.4, 0.7])[None, :]), axis=1) > 1e-3]
+    np.testing.assert_allclose(derived(t) @ matrix, basis(t, deriv=n), rtol=1e-9, atol=1e-9)
+
+
+def test_bspline_derivative_map_caps_multiplicity_at_the_reduced_order() -> None:
+    basis = BSpline(domain=(0.0, 1.0), order=7, breaks=[0.0, *([0.4] * 4), 1.0])
+
+    # Multiplicity 4 survives while it fits the reduced order, then saturates.
+    def multiplicity(n: int) -> int:
+        derived = basis._derivative_map(n)[0]
+        assert isinstance(derived, BSpline)
+        return derived.breaks.count(0.4)
+
+    assert multiplicity(2) == 4
+    assert multiplicity(4) == 3
+    assert multiplicity(6) == 1
+
+
+def test_bspline_discontinuous_spline_can_be_differentiated() -> None:
+    basis = BSpline(domain=(0.0, 1.0), order=2, breaks=[0.0, 0.5, 0.5, 1.0])
+    derived, matrix = basis._derivative_map(1)
+    t = np.array([0.1, 0.3, 0.7, 0.9])
+    np.testing.assert_allclose(derived(t) @ matrix, basis(t, deriv=1), atol=1e-12)
+
+
 def test_bspline_penalty_is_exactly_banded() -> None:
     basis = BSpline(domain=(0.0, 1.0), n_basis=12, order=4)
     pen = basis.penalty(2)
