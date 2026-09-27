@@ -142,6 +142,68 @@ def test_weights_match_replicated_observations() -> None:
     np.testing.assert_allclose(weighted.coefficients, replicated.coefficients, rtol=1e-10)
 
 
+def _functional_scalar_data(n: int = 30, seed: int = 5) -> tuple[np.ndarray, FData]:
+    """Return a noisy scalar response on one functional covariate."""
+    x = curves(n, seed=seed)
+    beta = FData(np.linspace(-1.0, 1.0, BASIS.n_basis), BASIS)
+    signal = np.asarray(inprod(x, beta))[:, 0]
+    noise = np.random.default_rng(seed + 1).standard_normal(n)
+    return 0.5 + signal + 0.3 * noise, x
+
+
+def test_weights_change_the_scalar_response_fit() -> None:
+    # Pins the documented behaviour: fregress uses weighted least squares for a
+    # scalar response (R's fRegress(wt=) does too; wtvec= is ignored in R).
+    y, x = _functional_scalar_data()
+    weights = np.random.default_rng(9).uniform(0.2, 3.0, size=y.shape[0])
+    plain = fregress(y, [1.0, x], lam=1e-4)
+    weighted = fregress(y, [1.0, x], lam=1e-4, weights=weights)
+    assert np.max(np.abs(weighted.coefficients - plain.coefficients)) > 1e-2
+    np.testing.assert_array_equal(weighted.weights, weights)
+
+
+def test_weighted_scalar_fit_minimises_the_weighted_criterion() -> None:
+    y, x = _functional_scalar_data()
+    weights = np.random.default_rng(9).uniform(0.2, 3.0, size=y.shape[0])
+    model = fregress(y, [1.0, x], weights=weights)
+    design = np.column_stack([np.ones_like(y), np.asarray(inprod(x, BASIS))])
+    root = np.sqrt(weights)
+    expected, *_ = np.linalg.lstsq(design * root[:, None], y * root, rcond=None)
+    np.testing.assert_allclose(model.coefficients, expected, rtol=1e-8)
+
+
+def test_unit_weights_give_the_unweighted_scalar_fit() -> None:
+    y, x = _functional_scalar_data()
+    plain = fregress(y, [1.0, x], lam=1e-4)
+    ones = fregress(y, [1.0, x], lam=1e-4, weights=np.ones(y.shape[0]))
+    np.testing.assert_allclose(ones.coefficients, plain.coefficients, rtol=1e-12, atol=1e-14)
+    np.testing.assert_allclose(ones.fitted, plain.fitted, rtol=1e-12, atol=1e-14)
+
+
+def test_constant_weights_without_penalty_give_the_unweighted_scalar_fit() -> None:
+    # Without a penalty only the relative weights matter.
+    y, x = _functional_scalar_data()
+    plain = fregress(y, [1.0, x])
+    scaled = fregress(y, [1.0, x], weights=np.full(y.shape[0], 3.0))
+    np.testing.assert_allclose(scaled.coefficients, plain.coefficients, rtol=1e-9, atol=1e-12)
+
+
+def test_f_test_of_a_weighted_model_uses_the_weights() -> None:
+    # R's Fperm.fd returns the same Fobs whatever wt is; f_test(model) refits
+    # with the model's weights, so the statistic moves.
+    from fabel.stats import f_test
+
+    y, x = _functional_scalar_data()
+    weights = np.random.default_rng(9).uniform(0.2, 3.0, size=y.shape[0])
+    plain = f_test(fregress(y, [1.0, x], lam=1e-4), n_perm=5, random_state=0)
+    weighted = f_test(fregress(y, [1.0, x], lam=1e-4, weights=weights), n_perm=5, random_state=0)
+    same = f_test(
+        fregress(y, [1.0, x], lam=1e-4, weights=np.ones(y.shape[0])), n_perm=5, random_state=0
+    )
+    assert abs(weighted.statistic - plain.statistic) > 1e-6
+    assert same.statistic == pytest.approx(plain.statistic, rel=1e-12)
+
+
 @settings(max_examples=25, deadline=None)
 @given(
     scale=st.floats(min_value=-5.0, max_value=5.0).filter(lambda v: abs(v) > 1e-3),

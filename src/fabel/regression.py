@@ -988,7 +988,8 @@ def fregress(
         Roughness operator for every term that does not give its own; an integer
         means ``D^penalty``.  Default ``2``.
     weights : array, optional
-        Positive observation weights, one per observation.
+        Positive observation weights, one per observation.  The fit is then
+        weighted least squares; see Notes.
 
     Returns
     -------
@@ -1005,6 +1006,22 @@ def fregress(
         malformed.
     KeyError
         If a formula names a variable missing from the data.
+
+    Notes
+    -----
+    With ``weights`` the coefficients minimise the penalised weighted
+    criterion :math:`\sum_i w_i \|y_i - \hat y_i\|^2 + \text{penalties}`, for a
+    scalar and a functional response alike.  This is what R's
+    ``fRegress(..., wt = w)`` computes, and the two agree to the accuracy of
+    R's numerical integration.  R has a trap here: its weight argument is
+    called ``wt``, and ``fRegress(..., wtvec = w)`` (the name R's smoothing
+    functions use) is swallowed by ``...`` without a warning, so R returns the
+    *unweighted* fit.  Scripts that pass ``wtvec`` to ``fRegress`` must drop
+    ``weights`` when ported, or they will get a different answer in Fabel.
+    Only the relative weights matter when there is no penalty; with a penalty,
+    scaling every weight by ``c`` acts like dividing ``lam`` by ``c``.  R's
+    ``Fperm.fd`` ignores weights, while :func:`fabel.stats.f_test` on a
+    weighted model does not -- see its Notes.
 
     Examples
     --------
