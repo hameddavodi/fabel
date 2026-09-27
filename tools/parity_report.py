@@ -128,6 +128,8 @@ SYMBOLS: tuple[Symbol, ...] = (
 
 #: ``(golden module, regex searched in the case's r_call or name, symbol name)``.
 #: The first matching rule wins, so specific patterns come before general ones.
+#: Stats parity tests are not parametrized on the golden case, so their rules
+#: also match the test name (``test_var_fd``, ``tperm_fd_...``): ``[._]``.
 CASE_RULES: tuple[tuple[str, str, str], ...] = (
     ("basis", r"create\.bspline\.basis", "BSpline"),
     ("basis", r"create\.fourier\.basis", "Fourier"),
@@ -150,12 +152,12 @@ CASE_RULES: tuple[tuple[str, str, str], ...] = (
     ("registration", r"landmarkreg", "landmark_register"),
     ("registration", r".", "register"),
     ("dynamics", r".", "PDA"),
-    ("stats", r"cor\.fd", "stats.cor"),
+    ("stats", r"cor[._]fd", "stats.cor"),
     ("stats", r"fbplot", "stats.boxplot"),
     ("stats", r"fdepth", "stats.depth"),
-    ("stats", r"tperm\.fd", "stats.t_test"),
-    ("stats", r"Fperm\.fd", "stats.f_test"),
-    ("stats", r"var\.fd", "stats.cov"),
+    ("stats", r"tperm[._]fd", "stats.t_test"),
+    ("stats", r"[Ff]perm[._]fd", "stats.f_test"),
+    ("stats", r"var[._]fd", "stats.cov"),
     ("stats", r".", "FData"),
     ("datasets", r".", "datasets.load_*"),
     ("io", r".", "read_rds"),
