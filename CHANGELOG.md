@@ -66,10 +66,24 @@ golden-file parity (`rtol = 1e-8`, `1e-5` for iterative fits).
   (`make book`) and run in CI with `nbmake`.
 - Packaging: typed (`py.typed`) wheel and sdist for Python 3.10 to 3.13,
   BSD-3-Clause license, `CITATION.cff`.
+- `register()` accepts an `FData` with PyTorch coefficients and returns PyTorch
+  results; gradients flow from the registered curves to the input coefficients
+  (autodiff Newton path; the optimal warps are held fixed).
+- Build: the Makefile uses the `.venv` Python and has new `sync` and `gate5`
+  targets.
 
 ### Fixed
+- `register(lam=0, criterion='eigen')` no longer raises `LinAlgError`: it warns
+  (`RuntimeWarning`) when a curve has no finite optimum, and raises `ValueError`
+  on NaN or infinite input.
+- `FPCA` and `FCCA` accept any integer-like `n` (`SupportsIndex`).
 - `FData.std` samples the pointwise standard deviation on
   `max(201, 10 * n_basis + 1)` points, matching R `sd.fd` to 1.8e-15.
+
+### Documentation
+- Dataset docstrings state the unit of every value and time field.
+- Observation weights: behaviour compared with R `fRegress(wt=)` and
+  `Fperm.fd` in the `fregress` / `f_test` notes and the R migration page.
 
 ### Known differences from R `fda`
 - Where R `fda` 6.3.0 is demonstrably less accurate (for example `deriv.fd`,
