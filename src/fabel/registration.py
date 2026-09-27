@@ -1073,6 +1073,8 @@ class Registrator(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         The registration of the training curves.
     n_features_in_ : int
         Number of basis coefficients per curve seen during ``fit``.
+    n_iter_ : int
+        Largest number of Newton iterations used by a training curve.
 
     Examples
     --------
@@ -1128,7 +1130,7 @@ class Registrator(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         basis = (
             self.basis
             if self.basis is not None
-            else BSpline(domain=(0.0, 1.0), n_basis=max(4, data.shape[1]))
+            else BSpline(domain=(0.0, 1.0), n_basis=data.shape[1], order=min(4, data.shape[1]))
         )
         if basis.n_basis != data.shape[1]:
             raise ValueError(
@@ -1167,6 +1169,8 @@ class Registrator(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         fd = self._as_fdata(X, reset=True)
         self.target_ = _as_numpy_fdata(fd).mean()
         self.result_ = self._register(fd, self.target_)
+        # A continuous registration always records its per-curve iterations.
+        self.n_iter_ = int(to_numpy(self.result_.n_iter).max())
         return self
 
     def transform(self, X: Any) -> Array:  # noqa: N803
