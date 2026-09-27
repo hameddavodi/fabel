@@ -14,14 +14,17 @@ authors = [{ name = "Hamed Davodi", email = "hamed.davodi94@gmail.com" }]
 keywords = ["functional data analysis", "fda", "splines", "smoothing", "fpca"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: BSD License",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Information Analysis",
   "Typing :: Typed",
 ]
 dependencies = [
@@ -47,6 +50,8 @@ dev = [
   "rpy2>=3.5",
   "nbmake>=1.5",
   "jupyter>=1.0",
+  # MkDocs 2.0 drops the plugin system that mkdocs-material and mkdocstrings need.
+  "mkdocs>=1.6,<2",
   "mkdocs-material>=9.5",
   "mkdocstrings[python]>=0.25",
   "build>=1.2",
@@ -59,6 +64,8 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/hameddavodi/fabel"
 Documentation = "https://hameddavodi.github.io/fabel"
+Source = "https://github.com/hameddavodi/fabel"
+Issues = "https://github.com/hameddavodi/fabel/issues"
 Changelog = "https://github.com/hameddavodi/fabel/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
