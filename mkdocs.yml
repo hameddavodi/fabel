@@ -1,13 +1,29 @@
 site_name: Fabel
 site_description: Functional data analysis for Python — a clean-room rewrite of R's fda.
+site_url: https://aismasrl.github.io/fabel/
 repo_url: https://github.com/AISMAsrl/fabel
+repo_name: AISMAsrl/fabel
+copyright: Copyright &copy; 2026 AISMA S.r.l. — BSD-3-Clause
 docs_dir: docs
 strict: true
 theme:
   name: material
   features:
     - navigation.sections
+    - navigation.top
     - content.code.copy
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 plugins:
   - search
   - mkdocstrings:
@@ -17,24 +33,39 @@ plugins:
           options:
             docstring_style: numpy
             show_source: false
+            show_root_heading: false
+            show_root_toc_entry: false
+            members_order: source
+            filters: ["!^_(?!_(call|matmul|getitem|add|mul|pow)__$)"]
+            merge_init_into_class: true
+            show_signature_annotations: true
+            separate_signature: true
 markdown_extensions:
   - admonition
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.highlight
   - pymdownx.superfences
   - tables
+  - toc:
+      permalink: true
 extra_javascript:
-  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+# Developer notes live under docs/dev/ and are published but kept out of the
+# user-facing navigation, except the conventions page.
+not_in_nav: |
+  /dev/data-release.md
+  /dev/reviews/*
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - Migrating from R fda: r-migration.md
-  - Tutorials:
-      - Basis systems and FData: tutorials/01-basis-fdata.md
-      - Smoothing and lambda selection: tutorials/02-smoothing.md
-      - Functional PCA and CCA: tutorials/03-decomposition.md
-      - Functional regression: tutorials/04-regression.md
-      - Registration: tutorials/05-registration.md
-      - Dynamics and PDA: tutorials/06-dynamics.md
-  - API reference: api.md
+  - API reference:
+      - api/index.md
+      - Basis systems: api/basis.md
+      - Core objects: api/core.md
+      - Smoothing: api/smoothing.md
+      - Decomposition: api/decomposition.md
+      - Datasets: api/datasets.md
+      - Input and output: api/io.md
   - Developer conventions: dev/conventions.md
