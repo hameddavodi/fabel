@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 import shutil
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any, TypeVar
 
 import numpy as np
 import pytest
@@ -14,15 +17,26 @@ import fabel.datasets as ds
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_RELEASE_DIR = REPO_ROOT / "data_release"
 
-pytestmark = pytest.mark.skipif(
-    not DATA_RELEASE_DIR.exists(),
-    reason="data_release/ fixtures missing; run tools/build_data_release.py first",
-)
+_F = TypeVar("_F", bound=Callable[..., Any])
+
+
+def offline(func: _F) -> _F:
+    """Mark a test that needs no ``data_release/`` files, so it always runs."""
+    func._fabel_offline = True  # type: ignore[attr-defined]
+    return func
 
 
 @pytest.fixture(autouse=True)
-def _local_downloads(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    """Redirect every dataset "download" to the local ``data_release/`` staging files."""
+def _local_downloads(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, request: pytest.FixtureRequest
+) -> None:
+    """Redirect every dataset "download" to the local ``data_release/`` staging files.
+
+    Tests that need those files are skipped when ``data_release/`` is missing;
+    tests marked :func:`offline` still run.
+    """
+    if not DATA_RELEASE_DIR.exists() and not getattr(request.function, "_fabel_offline", False):
+        pytest.skip("data_release/ fixtures missing; run tools/build_data_release.py first")
 
     def _copy_local(url: str, dest: Path) -> None:
         name_ext = url.rsplit("/", 1)[-1]
@@ -232,3 +246,83 @@ def test_real_download_from_github_release(tmp_path: Path, monkeypatch: pytest.M
     monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
     rp = ds.load_regina_precip()
     assert rp.value.shape == (1006,)
+
+
+# --------------------------------------------------------------------------- #
+# docstrings: every value/time field states its physical unit (R help pages)
+# --------------------------------------------------------------------------- #
+
+# (class, attribute as written in the Attributes section, text naming its unit)
+_DOCUMENTED_UNITS = [
+    (ds.CanadianWeather, "temp, precip", "deg C"),
+    (ds.CanadianWeather, "temp, precip", "mm"),
+    (ds.CanadianWeather, "t", "Day of year"),
+    (ds.CanadianWeather, "monthly_temp, monthly_precip", "deg C"),
+    (ds.CanadianWeather, "monthly_temp, monthly_precip", "mm"),
+    (ds.Growth, "hgtm", "cm"),
+    (ds.Growth, "hgtf", "cm"),
+    (ds.Growth, "age", "years"),
+    (ds.Gait, "value", "degrees"),
+    (ds.Gait, "t", "proportion of the cycle"),
+    (ds.Handwriting, "value", "metres"),
+    (ds.Handwriting, "t", "milliseconds"),
+    (ds.Pinch, "pinch", "newtons"),
+    (ds.Pinch, "pinchraw", "newtons"),
+    (ds.Pinch, "t", "seconds"),
+    (ds.Melanoma, "value", "per 100,000"),
+    (ds.Melanoma, "value", "year"),
+    (ds.Refinery, "time", "no unit"),
+    (ds.Refinery, "reflux", "no unit"),
+    (ds.Refinery, "tray47", "no unit"),
+    (ds.Seabird, "counts", "sightings"),
+    (ds.Seabird, "year, site, transect, temp", "no unit"),
+    (ds.ReginaPrecip, "value", "mm"),
+    (ds.MontrealTemp, "value", "degrees Celsius"),
+    (ds.Daily, "tempav, precav", "deg C"),
+    (ds.Daily, "tempav, precav", "mm"),
+    (ds.InfantGrowth, "day", "days"),
+    (ds.InfantGrowth, "tibia_length", "mm"),
+    (ds.InfantGrowth, "sd_length", "mm"),
+    (ds.Nondurables, "value", "no unit"),
+    (ds.Lip, "value", "mm"),
+    (ds.Lip, "t", "seconds"),
+]
+
+
+def _attribute_text(cls: type, name: str) -> str:
+    """Return the description block of attribute ``name`` in ``cls``'s docstring."""
+    lines = inspect.cleandoc(cls.__doc__ or "").splitlines()
+    start = lines.index("Attributes") + 2
+    block: list[str] = []
+    inside = False
+    for line in lines[start:]:
+        if line and not line.startswith(" "):
+            if inside:
+                break
+            inside = line.split(" : ")[0] == name
+        elif inside:
+            block.append(line.strip())
+    assert block, f"{cls.__name__} documents no attribute {name!r}"
+    return " ".join(block)
+
+
+@offline
+@pytest.mark.parametrize(
+    ("cls", "attribute", "unit"),
+    _DOCUMENTED_UNITS,
+    ids=[f"{c.__name__}.{a}.{u}" for c, a, u in _DOCUMENTED_UNITS],
+)
+def test_dataset_docstring_states_unit(cls: type, attribute: str, unit: str) -> None:
+    assert unit in _attribute_text(cls, attribute)
+
+
+@offline
+def test_every_dataset_class_is_audited_for_units() -> None:
+    classes = {
+        obj
+        for obj in vars(ds).values()
+        if inspect.isclass(obj)
+        and obj.__module__ == ds.__name__
+        and "Attributes" in (obj.__doc__ or "")
+    }
+    assert classes == {cls for cls, _, _ in _DOCUMENTED_UNITS}

@@ -236,7 +236,7 @@ class CanadianWeather:
     coordinates : ndarray, shape (35, 2)
         North latitude, west longitude.
     monthly_temp, monthly_precip : ndarray, shape (12, 35)
-        Monthly averages.
+        Monthly averages: temperature (deg C) and daily precipitation (mm).
     geogindex : ndarray, shape (35,)
         Station order east-to-west-then-north (R: ``CanadianWeather$geogindex``).
     """
@@ -325,8 +325,8 @@ class Gait:
     Attributes
     ----------
     value : ndarray, shape (20, 39, 2)
-        ``value[..., 0]`` is hip angle, ``value[..., 1]`` is knee angle
-        (see :attr:`hip_angle`/:attr:`knee_angle`).
+        Angles in degrees: ``value[..., 0]`` is hip angle, ``value[..., 1]``
+        is knee angle (see :attr:`hip_angle`/:attr:`knee_angle`).
     t : ndarray, shape (20,)
         Standardized gait time, proportion of the cycle (0.025 to 0.975).
     subjects : list of str
@@ -381,7 +381,8 @@ class Handwriting:
     Attributes
     ----------
     value : ndarray, shape (1401, 20, 2)
-        ``value[..., 0]`` is X, ``value[..., 1]`` is Y (see :attr:`x`/:attr:`y`).
+        Pen position in metres: ``value[..., 0]`` is X, ``value[..., 1]`` is Y
+        (see :attr:`x`/:attr:`y`).
     t : ndarray, shape (1401,)
         Sampling times in milliseconds, 0 to 2300.
     subjects : list of str
@@ -437,9 +438,10 @@ class Pinch:
     Attributes
     ----------
     pinch : ndarray, shape (151, 20)
-        Pinch force (N), aligned so each curve peaks at 0.076 s.
+        Pinch force in newtons (N), aligned so each curve peaks at 0.076 s.
     pinchraw : ndarray, shape (151, 20)
-        Pinch force (N), the first 151 of the original 300 samples, unaligned.
+        Pinch force in newtons (N), the first 151 of the original 300
+        samples, unaligned.
     t : ndarray, shape (151,)
         Time in seconds from the start, every 2 ms (R: ``pinchtime``).
     """
@@ -475,7 +477,8 @@ class Melanoma:
     Attributes
     ----------
     value : ndarray, shape (37, 3)
-        Columns as listed in ``columns``.
+        Columns as listed in ``columns``: the row index, the calendar year
+        (1936-1972), and the age-adjusted incidence per 100,000 people.
     columns : list of str
         ``["index", "year", "incidence"]``.
     """
@@ -503,15 +506,18 @@ class Refinery:
     """194 observations of reflux and "tray 47 level" in an oil refinery column.
 
     Reproduces R ``fda::refinery`` (a data frame with 3 numeric columns).
+    R documents no physical unit for any column, so none is given here.
 
     Attributes
     ----------
     time : ndarray, shape (194,)
-        Observation time, 0-193.
+        Observation time, 0-193 (an index; R gives no unit).
     reflux : ndarray, shape (194,)
-        Reflux flow, centered on the mean of the first 60 observations.
+        Reflux flow, centered on the mean of the first 60 observations
+        (no unit documented).
     tray47 : ndarray, shape (194,)
-        Tray 47 level, centered on the mean of the first 60 observations.
+        Tray 47 level, centered on the mean of the first 60 observations
+        (no unit documented).
     """
 
     time: NDArray[np.float64]
@@ -546,9 +552,11 @@ class Seabird:
     counts : dict of str to ndarray, each shape (3793,)
         One entry per species code (``BAGO``, ``BLSC``, ``COME``, ``COMU``,
         ``CORM``, ``HADU``, ``HOGR``, ``LOON``, ``MAMU``, ``OLDS``, ``PIGU``,
-        ``RBME``, ``RNGR``, ``SUSC``, ``WWSC``); ``NaN`` marks R's ``NA``.
+        ``RBME``, ``RNGR``, ``SUSC``, ``WWSC``): the number of sightings of
+        that species by transect by year; ``NaN`` marks R's ``NA``.
     year, site, transect, temp : ndarray, shape (3793,)
-        Survey year, site code, transect code, and temperature.
+        Survey year (1986-2005), site code, transect code, and temperature
+        (R documents no unit for the temperature).
     observ_cond : list of str
         Observing conditions factor (5 levels).
     bay : list of str
@@ -754,7 +762,8 @@ class Nondurables:
     Attributes
     ----------
     value : ndarray, shape (1377,)
-        The index value each month.
+        The index value each month (a dimensionless index; R documents no
+        unit).
     start : str
         First month covered, ``"1919-01"``.
     frequency : int
@@ -791,7 +800,8 @@ class Lip:
     Attributes
     ----------
     value : ndarray, shape (51, 20)
-        Lower lip position, sampled every 7 ms for 350 ms.
+        Lower lip position in mm (the unit R's help examples give it),
+        sampled every 7 ms for 350 ms.
     t : ndarray, shape (51,)
         Time in seconds from the start (R: ``liptime``).
     left_elbow, right_elbow : ndarray, shape (20,)
