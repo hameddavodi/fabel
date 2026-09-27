@@ -114,5 +114,6 @@ frame.shape
 
 ## Next
 
+- The [tutorials](tutorials/index.md) work through six full analyses.
 - [Migrating from R `fda`](r-migration.md) maps each R function to Fabel.
 - The [API reference](api/index.md) documents every argument.

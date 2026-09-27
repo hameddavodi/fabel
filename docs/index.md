@@ -50,6 +50,8 @@ girls.derivative().mean()(np.array([5.0, 12.0]))   # mean growth speed at 5 and 
 
 - [Quickstart](quickstart.md): the core objects and a full smoothing + FPCA workflow.
 - [Migrating from R `fda`](r-migration.md): every R function and its Fabel equivalent.
+- [Tutorials](tutorials/index.md): six end-to-end analyses (smoothing, FPCA, registration,
+  regression, dynamics, machine learning).
 - [API reference](api/index.md): every public class and function.
 
 ## References
