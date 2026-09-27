@@ -35,6 +35,7 @@ __all__ = [
     "gauss_legendre",
     "gauss_legendre_reference",
     "lstsq",
+    "pencil_eigh",
     "solve_spd",
     "sparse_penalty",
     "to_banded",
@@ -241,6 +242,54 @@ def lstsq(a: Any, b: Any, ridge: float = 0.0) -> Any:
     if len(trailing) != 1:
         return xp.reshape(coef, (a.shape[1], *trailing))
     return coef
+
+
+def pencil_eigh(a: NDArray, b: NDArray) -> tuple[NDArray, NDArray]:
+    r"""Diagonalise the symmetric pencil ``a v = mu * b v`` with ``vᵀ b v = I``.
+
+    A smoothing problem evaluates ``(S + λ R)⁻¹`` for many values of ``λ``.
+    Taking ``b = S + R`` once gives ``vᵀ S v = diag(mu)`` and
+    ``vᵀ R v = I - diag(mu)``, hence
+
+    .. math:: (S + \lambda R)^{-1} = V\,\mathrm{diag}\!\big((\mu + \lambda(1-\mu))^{-1}\big)\,V^{T}
+
+    so every further ``λ`` costs one diagonal scaling instead of a fresh
+    factorisation.
+
+    Parameters
+    ----------
+    a : numpy.ndarray
+        Symmetric ``(n, n)`` matrix.
+    b : numpy.ndarray
+        Symmetric ``(n, n)`` matrix, positive definite.  When ``b`` is
+        numerically singular a relative ridge of ``1e-12`` times its mean
+        diagonal is added; the affected directions are the ones constrained
+        neither by the data nor by the penalty, so the fit is unchanged.
+
+    Returns
+    -------
+    mu : numpy.ndarray
+        Eigenvalues, ascending, of shape ``(n,)``.
+    v : numpy.ndarray
+        Eigenvectors as columns, ``b``-orthonormal, of shape ``(n, n)``.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from fabel._linalg import pencil_eigh
+    >>> s = np.array([[2.0, 0.0], [0.0, 1.0]])
+    >>> mu, v = pencil_eigh(s, s + np.eye(2))
+    >>> np.round(mu, 6).tolist()
+    [0.5, 0.666667]
+    """
+    left = np.asarray(a, dtype=np.float64)
+    right = np.asarray(b, dtype=np.float64)
+    try:
+        mu, vec = sla.eigh(left, right)
+    except sla.LinAlgError:
+        ridge = 1e-12 * float(np.mean(np.diag(right)))
+        mu, vec = sla.eigh(left, right + ridge * np.eye(right.shape[0]))
+    return np.asarray(mu, dtype=np.float64), np.asarray(vec, dtype=np.float64)
 
 
 # --------------------------------------------------------------------------- #
