@@ -27,12 +27,12 @@ def coefs(n_basis: int = 6, n_curves: int = 2, seed: int = 3) -> Any:
     return torch.tensor(values, dtype=torch.float64, requires_grad=True)
 
 
-def check_gradient(scalar: Any, c: Any, *, rtol: float = 1e-6) -> None:
+def check_gradient(scalar: Any, c: Any, *, rtol: float = 1e-6) -> np.ndarray:
     """Compare ``d scalar / d c`` against a central finite difference."""
     assert scalar.requires_grad, "the result was detached from the graph"
     scalar.backward()
     assert c.grad is not None
-    analytic = c.grad.detach().numpy().copy()
+    analytic: np.ndarray = c.grad.detach().numpy().copy()
     assert np.all(np.isfinite(analytic))
     assert np.any(analytic != 0.0), "gradient is identically zero"
     return analytic

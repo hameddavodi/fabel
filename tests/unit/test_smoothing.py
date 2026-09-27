@@ -34,7 +34,8 @@ def spline(n_basis: int = 12) -> BSpline:
 def noisy(n_curves: int = 3, seed: int = 0) -> np.ndarray:
     rng = np.random.default_rng(seed)
     signal = np.sin(2 * np.pi * T)[:, None] * (1.0 + np.arange(n_curves))[None, :]
-    return signal + 0.1 * rng.standard_normal((T.size, n_curves))
+    out: np.ndarray = signal + 0.1 * rng.standard_normal((T.size, n_curves))
+    return out
 
 
 def normal_equations(

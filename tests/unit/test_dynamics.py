@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from typing import Any, cast
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -21,7 +24,7 @@ TWO_PI = 2.0 * np.pi
 
 
 @pytest.fixture(autouse=True)
-def _close_figures():
+def _close_figures() -> Iterator[None]:
     yield
     plt.close("all")
 
@@ -245,7 +248,7 @@ def test_solve_a_single_point_returns_the_initial_value() -> None:
 
 def test_fit_rejects_non_functional_data() -> None:
     with pytest.raises(TypeError, match="FData"):
-        PDA().fit(np.ones((5, 3)))
+        PDA().fit(cast(Any, np.ones((5, 3))))
 
 
 @pytest.mark.parametrize(
@@ -259,7 +262,7 @@ def test_fit_rejects_non_functional_data() -> None:
         ({"weight_basis": Constant(domain=(0.0, 1.0))}, "domain"),
     ],
 )
-def test_invalid_parameters(params: dict, match: str) -> None:
+def test_invalid_parameters(params: dict[str, Any], match: str) -> None:
     with pytest.raises(ValueError, match=match):
         PDA(**params).fit(harmonic_curves())
 
@@ -297,7 +300,7 @@ def test_transform_checks_variables_and_domain() -> None:
     with pytest.raises(ValueError, match="domain"):
         PDA(order=1).fit(harmonic_curves()).transform(other)
     with pytest.raises(TypeError, match="FData"):
-        pda.transform(np.ones(3))
+        pda.transform(cast(Any, np.ones(3)))
 
 
 def test_solve_validates_its_arguments() -> None:
@@ -328,11 +331,11 @@ def test_plot_overlay_draws_the_weight_trajectory() -> None:
     weight_basis = BSpline(domain=(0.0, TWO_PI), n_basis=5)
     pda = PDA(order=2, weight_basis=weight_basis, lam=1.0).fit(curves)
     ax = pda.plot_overlay(n_points=31)
-    trajectory = ax.lines[0].get_xydata()
+    trajectory = np.asarray(ax.lines[0].get_xydata())
     grid = np.linspace(0.0, TWO_PI, 31)
     np.testing.assert_allclose(trajectory[:, 0], pda.weights_[1](grid)[:, 0])
     np.testing.assert_allclose(trajectory[:, 1], pda.weights_[0](grid)[:, 0])
-    boundary = ax.lines[1].get_xydata()
+    boundary = np.asarray(ax.lines[1].get_xydata())
     np.testing.assert_allclose(boundary[:, 1], boundary[:, 0] ** 2 / 4.0)
     assert ax.get_xlabel()
     assert ax.get_ylabel()
@@ -359,7 +362,7 @@ def test_phase_plane_plots_velocity_against_acceleration() -> None:
     curves = harmonic_curves(2)
     ax = phase_plane(curves)
     assert len(ax.lines) == 2
-    xy = ax.lines[0].get_xydata()
+    xy = np.asarray(ax.lines[0].get_xydata())
     grid = np.linspace(0.0, TWO_PI, xy.shape[0])
     np.testing.assert_allclose(xy[:, 0], curves(grid, 1)[:, 0])
     np.testing.assert_allclose(xy[:, 1], curves(grid, 2)[:, 0])
@@ -371,7 +374,7 @@ def test_phase_plane_with_custom_grid_derivatives_and_labels() -> None:
     _, ax = plt.subplots()
     out = phase_plane(curves, t, deriv=(0, 1), labels={0.5: "m"}, ax=ax, color="k")
     assert out is ax
-    np.testing.assert_allclose(ax.lines[0].get_xydata()[:, 0], curves(t)[:, 0])
+    np.testing.assert_allclose(np.asarray(ax.lines[0].get_xydata())[:, 0], curves(t)[:, 0])
     assert [text.get_text() for text in ax.texts] == ["m"]
     assert ax.get_xlabel() == "D0 x"
     assert ax.get_ylabel() == "D1 x"

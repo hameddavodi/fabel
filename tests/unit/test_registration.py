@@ -11,7 +11,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from sklearn.exceptions import NotFittedError
 
-from fabel import BSpline, FData, Fourier, Monomial
+from fabel import Basis, BSpline, FData, Fourier, Monomial
 from fabel.registration import (
     AmpPhaseDecomposition,
     RegistrationResult,
@@ -53,6 +53,7 @@ def peak_times(fd: FData) -> np.ndarray:
 
 
 def _problem(criterion: str, periodic: bool, lam: float = 0.3) -> tuple[_CurveProblem, np.ndarray]:
+    curve_basis: Basis
     if periodic:
         curve_basis = Fourier(domain=DOMAIN, n_basis=7)
         values = np.stack(
@@ -204,7 +205,7 @@ def test_register_aligns_shifted_bumps(criterion: str) -> None:
 
 def test_register_lowers_the_criterion_from_the_identity() -> None:
     fd = bumps([0.45, 0.55])
-    options = {"warp_basis": BSpline(domain=DOMAIN, n_basis=4), "lam": 1e-3}
+    options: dict[str, Any] = {"warp_basis": BSpline(domain=DOMAIN, n_basis=4), "lam": 1e-3}
     start = register(fd, max_iter=0, **options)
     end = register(fd, **options)
     assert start.criterion is not None
@@ -273,7 +274,9 @@ def test_register_accepts_non_spline_curve_bases() -> None:
 def test_register_zero_curves_are_stationary() -> None:
     fd = FData(np.zeros((6, 2)), BSpline(domain=DOMAIN, n_basis=6))
     res = register(fd)
+    assert res.n_iter is not None
     np.testing.assert_array_equal(res.n_iter, [0, 0])
+    assert res.criterion is not None
     np.testing.assert_allclose(res.criterion, [0.0, 0.0])
 
 

@@ -68,7 +68,7 @@ def build_basis(spec: dict[str, Any]) -> Basis:
     """Construct the Fabel basis described by a golden basis specification."""
     kind = spec["type"]
     domain = (float(spec["rangeval"][0]), float(spec["rangeval"][1]))
-    params = spec.get("params")
+    params: Any = spec.get("params")
     if kind == "bspline":
         interior = [] if params is None else np.atleast_1d(np.asarray(params, dtype=float)).tolist()
         breaks = [domain[0], *interior, domain[1]]

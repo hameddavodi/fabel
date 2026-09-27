@@ -29,6 +29,7 @@ def test_from_pandas_shared_grid_returns_arrays() -> None:
     long = fb.from_pandas(df, "id", "t", "y")
     assert long.ids == ["a", "b"]
     assert isinstance(long.t, np.ndarray)
+    assert isinstance(long.y, np.ndarray)
     assert long.t.shape == (2,)
     assert long.y.shape == (2, 2)
     np.testing.assert_array_equal(long.y[:, 0], [1.0, 2.0])

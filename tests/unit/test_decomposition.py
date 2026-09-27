@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import matplotlib
 import numpy as np
@@ -139,7 +139,7 @@ def test_mean_fd_is_the_sample_mean() -> None:
 
 
 def test_integer_like_n_is_accepted() -> None:
-    pca = FPCA(n=np.int64(2)).fit(make_fd())
+    pca = FPCA(n=cast(Any, np.int64(2))).fit(make_fd())
     assert pca.scores.shape == (30, 2)
 
 
@@ -333,6 +333,7 @@ def test_rotation_is_orthogonal_and_preserves_the_span() -> None:
     pca = FPCA(n=3).fit(fd)
     rotated = pca.rotate("varimax")
     rot = rotated.rotation
+    assert rot is not None
     np.testing.assert_allclose(rot.T @ rot, np.eye(3), atol=1e-12)
     np.testing.assert_allclose(
         rotated.harmonics.coefs, np.asarray(pca.harmonics.coefs) @ rot, atol=1e-12
@@ -362,6 +363,7 @@ def test_rotation_keeps_the_sign_rule() -> None:
 def test_rotating_one_component_is_the_identity() -> None:
     pca = FPCA(n=1).fit(make_fd())
     rotated = pca.rotate()
+    assert rotated.rotation is not None
     np.testing.assert_allclose(rotated.rotation, np.eye(1))
 
 
