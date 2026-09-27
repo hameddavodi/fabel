@@ -219,7 +219,9 @@ def main() -> None:
         arrays, meta = builder()
         npz_path = DATA_RELEASE_DIR / f"{name}.npz"
         json_path = DATA_RELEASE_DIR / f"{name}.json"
-        np.savez_compressed(npz_path, **arrays)
+        # allow_pickle is numpy's default, spelled out so the stub cannot match a
+        # ``**arrays`` entry against that bool keyword.
+        np.savez_compressed(npz_path, allow_pickle=True, **arrays)
         with json_path.open("w", encoding="utf-8") as fh:
             json.dump(meta, fh)
         checksums[name] = {"npz": _sha256(npz_path), "json": _sha256(json_path)}

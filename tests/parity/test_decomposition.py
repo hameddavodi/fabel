@@ -191,10 +191,10 @@ def signed_permutation(fabel: np.ndarray, r: np.ndarray) -> tuple[list[int], np.
     """Return the column order and signs that best map ``fabel``'s columns onto ``r``'s."""
     n = fabel.shape[1]
     best: tuple[float, list[int]] = (-1.0, list(range(n)))
-    for order in permutations(range(n)):
-        score = sum(abs(float(np.dot(fabel[:, j], r[:, i]))) for i, j in enumerate(order))
+    for candidate in permutations(range(n)):
+        score = sum(abs(float(np.dot(fabel[:, j], r[:, i]))) for i, j in enumerate(candidate))
         if score > best[0]:
-            best = (score, list(order))
+            best = (score, list(candidate))
     order = best[1]
     signs = np.array([np.sign(np.dot(fabel[:, j], r[:, i])) or 1.0 for i, j in enumerate(order)])
     return order, signs

@@ -246,6 +246,7 @@ def test_depth_of_fdata_uses_a_101_point_grid() -> None:
     fd = _random_fd(12)
     result = depth(fd)
     grid = np.linspace(0.0, 1.0, 101)
+    assert result.t is not None
     np.testing.assert_allclose(result.t, grid)
     np.testing.assert_allclose(result.depth, depth(fd(grid)).depth)
     custom = depth(fd, t=np.array([0.2, 0.5]))
@@ -341,11 +342,11 @@ def test_boxplot_plot() -> None:
     # median, two whiskers, two outliers
     assert len(ax.lines) == 5
     assert len(ax.collections) == 1
-    np.testing.assert_allclose(ax.lines[0].get_xydata()[:, 1], boxplot(values).median)
+    np.testing.assert_allclose(np.asarray(ax.lines[0].get_xydata())[:, 1], boxplot(values).median)
     _, other = plt.subplots()
     grid = np.linspace(0.0, 2.0, 40)
     assert boxplot(values, t=grid).plot(ax=other, color="k") is other
-    np.testing.assert_allclose(other.lines[0].get_xydata()[:, 0], grid)
+    np.testing.assert_allclose(np.asarray(other.lines[0].get_xydata())[:, 0], grid)
     plt.close("all")
 
 
@@ -369,6 +370,7 @@ def test_t_test_statistic_is_the_maximal_welch_t() -> None:
     welch = np.abs(a.mean(1) - b.mean(1)) / np.sqrt(a.var(1, ddof=1) / 8 + b.var(1, ddof=1) / 6)
     np.testing.assert_allclose(result.pointwise, welch, rtol=1e-12)
     assert result.statistic == pytest.approx(welch.max(), rel=1e-12)
+    assert result.t is not None
     np.testing.assert_allclose(result.t, grid)
 
 
@@ -705,15 +707,17 @@ def test_f_test_on_a_weighted_functional_model_is_weighted_least_squares() -> No
 def test_f_test_on_a_model_rejects_raw_settings() -> None:
     y, group = _regression_data()
     model = fregress(y, [1.0, group])
+    # Deliberately ill-typed calls, checked at runtime: no overload accepts them.
+    untyped: Any = f_test
     with pytest.raises(TypeError, match="x"):
         f_test(model, [np.ones(12), group])
     with pytest.raises(TypeError, match="basis"):
-        f_test(model, basis=y.basis)  # type: ignore[call-overload]
+        untyped(model, basis=y.basis)
     with pytest.raises(TypeError, match="lam"):
-        f_test(model, lam=1.0)  # type: ignore[call-overload]
+        untyped(model, lam=1.0)
     with pytest.raises(TypeError, match="penalty"):
-        f_test(model, penalty=1)  # type: ignore[call-overload]
+        untyped(model, penalty=1)
     with pytest.raises(ValueError, match="n_perm"):
         f_test(model, n_perm=0)
     with pytest.raises(TypeError, match="covariates"):
-        f_test(y)  # type: ignore[call-overload]
+        untyped(y)

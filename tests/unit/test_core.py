@@ -128,6 +128,7 @@ def test_derivative_reproduces_pointwise_derivative(basis: Any, order: int) -> N
 def test_derivative_of_a_spline_lowers_the_order() -> None:
     fd = make_fd(n_basis=9)
     d = fd.derivative()
+    assert isinstance(fd.basis, BSpline)
     assert isinstance(d.basis, BSpline)
     assert d.basis.order == fd.basis.order - 1
     assert d.basis.breaks == fd.basis.breaks

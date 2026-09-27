@@ -10,6 +10,7 @@ from __future__ import annotations
 import importlib
 import subprocess
 import sys
+from typing import Any, cast
 
 import numpy as np
 import pytest
@@ -17,9 +18,10 @@ import pytest
 from fabel import LDO, BSpline, FData, Fourier
 from fabel.smoothing import smooth
 
-torch = pytest.importorskip("torch", reason="torch extra not installed")
+pytest.importorskip("torch", reason="torch extra not installed")
 
-from fabel import nn as fnn  # noqa: E402
+import torch
+from fabel import nn as fnn
 
 DOMAIN = (0.0, 1.0)
 GRID = np.linspace(0.0, 1.0, 21)
@@ -216,7 +218,8 @@ def test_smoothing_layer_gradcheck_smoothing_parameter() -> None:
     y = rand(2, len(GRID), grad=False)
 
     def as_function(log_lam: torch.Tensor, obs: torch.Tensor) -> torch.Tensor:
-        return torch.func.functional_call(layer, {"log_lam": log_lam}, (obs,))
+        out: torch.Tensor = torch.func.functional_call(layer, {"log_lam": log_lam}, (obs,))
+        return out
 
     log_lam = torch.tensor(np.log(1e-2), dtype=torch.float64, requires_grad=True)
     assert torch.autograd.gradcheck(as_function, (log_lam, y.requires_grad_(True)))
@@ -282,7 +285,7 @@ def test_dataset_checks_label_count() -> None:
 
 def test_dataset_rejects_non_fdata() -> None:
     with pytest.raises(TypeError, match="FData"):
-        fnn.FDataDataset(np.ones((7, 3)))
+        fnn.FDataDataset(cast(Any, np.ones((7, 3))))
 
 
 # --------------------------------------------------------------------------- #

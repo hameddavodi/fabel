@@ -28,7 +28,7 @@ import json
 from collections.abc import Callable
 from functools import cache
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pytest
@@ -325,7 +325,9 @@ def _fixture_actual(field: str) -> Any:
         "ocv": lambda: model.ocv,
         "Cmat": lambda: model.cmat,
         "Dmat": lambda: model.dmat,
-        "sigma2": lambda: float(np.sum((model.y - model.fitted) ** 2)) / (30 - model.df),
+        "sigma2": lambda: (
+            float(np.sum((model.y - model.fitted) ** 2)) / (30 - cast(float, model.df))
+        ),
         "bvar": lambda: model.stderr().cov,
         "betastderr": lambda: np.concatenate([b.coefs[:, 0] for b in model.stderr().beta]),
         "sse_cv": lambda: model.cv().sse,
