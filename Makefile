@@ -1,4 +1,4 @@
-.PHONY: lint type test parity golden bench docs build
+.PHONY: lint type test parity golden bench docs build book
 
 lint:
 	uv run ruff check .
@@ -26,3 +26,9 @@ docs:
 build:
 	uv run python -m build
 	uv run twine check dist/*
+
+# Rebuild notebooks/book_figures.ipynb from notebooks/book/ch*.py and execute it.
+# Datasets not shipped in the package come from the data-v1 release (or FABEL_DATA_DIR).
+book:
+	uv run python tools/build_book_notebook.py
+	uv run pytest --nbmake notebooks/book_figures.ipynb
