@@ -9,6 +9,8 @@ Run with ``pytest benchmarks -k smooth --benchmark-only``.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -40,28 +42,28 @@ def fourier() -> Fourier:
 
 
 @pytest.mark.benchmark(group="smooth")
-def test_bench_smooth_weather_fixed_lambda(benchmark, fourier: Fourier) -> None:
+def test_bench_smooth_weather_fixed_lambda(benchmark: Any, fourier: Fourier) -> None:
     y = curves(35)
     result = benchmark(smooth, y, GRID, basis=fourier, lam=1e2)
     assert np.asarray(result.fd.coefs).shape == (N_BASIS, 35)
 
 
 @pytest.mark.benchmark(group="smooth")
-def test_bench_smooth_1000_curves(benchmark, spline: BSpline) -> None:
+def test_bench_smooth_1000_curves(benchmark: Any, spline: BSpline) -> None:
     y = curves(1000)
     result = benchmark(smooth, y, GRID, basis=spline, lam=1e2)
     assert np.asarray(result.fd.coefs).shape == (N_BASIS, 1000)
 
 
 @pytest.mark.benchmark(group="smooth")
-def test_bench_smooth_gcv_search(benchmark, spline: BSpline) -> None:
+def test_bench_smooth_gcv_search(benchmark: Any, spline: BSpline) -> None:
     y = curves(35)
     result = benchmark(smooth, y, GRID, basis=spline, lam="gcv")
     assert result.lam > 0.0
 
 
 @pytest.mark.benchmark(group="smooth")
-def test_bench_smooth_gcv_curve_grid(benchmark, spline: BSpline) -> None:
+def test_bench_smooth_gcv_curve_grid(benchmark: Any, spline: BSpline) -> None:
     y = curves(35)
     lambdas = 10.0 ** np.arange(-4.0, 8.25, 0.25)
     scores = benchmark(gcv_curve, y, GRID, spline, lambdas)
@@ -69,7 +71,7 @@ def test_bench_smooth_gcv_curve_grid(benchmark, spline: BSpline) -> None:
 
 
 @pytest.mark.benchmark(group="smooth")
-def test_bench_smooth_monotone(benchmark) -> None:
+def test_bench_smooth_monotone(benchmark: Any) -> None:
     t = np.linspace(0.0, 1.0, 101)
     y = np.tanh(6.0 * (t - 0.5)) + 0.02 * RNG.standard_normal(t.size)
     basis = BSpline(domain=(0.0, 1.0), n_basis=12)
@@ -78,7 +80,7 @@ def test_bench_smooth_monotone(benchmark) -> None:
 
 
 @pytest.mark.benchmark(group="smooth")
-def test_bench_smoother_transform(benchmark, spline: BSpline) -> None:
+def test_bench_smoother_transform(benchmark: Any, spline: BSpline) -> None:
     x = curves(200).T
     smoother = Smoother(spline, t=GRID, lam=1e2).fit(x)
     coefs = benchmark(smoother.transform, x)

@@ -68,6 +68,8 @@ def test_scalar_penalty_shrinks_roughness() -> None:
     b_rough = rough.beta[1].coefs[:, 0]
     b_smooth = smoothed.beta[1].coefs[:, 0]
     assert b_smooth @ pen @ b_smooth < b_rough @ pen @ b_rough
+    assert smoothed.df is not None
+    assert rough.df is not None
     assert smoothed.df < rough.df
 
 

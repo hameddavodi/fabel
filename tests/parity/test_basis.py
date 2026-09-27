@@ -69,7 +69,7 @@ R_FDA_DEFECTS: dict[str, str] = {
 def build_basis(name: str, inp: dict[str, Any]) -> Basis:
     """Construct the Fabel basis described by one golden case."""
     family = name.split("_")[0]
-    domain = tuple(inp["domain"]) if "domain" in inp else None
+    domain: Any = tuple(inp["domain"]) if "domain" in inp else None
     if family == "bspline":
         return BSpline(
             domain=domain,
@@ -80,7 +80,9 @@ def build_basis(name: str, inp: dict[str, Any]) -> Basis:
     if family == "fourier":
         return Fourier(domain=domain, n_basis=inp["n_basis"], period=inp.get("period"))
     if family == "monomial":
-        return Monomial(domain=domain, n_basis=inp.get("n_basis"), exponents=inp.get("exponents"))
+        return Monomial(
+            domain=domain, n_basis=inp.get("n_basis", 2), exponents=inp.get("exponents")
+        )
     if family == "exponential":
         return Exponential(domain=domain, rates=inp["ratevec"])
     if family == "power":

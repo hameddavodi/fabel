@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -25,13 +26,15 @@ FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
 RTOL = 1e-8
 
 
-def _expected(name: str) -> dict:
+def _expected(name: str) -> dict[str, Any]:
     with (FIXTURES / name).open(encoding="utf-8") as fh:
-        return json.load(fh)
+        loaded: dict[str, Any] = json.load(fh)
+    return loaded
 
 
 def test_fd_coefs_and_eval_match_r() -> None:
     fdobj = fb.read_rds(FIXTURES / "bspline_fd.rds")
+    assert isinstance(fdobj, fb.FData)
     expected = _expected("bspline_fd_expected.json")
 
     np.testing.assert_allclose(fdobj.coefs, expected["coefs"], rtol=RTOL, atol=1e-12)
@@ -43,6 +46,7 @@ def test_fd_coefs_and_eval_match_r() -> None:
 
 def test_bifd_coefs_and_eval_match_r() -> None:
     bifdobj = fb.read_rds(FIXTURES / "bspline_bifd.rds")
+    assert isinstance(bifdobj, fb.BiFData)
     expected = _expected("bspline_bifd_expected.json")
 
     np.testing.assert_allclose(bifdobj.coefs, expected["coef"], rtol=RTOL, atol=1e-12)

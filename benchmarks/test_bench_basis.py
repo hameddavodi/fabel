@@ -9,6 +9,8 @@ Run with ``pytest benchmarks --benchmark-only``.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -33,42 +35,44 @@ def fourier() -> Fourier:
 
 @pytest.mark.benchmark(group="eval")
 @pytest.mark.parametrize("deriv", [0, 1, 2])
-def test_bench_bspline_eval(benchmark, spline: BSpline, deriv: int) -> None:
+def test_bench_bspline_eval(benchmark: Any, spline: BSpline, deriv: int) -> None:
     values = benchmark(spline, GRID, deriv)
     assert values.shape == (N_POINTS, N_BASIS)
 
 
 @pytest.mark.benchmark(group="eval")
-def test_bench_fourier_eval(benchmark, fourier: Fourier) -> None:
+def test_bench_fourier_eval(benchmark: Any, fourier: Fourier) -> None:
     values = benchmark(fourier, GRID, 0)
     assert values.shape == (N_POINTS, N_BASIS)
 
 
 @pytest.mark.benchmark(group="penalty")
 @pytest.mark.parametrize("order", [0, 1, 2])
-def test_bench_bspline_penalty(benchmark, spline: BSpline, order: int) -> None:
+def test_bench_bspline_penalty(benchmark: Any, spline: BSpline, order: int) -> None:
     # Penalties are memoised on the basis value, so the cache must be dropped
     # every round or this would time a dictionary lookup, not the quadrature.
     def build() -> np.ndarray:
         clear_gram_cache()
-        return spline.penalty(order)
+        matrix: np.ndarray = spline.penalty(order)
+        return matrix
 
     matrix = benchmark(build)
     assert matrix.shape == (N_BASIS, N_BASIS)
 
 
 @pytest.mark.benchmark(group="penalty")
-def test_bench_bspline_penalty_cached(benchmark, spline: BSpline) -> None:
+def test_bench_bspline_penalty_cached(benchmark: Any, spline: BSpline) -> None:
     spline.penalty(2)
     matrix = benchmark(spline.penalty, 2)
     assert matrix.shape == (N_BASIS, N_BASIS)
 
 
 @pytest.mark.benchmark(group="penalty")
-def test_bench_fourier_penalty(benchmark, fourier: Fourier) -> None:
+def test_bench_fourier_penalty(benchmark: Any, fourier: Fourier) -> None:
     def build() -> np.ndarray:
         clear_gram_cache()
-        return fourier.penalty(2)
+        matrix: np.ndarray = fourier.penalty(2)
+        return matrix
 
     matrix = benchmark(build)
     assert matrix.shape == (N_BASIS, N_BASIS)
