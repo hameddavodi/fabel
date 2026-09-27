@@ -530,7 +530,7 @@ class FData(PlotMixin):
         """
         if self.n_curves < 2:
             raise ValueError("a standard deviation needs at least two curves")
-        size = max(201, 10 * self.basis.n_basis)
+        size = max(201, 10 * self.basis.n_basis + 1)
         lower, upper = self.domain
         grid = default_namespace().linspace(lower, upper, size, dtype=default_namespace().float64)
         xp = array_namespace(self.coefs)
