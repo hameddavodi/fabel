@@ -66,6 +66,11 @@ nav:
       - Core objects: api/core.md
       - Smoothing: api/smoothing.md
       - Decomposition: api/decomposition.md
+      - Regression: api/regression.md
+      - Registration: api/registration.md
+      - Dynamics: api/dynamics.md
+      - Statistics: api/stats.md
+      - PyTorch layers: api/nn.md
       - Datasets: api/datasets.md
       - Input and output: api/io.md
   - Developer conventions: dev/conventions.md
