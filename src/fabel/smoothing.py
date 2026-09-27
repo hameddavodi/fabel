@@ -27,8 +27,8 @@ Examples
 >>> from fabel.smoothing import smooth
 >>> t = np.linspace(0.0, 1.0, 21)
 >>> y = np.sin(2 * np.pi * t)
->>> result = smooth(y, t, basis=BSpline(domain=(0.0, 1.0), n_basis=8), lam=1e-6)
->>> bool(np.max(np.abs(result.fd(t) - y)) < 1e-3)
+>>> result = smooth(y, t, basis=BSpline(domain=(0.0, 1.0), n_basis=12), lam=1e-8)
+>>> bool(np.max(np.abs(result.fd(t)[:, 0] - y)) < 1e-3)
 True
 """
 
