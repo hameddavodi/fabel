@@ -28,3 +28,6 @@ data_export/
 # tools/build_data_release.py from data_export/); not committed -- see
 # docs/dev/data-release.md for the human upload step.
 data_release/
+
+# Local knowledge graph of the repo (graphify); regenerable.
+graphify-out/
