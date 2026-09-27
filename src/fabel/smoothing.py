@@ -86,6 +86,11 @@ _GAUSS_NEWTON_TOL = 1e-12
 
 _CONSTRAINTS = ("positive", "monotone", "morph")
 
+#: Relative gap ``(n - df) / n`` below which a fit counts as interpolating and
+#: its GCV score as undefined.  A genuine near-interpolant keeps a gap of
+#: 1.7e-8 at ``lambda = 1e-12`` (8 splines on 8 points); an exact one 4e-16.
+_INTERPOLATION_TOL = 1e-10
+
 
 # --------------------------------------------------------------------------- #
 # result
@@ -251,6 +256,20 @@ def _normal_matrix(phi: Array, w: Array, xp: ModuleType) -> tuple[Array, Array]:
     return xp.matmul(xp.matrix_transpose(phi), weighted), xp.matrix_transpose(weighted)
 
 
+def _gcv_denominator(df: float, n_points: int) -> float:
+    """Return ``(1 - df/n)²``, or ``0`` when the fit interpolates the data.
+
+    At ``df = n`` the criterion is ``0 / 0``: the residuals and the denominator
+    are both pure rounding, and their ratio is noise (a measured 0.27 for an
+    exact interpolant).  R's ``smooth.basis`` returns no GCV there; Fabel
+    reports ``inf`` once ``n - df`` is within :data:`_INTERPOLATION_TOL` of
+    zero relative to ``n``.
+    """
+    if n_points - df <= _INTERPOLATION_TOL * n_points:
+        return 0.0
+    return (1.0 - df / n_points) ** 2
+
+
 def _linear_fit(
     phi: Array, ymat: Array, w: Array, pen: Array, lam: float, xp: ModuleType
 ) -> tuple[Array, Array, float, Array, float]:
@@ -267,9 +286,9 @@ def _linear_fit(
     df = float(xp.sum(phi * xp.matrix_transpose(y2c)))
     resid = ymat - fitted
     sse_columns = xp.sum(resid * resid, axis=0)
-    denom = (1.0 - df / n_points) ** 2
+    denom = _gcv_denominator(df, n_points)
     gcv = (sse_columns / n_points) / denom if denom > 0 else xp.full_like(sse_columns, inf)
-    return coefs, y2c, df, gcv, float(xp.sum(sse_columns))
+    return coefs, y2c, df, gcv, float(to_numpy(xp.sum(sse_columns)))
 
 
 # --------------------------------------------------------------------------- #
@@ -312,7 +331,7 @@ class _Pencil:
         df = float(xp.sum(self._mu * scale))
         resid = self._ymat - xp.matmul(self._projected, scale[:, None] * self._rhs)
         sse = xp.sum(resid * resid, axis=0)
-        denom = (1.0 - df / self._n) ** 2
+        denom = _gcv_denominator(df, self._n)
         if denom <= 0.0:
             return xp.full_like(sse, inf)
         return (sse / self._n) / denom
@@ -761,7 +780,7 @@ def _constrained_fit(
             beta_columns.append(beta)
     coefs_all = xp.stack(coef_columns, axis=1)
     sse_array = asarray(sse_columns, xp)
-    denom = (1.0 - (total_df / n_columns) / n_points) ** 2
+    denom = _gcv_denominator(total_df / n_columns, n_points)
     gcv = (sse_array / n_points) / denom if denom > 0 else xp.full_like(sse_array, inf)
     return SmoothResult(
         fd=FData(xp.reshape(coefs_all, (basis.n_basis, *curve_shape)), basis),
