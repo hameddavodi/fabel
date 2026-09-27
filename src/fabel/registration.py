@@ -69,7 +69,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, validate_data
 
 from fabel import _linalg
-from fabel._backend import asarray, default_namespace, to_numpy
+from fabel._backend import asarray, default_namespace, is_torch, to_numpy
 from fabel._operator import LDO
 from fabel.basis import Basis, BSpline
 from fabel.core import FData
@@ -84,6 +84,11 @@ __all__ = [
 ]
 
 Array = Any
+
+#: The criterion, gradient and Hessian of one curve as a function of its
+#: parameters, and a factory building it from a :class:`_CurveProblem`.
+Objective = Callable[[Array], tuple[float, Array, Array]]
+ObjectiveFactory = Callable[["_CurveProblem"], Objective]
 
 #: The registration grid has ``max(_MIN_FINE_POINTS, _POINTS_PER_BASIS * K + 1)``
 #: points, ``K`` being the size of the curves' basis -- R ``fda``'s choice.
@@ -221,7 +226,9 @@ class RegistrationResult:
         Returns
         -------
         array
-            Warp values of shape ``(n_points, n_curves)``.
+            Warp values of shape ``(n_points, n_curves)``: a tensor (constant,
+            on the device of the result) for a registration of tensors or for
+            tensor ``t``, a NumPy array otherwise.
 
         Examples
         --------
@@ -239,7 +246,13 @@ class RegistrationResult:
         points = xp.reshape(asarray(to_numpy(t), xp), (-1,))
         coefs = asarray(to_numpy(self.latent.coefs), xp)
         values = _warp_values(self.latent.basis, coefs, points)
-        return values + xp.reshape(asarray(to_numpy(self.shift), xp), (1, -1))
+        values = values + xp.reshape(asarray(to_numpy(self.shift), xp), (1, -1))
+        like = self.latent.coefs if is_torch(self.latent.coefs) else t
+        if not is_torch(like):
+            return values
+        from fabel._internal.registration_torch import as_tensor_like
+
+        return as_tensor_like(values, like)
 
     def decompose(self, domain: tuple[float, float] | None = None) -> AmpPhaseDecomposition:
         r"""Split the variation of the curves into amplitude and phase parts.
@@ -303,7 +316,7 @@ def _fine_grid(domain: tuple[float, float], n_basis: int) -> Array:
 
 
 def _as_numpy_fdata(fd: FData) -> FData:
-    """Return ``fd`` with NumPy coefficients (registration is not differentiable)."""
+    """Return ``fd`` with NumPy coefficients, the form the optimiser works on."""
     xp = default_namespace()
     return FData(asarray(to_numpy(fd.coefs), xp), fd.basis)
 
@@ -613,7 +626,7 @@ def _newton_step(hess: Array, grad: Array) -> Array:
 
 
 def _minimise(
-    evaluate: Callable[[Array], tuple[float, Array, Array]],
+    evaluate: Objective,
     start: Array,
     max_iter: int,
     tol: float,
@@ -723,8 +736,14 @@ def _continuous(
     init_shift: Any,
     max_iter: int,
     tol: float,
+    objective: ObjectiveFactory | None = None,
 ) -> RegistrationResult:
-    """Continuous registration of every curve of ``fd`` to ``target``."""
+    """Continuous registration of every curve of ``fd`` to ``target``.
+
+    ``objective`` builds the function handed to the optimiser from each curve's
+    problem; the default is the analytic :meth:`_CurveProblem.evaluate`.  The
+    PyTorch path passes one that differentiates the criterion by autograd.
+    """
     xp = default_namespace()
     if criterion not in _CRITERIA:
         raise ValueError(f"criterion must be one of {_CRITERIA}, got {criterion!r}")
@@ -774,7 +793,8 @@ def _continuous(
         start = coefs[1:, i]
         if periodic:
             start = xp.concat([start, shifts[i : i + 1]])
-        params, value, used, converged = _minimise(problem.evaluate, start, max_iter, tol)
+        evaluate = problem.evaluate if objective is None else objective(problem)
+        params, value, used, converged = _minimise(evaluate, start, max_iter, tol)
         if not converged:
             unconverged.append(i)
         full, shift = problem.split(params)
@@ -1034,7 +1054,9 @@ def register(
     Returns
     -------
     RegistrationResult
-        The registered curves, warps, latent functions and shifts.
+        The registered curves, warps, latent functions and shifts.  With
+        PyTorch input (see Notes) every array and coefficient matrix in it is a
+        tensor of the input's dtype and device.
 
     Raises
     ------
@@ -1053,8 +1075,29 @@ def register(
         The line search rejects steps at which the criterion or its
         derivatives overflow and a failed eigendecomposition of the Hessian
         falls back to steepest descent, so such curves stop at the last finite
-        iterate (a strictly increasing warp) with this warning rather than an
+        iterate (an increasing warp) with this warning rather than an
         exception.  A positive ``lam`` keeps ``W`` bounded.
+
+    Notes
+    -----
+    **PyTorch input.**  When ``fd`` (or, for continuous registration, an FData
+    ``target``) has :class:`torch.Tensor` coefficients, the result holds
+    tensors in the dtype and on the device of that input, and ``registered``
+    is differentiable with respect to the input coefficients.  Continuous
+    registration then evaluates the criterion in PyTorch and takes its
+    gradient and Hessian by automatic differentiation instead of the analytic
+    formulas; the safeguarded Newton iteration, the line search and the
+    stopping rules are the same, so both paths reach the same optimum.  The
+    optimisation always runs in float64 on the CPU (a registration needs
+    ``tol``-level accuracy, and some devices have no float64).  Gradients flow
+    through the final evaluation ``x_i(h_i(t))`` with the optimal warps held
+    fixed: the dependence of the optimum on the curves (the implicit
+    gradient) is not propagated.  Landmark registration needs no optimisation;
+    its warps depend only on the landmarks, so the gradient of ``registered``
+    with respect to the coefficients is exact.  ``warp``, ``latent``,
+    ``warp_inverse``, ``shift``, ``criterion`` and ``n_iter`` are constant
+    tensors.  ``import fabel`` never imports torch; this path imports it on
+    first use.
 
     Examples
     --------
@@ -1073,24 +1116,51 @@ def register(
     _check_univariate(fd, "fd")
     data = _as_numpy_fdata(fd)
     _check_finite(data.coefs, "fd")
+    like = _torch_reference(fd, None if landmarks is not None else target)
     if landmarks is not None:
         weight = _DEFAULT_LANDMARK_LAMBDA if lam is None else float(lam)
         if weight < 0.0:
             raise ValueError(f"lam must be non-negative, got {weight}")
-        return _landmark(data, landmarks, target_landmarks, warp_basis, weight, penalty)
-    return _continuous(
-        data,
-        target,
-        warp_basis,
-        0.0 if lam is None else float(lam),
-        penalty,
-        criterion,
-        periodic,
-        init,
-        init_shift,
-        max_iter,
-        tol,
-    )
+        result = _landmark(data, landmarks, target_landmarks, warp_basis, weight, penalty)
+    else:
+        objective: ObjectiveFactory | None = None
+        if like is not None:
+            from fabel._internal.registration_torch import AutogradObjective
+
+            objective = AutogradObjective
+        result = _continuous(
+            data,
+            target,
+            warp_basis,
+            0.0 if lam is None else float(lam),
+            penalty,
+            criterion,
+            periodic,
+            init,
+            init_shift,
+            max_iter,
+            tol,
+            objective,
+        )
+    if like is None:
+        return result
+    from fabel._internal.registration_torch import to_torch_result
+
+    return to_torch_result(result, fd, target, like, periodic=landmarks is None and periodic)
+
+
+def _torch_reference(fd: FData, target: Any) -> Array | None:
+    """Return the tensor whose dtype and device a torch result takes, if any.
+
+    That is ``fd``'s coefficients when they are a tensor, else the target's
+    when the target is an FData with tensor coefficients, else ``None`` (the
+    NumPy path).  Checking never imports torch.
+    """
+    if is_torch(fd.coefs):
+        return fd.coefs
+    if isinstance(target, FData) and is_torch(target.coefs):
+        return target.coefs
+    return None
 
 
 def landmark_register(
