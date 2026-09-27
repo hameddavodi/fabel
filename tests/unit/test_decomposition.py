@@ -572,3 +572,43 @@ def test_cca_accessors_before_fit_raise() -> None:
 def test_cca_tags_require_a_target() -> None:
     assert FCCA().__sklearn_tags__().target_tags.required is True
     assert FPCA().__sklearn_tags__().target_tags.required is False
+
+
+# --------------------------------------------------------------------------- #
+# n accepts any integer-like value (typing.SupportsIndex)
+# --------------------------------------------------------------------------- #
+
+
+class _IndexLike:
+    """A non-int object that still implements ``__index__``."""
+
+    def __init__(self, value: int) -> None:
+        self.value = value
+
+    def __index__(self) -> int:
+        return self.value
+
+
+@pytest.mark.parametrize("n", [np.int64(3), np.int32(3), np.uint8(3), _IndexLike(3)])
+def test_fpca_accepts_integer_like_n(n: Any) -> None:
+    pca = FPCA(n=n).fit(make_fd())
+    assert pca.n_components_ == 3
+    assert pca.harmonics.n_curves == 3
+    assert pca.get_params()["n"] is n
+
+
+@pytest.mark.parametrize("n", [np.int64(2), _IndexLike(2)])
+def test_cca_accepts_integer_like_n(n: Any) -> None:
+    x, y = cca_pair()
+    cca = FCCA(n=n, lam1=1e-4, lam2=1e-4).fit(x, y)
+    assert cca.n_components_ == 2
+    assert cca.get_params()["n"] is n
+
+
+@pytest.mark.parametrize("n", [np.float64(2.0), 2.0, np.True_, np.int64(0), _IndexLike(-1)])
+def test_integer_like_n_rejects_non_integers(n: Any) -> None:
+    with pytest.raises(ValueError, match="positive integer"):
+        FPCA(n=n).fit(make_fd())
+    x, y = cca_pair()
+    with pytest.raises(ValueError, match="positive integer"):
+        FCCA(n=n).fit(x, y)
