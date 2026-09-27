@@ -212,6 +212,7 @@ def _sha256(path: Path) -> str:
 
 
 def main() -> None:
+    """Write every release asset and its SHA-256 checksum into ``data_release/``."""
     DATA_RELEASE_DIR.mkdir(parents=True, exist_ok=True)
     checksums: dict[str, dict[str, str]] = {}
     for name, builder in _BUILDERS.items():
