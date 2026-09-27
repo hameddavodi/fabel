@@ -83,7 +83,8 @@ Order matters: `_backend` → `basis` → `core`.
 - [x] `PARITY_REPORT.md`: auto-generated table — every public symbol, R counterpart, max abs/rel error, status
 - [x] Packaging: wheels via `python -m build`, `twine check dist/*` clean, `pip install fabel` smoke test in clean venv, py3.10–3.13 matrix
 - [x] `CHANGELOG.md`, `LICENSE` (BSD-3), `CITATION.cff`, README with badges
-- [ ] Version `1.0.0` tagged. Publish command prepared but **not executed** (`twine upload` is the only human step)
+- [x] Version `1.0.0` tagged. Publish command prepared but **not executed** (`twine upload` is the only human step)
+  - 2026-09-27: GATE 5 green, annotated tag `v1.0.0` (local). Publish commands in PROGRESS.md "Human steps"
 
 **GATE 5 (final):**
 ```bash

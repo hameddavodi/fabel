@@ -1,5 +1,36 @@
 # PROGRESS
-## Status: WAVE 3 MERGED 2026-09-27 -- Phases 0-4 done on main (torch registration path included); Phase 5: docs done, book notebook at 70 of 76 figures, 1.0.0 tag left
+## Status: release candidate 1.0.0 ready -- GATE 5 green on main 2026-09-27, tag v1.0.0 created locally (not pushed, not uploaded). Open: book notebook at 70 of 76 figures.
+## Release 1.0.0 (2026-09-27)
+- GATE 5 (WORKFLOW.md) run on main with `.venv/bin/*` and `FABEL_DATA_DIR=data_release`, all steps green: `pytest` 1654 passed, 5 skipped, 154 strict xfail; `pytest tests/parity` 525 passed, 154 strict xfail; `mypy --strict src/fabel` clean (18 files); `ruff check .` and `ruff format --check .` clean; `mkdocs build --strict` clean; `python -m build` gives `fabel-1.0.0.tar.gz` + `fabel-1.0.0-py3-none-any.whl`, `twine check dist/*` PASSED; `pytest --nbmake notebooks/book_figures.ipynb` 1 passed.
+- `PARITY_REPORT.md` regenerated with `tools/parity_report.py`: no change (679 checks, 525 pass, 154 strict xfail, 0 fail).
+- Wheel smoke test (fresh `uv venv` under /tmp, install the built wheel, `import fabel`, run the README quickstart): 3.11, 3.12, 3.13 pass; `import fabel` does not import torch. 3.10: the resolver picks scipy 1.15.3, whose macOS arm64 wheel does not load on macOS 27 (`dlopen ... __DATA/__thread_bss has a zero-fill section type`); a venv with only scipy fails the same way, so it is an upstream scipy wheel problem, not Fabel. With scipy 1.14.1 (allowed by `scipy>=1.14`) the 3.10 smoke test passes with the same numbers. numpy 2.2.6 prints spurious matmul RuntimeWarnings on this macOS (known Accelerate issue); output is identical.
+- GATE 5 note: the nbmake step needs the non-shipped datasets, so run it with `FABEL_DATA_DIR=data_release` (the `make gate5` target sets it) until the `data-v1` release is uploaded.
+- Annotated tag `v1.0.0` created locally on the release commit. Nothing pushed (no remote), nothing uploaded.
+
+## Human steps
+Run from the repo root on the tagged commit (`git checkout v1.0.0`).
+1. Add the remote and push (the repo has no remote yet):
+   ```
+   git remote add origin git@github.com:AISMAsrl/fabel.git
+   git push origin main
+   git push origin v1.0.0
+   ```
+2. Upload the dataset assets (docs/dev/data-release.md). Needs the GitHub CLI logged in to AISMAsrl:
+   ```
+   .venv/bin/python tools/build_data_release.py   # only if data_export/ changed; compare the table with _CHECKSUMS
+   gh release create data-v1 data_release/*.npz data_release/*.json \
+     --repo AISMAsrl/fabel \
+     --title "fabel dataset assets v1" \
+     --notes "Dataset arrays for fabel.datasets lazy loaders. See docs/dev/data-release.md."
+   FABEL_RUN_NETWORK_TESTS=1 .venv/bin/pytest -m network tests/unit/test_datasets.py -v
+   ```
+3. Publish to PyPI (the only upload step; PyPI name `fabel` was free on 2026-09-27):
+   ```
+   rm -rf dist && .venv/bin/python -m build && .venv/bin/python -m twine check dist/*
+   .venv/bin/python -m twine upload dist/*
+   ```
+   Optional first: `.venv/bin/python -m twine upload --repository testpypi dist/*`.
+
 ## Current state (2026-09-27, after Wave 2)
 - `main` = integration of Wave 2 (6 parallel builders: sklearn-compat, ftest-model-and-test-typing, docs-tutorials, book-ch01-04-assembler, book-ch05-07, book-ch08-11). No merge conflicts. Two merge-caused mypy errors in `tests/sklearn_compat` fixed (untyped sklearn decorator, `Basis.order` narrowing).
 - Full suite: 1578 passed, 6 skipped (4 sklearn array-API checks, 1 network, 1 FABEL_DATA_DIR guard), 154 strict xfail. Doctests: 158 pass. ruff, `mypy --strict src/fabel` and `mypy src tests tools benchmarks` clean. `mkdocs build --strict` clean.
@@ -16,13 +47,11 @@
 
 ## Remaining work
 - **Book figures:** 70 of 76 figures exist (ch1 10, ch3 4, ch4 3, ch5 8, ch6 8, ch7 6, ch8 7, ch9 7, ch10 8, ch11 9). Numbering and content were rebuilt from memory (book text was not reachable; the fda `scripts/` folder is off limits by the clean-room rule). Needs a check against a printed copy, then the missing 6 figures, then `build_book_notebook.py --expect 76`. Then tick the WORKFLOW Phase 5 box.
-- **Wave 3 (1):** GATE 5 and tag 1.0.0 (set CITATION.cff `date-released` and the CHANGELOG date).
 - Smaller open items:
   - API gaps found while building the book (no SPEC symbol asks for them, so not blocking): density estimation (R `density.fd`), pointwise confidence bands helper for a smooth, PDA forcing functions (awtlist/ufdlist), nonlinear ODE parameter estimation (profiling), bivariate beta(s,t) function-on-function regression, and an `FData` of a constrained (monotone) smooth (only derivatives 0 and 1 today).
   - Registration: multivariate curves. The torch continuous path holds the optimal warps fixed (no implicit gradient through the warp).
   - `tools/golden_r/regression.R`: record `b$coefs` for `betastderrlist` (golden stderr cases hold nulls). Needs a human OK to regenerate a golden file.
   - `fregress` computes in NumPy only (no torch pass-through).
-- Human steps: upload `data-v1` GitHub release assets (docs/dev/data-release.md) -- until then the CI `notebooks` job fails on the first download; `twine upload`. PyPI name `fabel` was free on 2026-09-27.
 ## Done
 - **Wave 3 integration (2026-09-27)** branch `integration/wave3` fast-forwarded to `main`.
 - **Wave 3 registration** `register(lam=0, criterion='eigen')` no longer raises `LinAlgError`: warp integrals of exp(W - max W), non-finite steps rejected, steepest-descent fallback, non-convergence RuntimeWarning, ValueError on NaN/inf input. Torch path `fabel._internal.registration_torch` (autograd Newton, torch results, gradients to input coefficients); benchmark numpy vs torch. registration.py 99%, registration_torch.py 100%.
