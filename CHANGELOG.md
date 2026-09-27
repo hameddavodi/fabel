@@ -34,6 +34,14 @@ golden-file parity (`rtol = 1e-8`, `1e-5` for iterative fits).
   the `phase_plane()` plot.
 - Statistics (`fabel.stats`): `cov`, `cor`, functional depth (MBD, BD2, FM),
   the functional `boxplot`, and the permutation tests `t_test` and `f_test`.
+  `f_test` takes either raw inputs `(y, x, basis=, lam=, penalty=)` like R
+  `Fperm.fd`, or a fitted `fregress` model: `f_test(model, n_perm=, q=, t=,
+  random_state=)`.
+- scikit-learn: `check_estimator` passes for `Smoother`, `FPCA`, `FRegress` and
+  `Registrator` with no exemptions. `FRegress` validates `y` as scikit-learn does
+  (finite, column vectors flattened with a warning, at least 2 samples).
+  `Registrator` has `n_iter_`, and its default basis for an n-column coefficient
+  matrix is `BSpline(n_basis=n, order=min(4, n))`, the same rule as `FPCA`.
 - PyTorch layers (`fabel.nn`, optional `fabel[torch]` extra): `BasisLayer`,
   `SmoothingLayer` (learnable λ) and `FDataDataset`. `import fabel` does not
   import PyTorch; `fabel.nn` loads on first use.
@@ -50,7 +58,12 @@ golden-file parity (`rtol = 1e-8`, `1e-5` for iterative fits).
 - Golden-file parity suite against R `fda` 6.3.0, and `tools/parity_report.py`,
   which measures every parity check and writes `PARITY_REPORT.md`.
 - Documentation site (MkDocs Material + mkdocstrings): quickstart, R migration
-  table and API reference for every module.
+  table, API reference for every module, and six tutorials (smoothing, FPCA,
+  registration, regression, dynamics, machine learning). Tests run every
+  tutorial block and check that every public symbol is rendered.
+- `notebooks/book_figures.ipynb`: figures of Ramsay, Hooker & Graves (2009),
+  assembled from `notebooks/book/ch*.py` by `tools/build_book_notebook.py`
+  (`make book`) and run in CI with `nbmake`.
 - Packaging: typed (`py.typed`) wheel and sdist for Python 3.10 to 3.13,
   BSD-3-Clause license, `CITATION.cff`.
 

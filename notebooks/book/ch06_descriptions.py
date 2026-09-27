@@ -6,7 +6,6 @@
 # nondurable goods index, girls' growth) and pointwise confidence limits.
 
 # %%
-# ruff: noqa: B018 -- every figure cell ends with the bare expression `fig` (notebook display)
 import matplotlib.pyplot as plt
 import numpy as np
 
