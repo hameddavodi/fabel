@@ -116,6 +116,28 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run mkdocs build --strict
 
+  notebooks:
+    name: notebooks
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --extra dev --extra plot
+      # Assemble notebooks/book_figures.ipynb from the chapter files and check the
+      # chapter contract (figure numbering, every figure cell ends in `fig`).
+      - run: uv run python tools/build_book_notebook.py
+      # Executing the notebook downloads every dataset that is not shipped in the
+      # package from the `data-v1` GitHub release. A human still has to upload
+      # those release assets (docs/dev/data-release.md); until then this step
+      # fails with a download error on the first such dataset.
+      - run: uv run pytest --nbmake notebooks/book_figures.ipynb
+        env:
+          MPLBACKEND: Agg
+
   build:
     name: build
     needs: [test, parity]
