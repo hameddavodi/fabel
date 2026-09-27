@@ -43,6 +43,7 @@ dev = [
   "hypothesis>=6.100",
   "ruff>=0.6",
   "mypy>=1.11",
+  "pyright>=1.1.403",
   "rpy2>=3.5",
   "nbmake>=1.5",
   "jupyter>=1.0",
@@ -101,6 +102,56 @@ warn_unreachable = true
 [[tool.mypy.overrides]]
 module = ["array_api_compat.*", "sklearn.*", "matplotlib.*", "torch.*", "rdata.*", "xarray.*", "hypothesis.*", "rpy2.*"]
 ignore_missing_imports = true
+
+[tool.pyright]
+# Pyright backs the editor/agent language server: code intelligence (jump-to-def,
+# references, document symbols) plus fast control-flow checks. `mypy --strict` stays
+# the authoritative type gate in CI -- pyright is tuned here NOT to re-report what
+# mypy and ruff already own, so that what it does say is signal rather than noise.
+#
+# venvPath/venv are the load-bearing lines: without them pyright resolves no project
+# import at all and every numpy/scipy/sklearn call cascades into a phantom error.
+venvPath = "."
+venv = ".venv"
+# 3.12 for the same reason as [tool.mypy]: numpy >= 2.3 ships stubs written with PEP
+# 695 `type` statements. Runtime support stays >= 3.10, guarded by ruff py310.
+pythonVersion = "3.12"
+# Every directory ruff lints, so code intelligence works outside src/ too.
+include = ["src", "tests", "tools", "benchmarks"]
+exclude = [
+  "**/__pycache__",
+  "**/.ruff_cache",
+  "**/.mypy_cache",
+  "**/.pytest_cache",
+  "**/.hypothesis",
+  ".venv",
+  "notebooks",
+  "data_export",
+  "data_release",
+  "tests/golden",
+]
+typeCheckingMode = "standard"
+# `ignore` suppresses diagnostics but STILL indexes these files, so jump-to-definition
+# and find-references keep working across the tests. (`exclude` would drop them from the
+# index entirely and break code intelligence.) Tests, tools and benchmarks are
+# deliberately unannotated -- ruff already exempts them via per-file-ignores ANN --
+# so type-checking them yields noise, not signal.
+ignore = ["tests", "tools", "benchmarks"]
+# Already enforced by ruff: F401 unused import, F841 unused local.
+reportUnusedImport = "none"
+reportUnusedVariable = "none"
+# Already handled by [[tool.mypy.overrides]] ignore_missing_imports.
+reportMissingTypeStubs = "none"
+# The checks that earn their place: control-flow faults mypy --strict does not
+# report by default. reportPossiblyUnbound caught a real UnboundLocalError path
+# in smoothing._smooth_irregular that no grep or AST scan can see.
+reportPossiblyUnboundVariable = "error"
+reportUnboundVariable = "error"
+# Known, accepted false positives: sklearn's `validate_data` declares a union return type
+# that includes the `"no_validation"` sentinel string, so pyright thinks `.shape`/`.T` may
+# be attribute access on `str` at 3 call sites (decomposition._as_fdata, Smoother.fit).
+# mypy sidesteps this via ignore_missing_imports for sklearn.*. The rule stays ON because
+# it catches real faults elsewhere -- it flagged a genuine bad attribute in io.py.
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
