@@ -1,34 +1,58 @@
-.PHONY: lint type test parity golden bench docs build book
+# Every target runs tools from the project venv. A bare `uv run` would re-sync
+# .venv without the extras and remove pytest, torch and rpy2, so it is not used.
+# Run `make sync` once to create or refresh the venv with every extra.
+# Override the interpreter with `make PY=/path/to/python <target>`.
+PY ?= .venv/bin/python
+
+# Datasets not shipped in the package (GATE 5 runs the book notebook and the
+# dataset tests); default to the local release staging directory.
+FABEL_DATA_DIR ?= $(CURDIR)/data_release
+
+.PHONY: sync lint type test parity golden bench docs build book gate5
+
+sync:
+	uv sync --all-extras
 
 lint:
-	uv run ruff check .
-	uv run ruff format --check .
+	$(PY) -m ruff check .
+	$(PY) -m ruff format --check .
 
 type:
-	uv run mypy src tests tools benchmarks
+	$(PY) -m mypy src tests tools benchmarks
 
 test:
-	uv run pytest tests/unit -m "not parity and not slow and not gpu" --cov=fabel --cov-report=term-missing
+	$(PY) -m pytest tests/unit -m "not parity and not slow and not gpu" --cov=fabel --cov-report=term-missing
 
 parity:
-	uv run pytest tests/unit/test_golden_schema.py tests/parity -m parity
+	$(PY) -m pytest tests/unit/test_golden_schema.py tests/parity -m parity
 
 golden:
-	uv run python tools/make_golden.py basis
-	uv run python tools/make_golden.py core
+	$(PY) tools/make_golden.py basis
+	$(PY) tools/make_golden.py core
 
 bench:
-	uv run pytest benchmarks --benchmark-only
+	$(PY) -m pytest benchmarks --benchmark-only
 
 docs:
-	uv run mkdocs build --strict
+	$(PY) -m mkdocs build --strict
 
 build:
-	uv run python -m build
-	uv run twine check dist/*
+	$(PY) -m build
+	$(PY) -m twine check dist/*
 
 # Rebuild notebooks/book_figures.ipynb from notebooks/book/ch*.py and execute it.
 # Datasets not shipped in the package come from the data-v1 release (or FABEL_DATA_DIR).
 book:
-	uv run python tools/build_book_notebook.py
-	uv run pytest --nbmake notebooks/book_figures.ipynb
+	$(PY) tools/build_book_notebook.py
+	$(PY) -m pytest --nbmake notebooks/book_figures.ipynb
+
+# The exact GATE 5 (final) chain from WORKFLOW.md; stops at the first failure.
+gate5: export FABEL_DATA_DIR := $(FABEL_DATA_DIR)
+gate5:
+	$(PY) -m pytest
+	$(PY) -m pytest tests/parity
+	$(PY) -m mypy --strict src/fabel
+	$(PY) -m ruff check .
+	$(PY) -m mkdocs build --strict
+	$(PY) -m build && $(PY) -m twine check dist/*
+	$(PY) -m pytest --nbmake notebooks/book_figures.ipynb
