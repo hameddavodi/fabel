@@ -21,6 +21,7 @@ import numpy as np
 import pytest
 
 from fabel import FData, Fourier
+from fabel.regression import fregress
 from fabel.smoothing import smooth
 from fabel.stats import boxplot, cor, cov, depth, f_test, t_test
 
@@ -285,3 +286,33 @@ def test_permutation_tests(name: str, field: str) -> None:
     column = 0 if name.startswith("tperm") else 1
     attribute = next(attr for attr, pair in _PERM_FIELDS.items() if pair[column] == field)
     compare(getattr(result, attribute), CASES[name]["output"][field], _rtol(name))
+
+
+def test_fperm_through_a_fitted_model() -> None:
+    # SPEC 4.3 form f_test(fregress(...)): the golden Fperm.fd design (intercept +
+    # Atlantic dummy, Fourier(25) betas, lambda = 1e2) fitted by fregress first.
+    # It must give exactly the raw-form result above -- so the same golden fields
+    # agree and the same three R defects apply -- and the R-exact fields match.
+    case = CASES["fperm_fd_weather_temp_atlantic_dummy"]
+    atlantic = np.asarray(case["input"]["atlantic"], dtype=float)
+    model = fregress(
+        weather_fd(),
+        {"const": 1.0, "atlantic": atlantic},
+        [WEATHER_BASIS, WEATHER_BASIS],
+        lam=1e2,
+        penalty=2,
+    )
+    result = f_test(
+        model,
+        n_perm=case["input"]["nperm"],
+        q=case["input"]["q"],
+        random_state=RRandom(case["input"]["seed"]),
+    )
+    raw = _fperm()
+    assert result.statistic == raw.statistic
+    assert result.pvalue == raw.pvalue
+    assert result.critical_value == raw.critical_value
+    np.testing.assert_array_equal(result.null, raw.null)
+    np.testing.assert_array_equal(result.pointwise, raw.pointwise)
+    compare(result.pvalue, case["output"]["pval"], _rtol(case["name"]))
+    compare(result.t, case["output"]["argvals"], _rtol(case["name"]))

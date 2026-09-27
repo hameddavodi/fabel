@@ -11,6 +11,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from fabel import LDO, BSpline, FData, Fourier, inprod
+from fabel.regression import fregress
 from fabel.stats import (
     BoxplotResult,
     DepthResult,
@@ -562,3 +563,157 @@ def test_f_test_accepts_a_single_covariate() -> None:
     np.testing.assert_allclose(one.pointwise, listed.pointwise)
     # An intercept alone explains nothing but the mean: yhat is constant in i.
     np.testing.assert_allclose(one.pointwise, 0.0, atol=1e-20)
+
+
+# --------------------------------------------------------------------------- #
+# f_test on a fitted fregress model
+# --------------------------------------------------------------------------- #
+
+
+def _same_result(left: PermutationTestResult, right: PermutationTestResult) -> None:
+    """Assert two permutation test results are identical, bit for bit."""
+    assert left.statistic == right.statistic
+    assert left.pvalue == right.pvalue
+    assert left.critical_value == right.critical_value
+    np.testing.assert_array_equal(left.null, right.null)
+    np.testing.assert_array_equal(left.pointwise, right.pointwise)
+    np.testing.assert_array_equal(left.pointwise_null, right.pointwise_null)
+    np.testing.assert_array_equal(left.pointwise_critical_value, right.pointwise_critical_value)
+    if left.t is None or right.t is None:
+        assert left.t is None
+        assert right.t is None
+    else:
+        np.testing.assert_array_equal(left.t, right.t)
+
+
+def test_f_test_on_a_functional_response_model_matches_the_raw_form() -> None:
+    y, group = _regression_data()
+    beta_basis = BSpline(domain=(0.0, 1.0), n_basis=6)
+    model = fregress(y, [np.ones(12), group], [beta_basis, beta_basis], lam=1e-3, penalty=2)
+    from_model = f_test(model, n_perm=20, q=0.1, random_state=5)
+    raw = f_test(
+        y,
+        [np.ones(12), group],
+        basis=beta_basis,
+        lam=1e-3,
+        penalty=2,
+        n_perm=20,
+        q=0.1,
+        random_state=5,
+    )
+    _same_result(from_model, raw)
+
+
+def test_f_test_on_a_functional_covariate_model_matches_the_raw_form() -> None:
+    rng = np.random.default_rng(61)
+    basis = BSpline(domain=(0.0, 1.0), n_basis=6)
+    x = FData(rng.normal(size=(6, 10)), basis)
+    y = x * FData(np.sin(np.linspace(0.0, 1.0, 6)), basis)
+    beta_basis = BSpline(domain=(0.0, 1.0), n_basis=5)
+    model = fregress(y, {"x": x}, {"x": (beta_basis, 1e-4, LDO(2))})
+    points = np.linspace(0.0, 1.0, 31)
+    from_model = f_test(model, n_perm=4, t=points, random_state=2)
+    raw = f_test(
+        y, x, basis=beta_basis, lam=1e-4, penalty=LDO(2), n_perm=4, t=points, random_state=2
+    )
+    _same_result(from_model, raw)
+
+
+def test_f_test_on_a_scalar_response_model_matches_the_raw_form() -> None:
+    rng = np.random.default_rng(72)
+    basis = BSpline(domain=(0.0, 1.0), n_basis=5)
+    x = FData(rng.normal(size=(5, 15)), basis)
+    response = np.asarray(inprod(x, FData(np.ones(5), basis)))[:, 0] + 0.1 * rng.normal(size=15)
+    model = fregress(response, [np.ones(15), x], lam=1e-3)
+    from_model = f_test(model, n_perm=25, random_state=np.random.default_rng(9))
+    raw = f_test(
+        response,
+        [np.ones(15), x],
+        lam=[0.0, 1e-3],
+        n_perm=25,
+        random_state=np.random.default_rng(9),
+    )
+    _same_result(from_model, raw)
+    assert from_model.t is None
+
+
+def test_f_test_on_a_model_honours_the_intercept() -> None:
+    y, group = _regression_data()
+    model = fregress(y, {"const": 1.0, "group": group})
+    from_model = f_test(model, n_perm=10, random_state=3)
+    with_intercept = f_test(y, [np.ones(12), group], n_perm=10, random_state=3)
+    without = f_test(y, group, n_perm=10, random_state=3)
+    _same_result(from_model, with_intercept)
+    assert not np.allclose(from_model.pointwise, without.pointwise)
+
+
+def test_f_test_on_a_formula_model_matches_the_raw_form() -> None:
+    y, group = _regression_data()
+    labels = ["a" if g == 0.0 else "b" for g in group]
+    model = fregress("y ~ g", {"y": y, "g": labels})
+    assert model.names == ("const", "g.b")
+    _same_result(
+        f_test(model, n_perm=5, random_state=4),
+        f_test(y, [np.ones(12), group], n_perm=5, random_state=4),
+    )
+
+
+def test_f_test_on_a_weighted_scalar_model_is_weighted_least_squares() -> None:
+    rng = np.random.default_rng(73)
+    group = np.repeat([0.0, 1.0], 10)
+    response = rng.normal(size=20) + 2.0 * group
+    weights = rng.uniform(0.5, 2.0, size=20)
+    model = fregress(response, [1.0, group], weights=weights)
+    result = f_test(model, n_perm=6, random_state=0)
+    design = np.column_stack([np.ones(20), group])
+    root = np.sqrt(weights)
+    perm = np.random.default_rng(0)
+    orders = [np.arange(20), *(perm.permutation(20) for _ in range(6))]
+    expected = []
+    for order in orders:
+        coef = np.linalg.lstsq(design * root[:, None], response[order] * root, rcond=None)[0]
+        fitted = design @ coef
+        expected.append(fitted.var(ddof=1) / np.mean((response[order] - fitted) ** 2))
+    assert result.statistic == pytest.approx(expected[0], rel=1e-10)
+    np.testing.assert_allclose(result.null, expected[1:], rtol=1e-10)
+
+
+def test_f_test_on_a_weighted_functional_model_is_weighted_least_squares() -> None:
+    y, group = _regression_data()
+    weights = np.linspace(0.5, 2.0, 12)
+    model = fregress(y, [1.0, group], weights=weights)
+    result = f_test(model, n_perm=3, random_state=1)
+    # Scalar covariates with beta in the response basis: the concurrent model is
+    # pointwise weighted least squares, the same hat matrix at every t.
+    values = y(np.linspace(0.0, 1.0, 101))
+    design = np.column_stack([np.ones(12), group])
+    hat = design @ np.linalg.solve(design.T @ (weights[:, None] * design), design.T * weights)
+    perm = np.random.default_rng(1)
+    orders = [np.arange(12), *(perm.permutation(12) for _ in range(3))]
+    expected = []
+    for order in orders:
+        fitted = values[:, order] @ hat.T
+        expected.append(
+            fitted.var(axis=1, ddof=1) / np.mean((values[:, order] - fitted) ** 2, axis=1)
+        )
+    np.testing.assert_allclose(result.pointwise, expected[0], rtol=1e-9)
+    np.testing.assert_allclose(result.pointwise_null, np.array(expected[1:]), rtol=1e-9)
+    unweighted = f_test(y, [np.ones(12), group], n_perm=3, random_state=1)
+    assert not np.allclose(result.pointwise, unweighted.pointwise)
+
+
+def test_f_test_on_a_model_rejects_raw_settings() -> None:
+    y, group = _regression_data()
+    model = fregress(y, [1.0, group])
+    with pytest.raises(TypeError, match="x"):
+        f_test(model, [np.ones(12), group])
+    with pytest.raises(TypeError, match="basis"):
+        f_test(model, basis=y.basis)  # type: ignore[call-overload]
+    with pytest.raises(TypeError, match="lam"):
+        f_test(model, lam=1.0)  # type: ignore[call-overload]
+    with pytest.raises(TypeError, match="penalty"):
+        f_test(model, penalty=1)  # type: ignore[call-overload]
+    with pytest.raises(ValueError, match="n_perm"):
+        f_test(model, n_perm=0)
+    with pytest.raises(TypeError, match="covariates"):
+        f_test(y)  # type: ignore[call-overload]

@@ -32,7 +32,7 @@ import math
 import operator
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, overload
 
 from fabel import _linalg
 from fabel._backend import (
@@ -45,6 +45,7 @@ from fabel._backend import (
 from fabel._operator import LDO
 from fabel.basis import Basis, _same_domain
 from fabel.core import BiFData, FData, _quadrature, inprod
+from fabel.regression import FRegressResult
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import numpy as np
@@ -52,7 +53,13 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     Array = Any
     NDArray = np.ndarray[Any, np.dtype[Any]]
-    RandomState = int | np.random.Generator | None
+
+    class _Permuter(Protocol):
+        """Anything drawing a permutation of ``range(n)``, like a NumPy Generator."""
+
+        def permutation(self, n: int, /) -> Any: ...
+
+    RandomState = int | np.random.Generator | _Permuter | None
 else:
     Array = Any
     NDArray = Any
@@ -935,6 +942,7 @@ def _functional_response(
     ops: list[Any],
     points: NDArray,
     orders: list[NDArray],
+    obs_weights: NDArray | None = None,
 ) -> tuple[NDArray, NDArray]:
     """Pointwise F statistics of the concurrent model for each response order.
 
@@ -948,6 +956,8 @@ def _functional_response(
     are integrated by Gauss--Legendre quadrature on the joint break points of
     every basis involved (exact for splines), and the left-hand side, which
     does not depend on the order of the responses, is shared by all of them.
+    Observation weights ``w_i`` (``None``: all one) multiply every sum over
+    ``i``; they stay with the covariates when the responses are permuted.
     """
     nxp = default_namespace()
     functional = [c.basis for c in covariates if isinstance(c, FData)]
@@ -966,7 +976,7 @@ def _functional_response(
     for j in range(len(bases)):
         row = []
         for k in range(len(bases)):
-            density = weights * nxp.sum(x_nodes[j] * x_nodes[k], axis=1)
+            density = weights * nxp.sum(_weighted(x_nodes[j] * x_nodes[k], obs_weights), axis=1)
             row.append(
                 nxp.matmul(nxp.matrix_transpose(phi_nodes[j]), density[:, None] * phi_nodes[k])
             )
@@ -980,7 +990,7 @@ def _functional_response(
                 [
                     nxp.matmul(
                         nxp.matrix_transpose(phi),
-                        weights * nxp.sum(xj * y_nodes[:, order], axis=1),
+                        weights * nxp.sum(_weighted(xj * y_nodes[:, order], obs_weights), axis=1),
                     )
                     for phi, xj in zip(phi_nodes, x_nodes, strict=True)
                 ]
@@ -1003,6 +1013,11 @@ def _functional_response(
     return stats[0], stats[1:]
 
 
+def _weighted(products: NDArray, obs_weights: NDArray | None) -> NDArray:
+    """Scale the last (observation) axis by the weights, if there are any."""
+    return products if obs_weights is None else products * obs_weights
+
+
 def _f_ratio(observed: NDArray, fitted: NDArray) -> Array:
     """Pointwise ``var(fitted) / mean((observed - fitted)^2)`` across axis 1."""
     nxp = default_namespace()
@@ -1020,8 +1035,13 @@ def _scalar_response(
     lams: list[float],
     ops: list[Any],
     orders: list[NDArray],
+    obs_weights: NDArray | None = None,
 ) -> tuple[NDArray, NDArray]:
-    """F statistics of ``y_i = sum_j int x_ij beta_j + sum_j x_ij b_j``."""
+    """F statistics of ``y_i = sum_j int x_ij beta_j + sum_j x_ij b_j``.
+
+    The fit minimises ``sum_i w_i (y_i - yhat_i)^2`` plus the penalty, with
+    weights ``w_i`` (``None``: all one) fixed to the covariates.
+    """
     nxp = default_namespace()
     columns: list[NDArray] = []
     for covariate, basis in zip(covariates, bases, strict=True):
@@ -1031,14 +1051,28 @@ def _scalar_response(
         else:
             columns.append(covariate[:, None])
     design = nxp.concat(columns, axis=1)
-    normal = nxp.matmul(nxp.matrix_transpose(design), design) + _penalty_block(bases, lams, ops)
+    weighted = _weighted(nxp.matrix_transpose(design), obs_weights)
+    normal = nxp.matmul(weighted, design) + _penalty_block(bases, lams, ops)
     responses = nxp.stack([y[order] for order in orders], axis=1)
-    solution = _solve_normal(normal, nxp.matmul(nxp.matrix_transpose(design), responses))
+    solution = _solve_normal(normal, nxp.matmul(weighted, responses))
     fitted = nxp.matmul(design, solution)
     stats = _f_ratio(nxp.matrix_transpose(responses), nxp.matrix_transpose(fitted))
     return stats[:1], stats[1:, None]
 
 
+@overload
+def f_test(
+    y: FRegressResult,
+    x: None = None,
+    *,
+    n_perm: int = 200,
+    q: float = 0.05,
+    t: Any = None,
+    random_state: RandomState = None,
+) -> PermutationTestResult: ...
+
+
+@overload
 def f_test(
     y: FData | Any,
     x: Any,
@@ -1046,6 +1080,20 @@ def f_test(
     basis: Basis | Sequence[Basis | None] | None = None,
     lam: float | Sequence[float] = 0.0,
     penalty: int | LDO | Sequence[int | LDO] = 2,
+    n_perm: int = 200,
+    q: float = 0.05,
+    t: Any = None,
+    random_state: RandomState = None,
+) -> PermutationTestResult: ...
+
+
+def f_test(
+    y: FRegressResult | FData | Any,
+    x: Any = None,
+    *,
+    basis: Basis | Sequence[Basis | None] | None = None,
+    lam: float | Sequence[float] | None = None,
+    penalty: int | LDO | Sequence[int | LDO] | None = None,
     n_perm: int = 200,
     q: float = 0.05,
     t: Any = None,
@@ -1060,8 +1108,18 @@ def f_test(
 
     (the variance with denominator ``n - 1``) is evaluated pointwise and the
     test statistic is its maximum.  The null distribution refits the model
-    after randomly permuting the responses against fixed covariates.  No
-    intercept is added: include a vector of ones in ``x`` for one, as in R.
+    after randomly permuting the responses against fixed covariates.
+
+    The model comes either from raw inputs, as in R's
+    ``Fperm.fd(yfdPar, xfdlist, betalist)``, or from a model fitted by
+    :func:`fabel.regression.fregress` (``f_test(model)``).  In the raw form no
+    intercept is added: include a vector of ones in ``x`` for one, as in R.  In
+    the model form the test refits exactly the fitted model -- its response,
+    terms (an intercept included), coefficient bases, smoothing parameters,
+    penalty operators and observation weights -- so ``x``, ``basis``, ``lam``
+    and ``penalty`` must not be given.  Weights enter the fit only (a weighted
+    least-squares refit under every permutation, the weights staying with the
+    covariates); ``F`` itself is unweighted.
 
     Two models are supported:
 
@@ -1077,21 +1135,24 @@ def f_test(
 
     Parameters
     ----------
-    y : FData or array_like
-        Response: ``n`` curves, or ``n`` numbers.
+    y : FData, array_like or FRegressResult
+        Response: ``n`` curves, or ``n`` numbers.  Or a fitted model returned by
+        :func:`fabel.regression.fregress`, which supplies the response, the
+        covariates and every coefficient setting.
     x : array_like, FData or sequence of them
         Covariates, each a length-``n`` vector or an :class:`FData` of ``n``
         curves on the response domain.  A single covariate need not be wrapped
-        in a list.
+        in a list.  Required with a raw response; not allowed with a model.
     basis : Basis or list of Basis, optional
         Basis of each coefficient function: one shared value, or a list (or
         tuple) with one entry per covariate, ``None`` meaning the default.
+        Raw form only.
     lam : float or list of float, optional
         Smoothing parameter of each coefficient function, shared or one per
-        covariate.  Default ``0.0``.
+        covariate.  Default ``0.0``.  Raw form only.
     penalty : int, LDO or list of them, optional
         Roughness operator of each coefficient function, shared or one per
-        covariate.  Default ``2``.
+        covariate.  Default ``2``.  Raw form only.
     n_perm : int, optional
         Number of permutations.  Default ``200``.
     q : float, optional
@@ -1115,7 +1176,9 @@ def f_test(
         If the covariates, bases or settings do not match the response, the
         normal equations are singular, or ``n_perm`` or ``q`` is out of range.
     TypeError
-        If ``random_state`` is not a seed or a generator.
+        If ``random_state`` is not a seed or a generator, ``x`` is missing with
+        a raw response, or ``x``, ``basis``, ``lam`` or ``penalty`` is given
+        with a fitted model.
 
     Examples
     --------
@@ -1128,8 +1191,33 @@ def f_test(
     >>> result = f_test(y, [np.ones(12), group], lam=1e-4, n_perm=50, random_state=0)
     >>> result.pvalue < 0.05
     True
+
+    The same test on a fitted model, whose intercept term is part of the model:
+
+    >>> from fabel.regression import fregress
+    >>> model = fregress(y, {"const": 1.0, "group": group}, lam=1e-4)
+    >>> again = f_test(model, n_perm=50, random_state=0)
+    >>> again.statistic == result.statistic
+    True
     """
     _check_test_args(n_perm, q)
+    if isinstance(y, FRegressResult):
+        if x is not None:
+            raise TypeError(
+                "f_test(model) takes no covariates x: the fitted model's terms are used"
+            )
+        settings = (("basis", basis), ("lam", lam), ("penalty", penalty))
+        given = [name for name, value in settings if value is not None]
+        if given:
+            raise TypeError(
+                f"f_test(model) takes no {', '.join(given)}: the fitted model's "
+                "coefficient settings are used"
+            )
+        return _model_f_test(y, n_perm, q, t, random_state)
+    if x is None:
+        raise TypeError(
+            "f_test needs covariates x, or a fitted fregress model as its only argument"
+        )
     nxp = default_namespace()
     if isinstance(y, FData):
         if y.n_vars != 1:
@@ -1145,22 +1233,18 @@ def f_test(
     covariates = _covariates(x, n, domain)
     n_cov = len(covariates)
     chosen = _per_covariate(basis, n_cov, "basis")
-    lams = [float(v) for v in _per_covariate(lam, n_cov, "lam")]
-    ops = _per_covariate(penalty, n_cov, "penalty")
+    lams = [float(v) for v in _per_covariate(0.0 if lam is None else lam, n_cov, "lam")]
+    ops = _per_covariate(2 if penalty is None else penalty, n_cov, "penalty")
     if any(v < 0.0 for v in lams):
         raise ValueError(f"lam must be non-negative, got {lams}")
-    rng = _generator(random_state)
-    orders = [nxp.arange(n)] + [nxp.asarray(rng.permutation(n)) for _ in range(n_perm)]
     if isinstance(y, FData):
-        bases: list[Basis] = [y.basis if b is None else b for b in chosen]
+        bases: list[Basis | None] = [y.basis if b is None else b for b in chosen]
         for b in bases:
-            if not _same_domain(b.domain, y.domain):
+            if b is not None and not _same_domain(b.domain, y.domain):
                 raise ValueError(
                     f"coefficient bases must share the response domain {y.domain}, got {b.domain}"
                 )
-        points = _default_grid(y.domain) if t is None else to_numpy(t)
-        observed, null = _functional_response(y, covariates, bases, lams, ops, points, orders)
-        return _summarise(observed, null, q, points)
+        return _permutation_f_test(y, covariates, bases, lams, ops, n_perm, q, t, random_state)
     scalar_bases: list[Basis | None] = []
     for covariate, b in zip(covariates, chosen, strict=True):
         if isinstance(covariate, FData):
@@ -1173,5 +1257,70 @@ def f_test(
             scalar_bases.append(target)
         else:
             scalar_bases.append(None)
-    observed, null = _scalar_response(response, covariates, scalar_bases, lams, ops, orders)
+    return _permutation_f_test(
+        response, covariates, scalar_bases, lams, ops, n_perm, q, t, random_state
+    )
+
+
+def _model_f_test(
+    model: FRegressResult, n_perm: int, q: float, t: Any, random_state: RandomState
+) -> PermutationTestResult:
+    """Permutation F test of a model fitted by :func:`fabel.regression.fregress`.
+
+    Every term keeps its coefficient basis, smoothing parameter and penalty
+    operator (a scalar term of a scalar-response model keeps its constant
+    basis, so a penalty on it is honoured too).  Unit weights are dropped, so
+    an unweighted model reproduces the raw form bit for bit.
+    """
+    nxp = default_namespace()
+    response: FData | NDArray = (
+        model.y if isinstance(model.y, FData) else nxp.asarray(to_numpy(model.y), dtype=nxp.float64)
+    )
+    covariates: list[FData | NDArray] = [
+        term.values
+        if isinstance(term.values, FData)
+        else nxp.asarray(to_numpy(term.values), dtype=nxp.float64)
+        for term in model.terms
+    ]
+    bases: list[Basis | None] = [term.basis for term in model.terms]
+    lams = [float(term.lam) for term in model.terms]
+    ops: list[Any] = [term.penalty for term in model.terms]
+    weights = nxp.asarray(to_numpy(model.weights), dtype=nxp.float64)
+    obs_weights = None if bool(nxp.all(weights == 1.0)) else weights
+    return _permutation_f_test(
+        response, covariates, bases, lams, ops, n_perm, q, t, random_state, obs_weights
+    )
+
+
+def _permutation_f_test(
+    response: FData | NDArray,
+    covariates: list[FData | NDArray],
+    bases: list[Basis | None],
+    lams: list[float],
+    ops: list[Any],
+    n_perm: int,
+    q: float,
+    t: Any,
+    random_state: RandomState,
+    obs_weights: NDArray | None = None,
+) -> PermutationTestResult:
+    """Draw the permutations, refit under each and summarise the F statistics.
+
+    ``bases`` holds the resolved coefficient basis of every covariate: a basis
+    for each term of a functional response; for a scalar response the basis of
+    a functional covariate, and ``None`` (no penalty) or a constant basis for a
+    scalar covariate.
+    """
+    nxp = default_namespace()
+    n = response.n_curves if isinstance(response, FData) else int(response.shape[0])
+    rng = _generator(random_state)
+    orders = [nxp.arange(n)] + [nxp.asarray(rng.permutation(n)) for _ in range(n_perm)]
+    if isinstance(response, FData):
+        curve_bases = [response.basis if b is None else b for b in bases]
+        points = _default_grid(response.domain) if t is None else to_numpy(t)
+        observed, null = _functional_response(
+            response, covariates, curve_bases, lams, ops, points, orders, obs_weights
+        )
+        return _summarise(observed, null, q, points)
+    observed, null = _scalar_response(response, covariates, bases, lams, ops, orders, obs_weights)
     return _summarise(observed, null, q, None)
