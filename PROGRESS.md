@@ -1,5 +1,16 @@
 # PROGRESS
-## Status: Phase 0 harness + Phase 1 (basis, core) + Phase 2 (smoothing, stats, datasets) + Phase 3/4 (decomposition, regression, registration, dynamics) golden files done
+## Status: CHECKPOINT 2026-09-27 -- Phase 1 + datasets/io done on main; smoothing + decomposition on branch `wip/smoothing-decomposition` (not yet at Definition of Done)
+## Checkpoint 2026-09-27 (resume here)
+- `main` is green: 796 passed, 1 skipped, 72 xfailed; ruff + mypy --strict clean.
+- Branch `wip/smoothing-decomposition` holds unfinished work, NOT merged:
+  - `smoothing.py` + `_linalg.pencil_eigh` + `tests/parity/test_smoothing.py`: all parity cases pass or are documented xfails. Missing: unit tests (coverage 67%, need 90%), export in `fabel/__init__.py`, benchmark (`-k smooth`, GATE 2).
+  - `decomposition.py` (FPCA, FCCA): code only. Missing: parity tests vs `tests/golden/decomposition.json`, unit tests, export.
+- Dev env: run `uv sync --all-extras` first; a bare `uv run` re-syncs `.venv` without extras and removes pytest/torch/rpy2.
+- Resume plan (parallel agents, one git worktree each, one integrator merges `__init__.py` + PROGRESS.md):
+  - Wave 1 (6): (1) finish smoothing + decomposition from the wip branch; (2) `stats.py`; (3) `regression.py`; (4) `registration.py` (hardest, start first); (5) `dynamics.py` + `nn.py`; (6) release basics: README badges, docs skeleton, PARITY_REPORT generator, clean-venv wheel test.
+  - Wave 2 (3): sklearn `check_estimator` compliance; book-figures notebook (split by chapter); tutorials + API docs.
+  - Wave 3 (1): GATE 5, tag 1.0.0.
+- Human steps: upload `data-v1` GitHub release assets (docs/dev/data-release.md); `twine upload`. PyPI name `fabel` was free on 2026-09-27.
 ## Done
 - **Phase 3/4** `tools/golden_r/{decomposition,regression,registration,dynamics}.R`: golden-file generators for `pca.fd`/`varmx.pca.fd`/`cca.fd`, `fRegress` (+ `predict.fRegress`/`fRegress.stderr`/`fRegress.CV`), `landmarkreg`/`register.fd`/`AmpPhaseDecomp`, and `pda.fd`.
 - `tests/golden/decomposition.json` (12 cases, rtol 1e-8), `tests/golden/regression.json` (9 cases, rtol 1e-8), `tests/golden/registration.json` (4 cases, rtol 1e-5), `tests/golden/dynamics.json` (3 cases, rtol 1e-8).
