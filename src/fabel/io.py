@@ -75,8 +75,9 @@ def from_pandas(df: pd.DataFrame, id_col: str, t_col: str, y_col: str) -> LongDa
     Returns
     -------
     LongData
-        ``t``/``y`` are a single shared 2-D array when every curve has the
-        same, identically-ordered ``t_col`` values; otherwise a dict of
+        When every curve has the same, identically-ordered ``t_col`` values,
+        ``t`` is one shared 1-D array and ``y`` one 2-D array (argument x
+        curve); otherwise both are dicts of
         per-curve 1-D arrays (curves may then have different lengths).
 
     Raises
@@ -96,6 +97,8 @@ def from_pandas(df: pd.DataFrame, id_col: str, t_col: str, y_col: str) -> LongDa
     >>> long.ids
     ['a', 'b']
     >>> long.t.shape
+    (2,)
+    >>> long.y.shape
     (2, 2)
     """
     missing = [col for col in (id_col, t_col, y_col) if col not in df.columns]
