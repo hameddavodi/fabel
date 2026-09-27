@@ -3,7 +3,7 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
-## [1.0.0] - Unreleased
+## [1.0.0] - 2026-09-27
 
 First public release: a clean-room Python rewrite of R `fda` 6.3.0 with
 golden-file parity (`rtol = 1e-8`, `1e-5` for iterative fits).

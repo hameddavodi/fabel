@@ -8,7 +8,7 @@ abstract: >-
   canonical correlation analysis, functional regression, curve registration
   and principal differential analysis, with numerical parity against R.
 version: 1.0.0
-date-released: 2026-09-06
+date-released: 2026-09-27
 license: BSD-3-Clause
 authors:
   - name: "Hamed Davodi"
