@@ -56,7 +56,8 @@ from types import ModuleType
 from typing import Any
 
 from sklearn.base import BaseEstimator, RegressorMixin
-from sklearn.utils.validation import check_is_fitted, validate_data
+from sklearn.utils import check_array
+from sklearn.utils.validation import check_is_fitted, column_or_1d, validate_data
 
 from fabel._backend import array_namespace, asarray, default_namespace
 from fabel._operator import LDO
@@ -1084,6 +1085,13 @@ def fregress(
 # --------------------------------------------------------------------------- #
 
 
+def _is_matrix(X: Any) -> bool:  # noqa: N803
+    """Whether ``X`` is a plain covariate matrix rather than curves."""
+    if isinstance(X, FData):
+        return False
+    return not (isinstance(X, (list, tuple)) and any(isinstance(v, FData) for v in X))
+
+
 class FRegress(RegressorMixin, BaseEstimator):  # type: ignore[misc]
     """Functional linear regression as a scikit-learn regressor.
 
@@ -1138,18 +1146,23 @@ class FRegress(RegressorMixin, BaseEstimator):  # type: ignore[misc]
         self.penalty = penalty
         self.fit_intercept = fit_intercept
 
-    def _covariates(self, X: Any, *, reset: bool) -> list[Any]:  # noqa: N803
-        """Return the covariate list for ``X``, validating a numeric matrix."""
-        if isinstance(X, FData):
-            covariates: list[Any] = [X]
-        elif isinstance(X, (list, tuple)) and any(isinstance(v, FData) for v in X):
-            covariates = list(X)
-        else:
+    def _covariates(self, X: Any, *, reset: bool, y: Any = None) -> tuple[list[Any], Any]:  # noqa: N803
+        """Return the covariate list for ``X`` and the validated response ``y``.
+
+        A numeric matrix goes through scikit-learn's ``validate_data`` (together
+        with a numeric ``y`` when one is given); curves are passed on as they are.
+        """
+        if not _is_matrix(X):
+            covariates: list[Any] = [X] if isinstance(X, FData) else list(X)
+        elif y is None or isinstance(y, (FData, SmoothResult)):
             data = validate_data(self, X, reset=reset, ensure_min_samples=1)
+            covariates = [data[:, j] for j in range(data.shape[1])]
+        else:
+            data, y = validate_data(self, X, y, reset=reset, ensure_min_samples=1, y_numeric=True)
             covariates = [data[:, j] for j in range(data.shape[1])]
         if self.fit_intercept:
             covariates = [1.0, *covariates]
-        return covariates
+        return covariates, y
 
     def fit(self, X: Any, y: Any) -> FRegress:  # noqa: N803
         """Fit the model.
@@ -1158,19 +1171,53 @@ class FRegress(RegressorMixin, BaseEstimator):  # type: ignore[misc]
         ----------
         X : array of shape (n_samples, n_features), FData or list
             Covariates.
-        y : array of shape (n_samples,) or FData
-            Response.
+        y : array of shape (n_samples,), FData or SmoothResult
+            Response.  A numeric ``y`` must be finite; a column vector is
+            flattened with a ``DataConversionWarning``.
 
         Returns
         -------
         FRegress
             The fitted estimator.
+
+        Raises
+        ------
+        ValueError
+            If ``y`` is missing or not finite, ``X`` and ``y`` hold different
+            numbers of samples, or there is only one sample.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from fabel.regression import FRegress
+        >>> X = np.array([[0.0], [1.0], [2.0], [3.0]])
+        >>> model = FRegress().fit(X, 1.0 + 2.0 * X[:, 0])
+        >>> [round(float(b.coefs[0, 0]), 10) for b in model.coef_]
+        [1.0, 2.0]
         """
-        covariates = self._covariates(X, reset=True)
-        n = y.n_curves if isinstance(y, FData) else len(y)
+        if y is None:
+            raise ValueError(
+                f"{type(self).__name__} requires y to be passed, but the target y is None."
+            )
+        if not isinstance(y, (FData, SmoothResult)) and not _is_matrix(X):
+            y = column_or_1d(
+                check_array(y, ensure_2d=False, dtype="numeric", input_name="y"), warn=True
+            )
+        covariates, y = self._covariates(X, reset=True, y=y)
+        if isinstance(y, SmoothResult):
+            n = y.fd.n_curves
+        elif isinstance(y, FData):
+            n = y.n_curves
+        else:
+            n = len(y)
+        if n < 2:
+            raise ValueError(f"{type(self).__name__} needs at least 2 samples, got n_samples = {n}")
         for value in covariates:
-            if not isinstance(value, FData) and not _is_number(value) and len(value) != n:
-                raise ValueError(f"X has {len(value)} samples but y has {n}")
+            n_value = value.n_curves if isinstance(value, FData) else None
+            if n_value is None and not _is_number(value):
+                n_value = len(value)
+            if n_value is not None and n_value != n:
+                raise ValueError(f"X has {n_value} samples but y has {n}")
         self.result_ = fregress(y, covariates, self.beta, lam=self.lam, penalty=self.penalty)
         self.coef_ = self.result_.beta
         return self
@@ -1189,7 +1236,7 @@ class FRegress(RegressorMixin, BaseEstimator):  # type: ignore[misc]
             Predicted response.
         """
         check_is_fitted(self)
-        covariates = self._covariates(X, reset=False)
+        covariates, _ = self._covariates(X, reset=False)
         if not any(isinstance(v, FData) for v in covariates):
             n = max(len(v) for v in covariates if not _is_number(v))
             covariates = [
