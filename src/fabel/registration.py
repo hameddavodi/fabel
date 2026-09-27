@@ -151,7 +151,7 @@ class AmpPhaseDecomposition(NamedTuple):
     c: float
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class RegistrationResult:
     """Outcome of :func:`register`.
 
@@ -417,7 +417,7 @@ class _WarpQuadrature:
         return h, grad, hess
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class _CurveProblem:
     """The registration criterion of one curve as a function of its parameters."""
 
