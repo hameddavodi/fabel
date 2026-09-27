@@ -60,6 +60,14 @@ nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - Migrating from R fda: r-migration.md
+  - Tutorials:
+      - tutorials/index.md
+      - Smoothing: tutorials/smoothing.md
+      - Functional PCA and CCA: tutorials/fpca.md
+      - Registration: tutorials/registration.md
+      - Functional regression: tutorials/regression.md
+      - Dynamics: tutorials/dynamics.md
+      - Machine learning: tutorials/machine-learning.md
   - API reference:
       - api/index.md
       - Basis systems: api/basis.md
