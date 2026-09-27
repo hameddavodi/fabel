@@ -4,11 +4,18 @@ The problem size mirrors the growth golden case: ten curves in a 35-function
 order-6 spline basis on ``[1, 18]`` (a 351-point registration grid) and a
 five-function cubic warp basis.
 
+The continuous benchmarks run twice: ``numpy`` (analytic gradient and Hessian)
+and ``torch`` (the same curves as tensors, so :func:`fabel.registration.register`
+takes the autodiff path: criterion in PyTorch, gradient and Hessian by
+autograd, the same Newton iteration).  The torch cases skip without the
+``fabel[torch]`` extra.
+
 Run with ``pytest benchmarks --benchmark-only``.
 """
 
 from __future__ import annotations
 
+import importlib.util
 from typing import Any
 
 import numpy as np
@@ -16,6 +23,13 @@ import pytest
 
 from fabel import BSpline, FData
 from fabel.registration import RegistrationResult, register
+
+HAS_TORCH = importlib.util.find_spec("torch") is not None
+
+BACKENDS = [
+    "numpy",
+    pytest.param("torch", marks=pytest.mark.skipif(not HAS_TORCH, reason="torch not installed")),
+]
 
 DOMAIN = (1.0, 18.0)
 N_CURVES = 10
@@ -33,12 +47,25 @@ def curves() -> FData:
     return FData(np.linalg.lstsq(basis(grid), values, rcond=None)[0], basis)
 
 
+def _on_backend(fd: FData, backend: str) -> FData:
+    """Return ``fd`` with NumPy or torch coefficients."""
+    if backend == "numpy":
+        return fd
+    import torch
+
+    return FData(torch.tensor(np.asarray(fd.coefs), dtype=torch.float64), fd.basis)
+
+
 @pytest.mark.benchmark(group="registration")
+@pytest.mark.parametrize("backend", BACKENDS)
 @pytest.mark.parametrize("criterion", ["eigen", "least_squares"])
-def test_bench_register_continuous(benchmark: Any, curves: FData, criterion: str) -> None:
+def test_bench_register_continuous(
+    benchmark: Any, curves: FData, criterion: str, backend: str
+) -> None:
     warp_basis = BSpline(domain=DOMAIN, n_basis=5)
+    data = _on_backend(curves, backend)
     result: RegistrationResult = benchmark(
-        register, curves, warp_basis=warp_basis, lam=1.0, criterion=criterion
+        register, data, warp_basis=warp_basis, lam=1.0, criterion=criterion
     )
     assert result.registered.n_curves == N_CURVES
 
