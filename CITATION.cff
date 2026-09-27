@@ -1,6 +1,12 @@
 cff-version: 1.2.0
 message: "If you use Fabel, please cite it as below, together with Ramsay & Silverman (2005)."
+type: software
 title: "Fabel: functional data analysis for Python"
+abstract: >-
+  Fabel is a clean-room Python rewrite of the R package fda (version 6.3.0):
+  basis expansions, penalised smoothing, functional principal component and
+  canonical correlation analysis, functional regression, curve registration
+  and principal differential analysis, with numerical parity against R.
 version: 1.0.0
 date-released: 2026-09-06
 license: BSD-3-Clause
@@ -8,9 +14,17 @@ authors:
   - name: "AISMA S.r.l."
     email: hamed.davoodi@aisma.it
 repository-code: "https://github.com/AISMAsrl/fabel"
+url: "https://aismasrl.github.io/fabel"
+keywords:
+  - functional data analysis
+  - fda
+  - splines
+  - smoothing
+  - functional PCA
 references:
   - type: book
     title: "Functional Data Analysis"
+    edition: "2nd"
     authors:
       - family-names: Ramsay
         given-names: J. O.
@@ -31,3 +45,14 @@ references:
     year: 2009
     publisher:
       name: Springer
+  - type: software
+    title: "fda: Functional Data Analysis (R package)"
+    version: 6.3.0
+    authors:
+      - family-names: Ramsay
+        given-names: J. O.
+      - family-names: Graves
+        given-names: Spencer
+      - family-names: Hooker
+        given-names: Giles
+    url: "https://cran.r-project.org/package=fda"
