@@ -62,7 +62,7 @@ from __future__ import annotations
 import warnings
 from collections.abc import Callable
 from dataclasses import dataclass
-from math import atan2, cos, sin, sqrt
+from math import atan2, cos, isfinite, sin, sqrt
 from typing import Any, NamedTuple
 
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -73,7 +73,7 @@ from fabel._backend import asarray, default_namespace, to_numpy
 from fabel._operator import LDO
 from fabel.basis import Basis, BSpline
 from fabel.core import FData
-from fabel.smoothing import _cumulative_exp, smooth
+from fabel.smoothing import smooth
 
 __all__ = [
     "AmpPhaseDecomposition",
@@ -94,6 +94,10 @@ _POINTS_PER_BASIS = 10
 #: ``W`` is a polynomial on every interval, so eight nodes integrate ``e^W`` to
 #: rounding error for any warp that can occur in practice.
 _QUAD_DEGREE = 8
+
+#: Gauss-Legendre nodes per panel for the warps returned to the user (the same
+#: rule :func:`fabel.smoothing.smooth` uses for monotone fits).
+_WARP_QUAD_DEGREE = 12
 
 _ARMIJO = 1e-4
 _EIGEN_FLOOR = 1e-12
@@ -310,14 +314,53 @@ def _check_univariate(fd: FData, name: str) -> None:
         raise ValueError(f"{name} must be univariate, got {fd.n_vars} variables per curve")
 
 
+def _relative_cumulative(basis: Basis, coefs: Array, t: Array) -> tuple[Array, Array, Array]:
+    """Cumulative integrals of ``e^{W - m}`` at ``t`` and over the whole domain.
+
+    ``m`` is, per column, the largest value of ``W`` at the quadrature nodes.
+    The warp depends on ``W`` only up to a constant, and with this offset the
+    integrand is at most one (``e^W`` cannot overflow however large unpenalised
+    coefficients grow) and equals one at some node (the total cannot underflow).
+    The panels are the breaks of ``basis`` refined by ``t``, so every panel
+    sees one polynomial piece of ``W``.
+
+    Returns
+    -------
+    tuple of array
+        ``(values, total, offset)`` of shapes ``(n_t, n_curves)``,
+        ``(1, n_curves)`` and ``(1, n_curves)``.
+    """
+    xp = default_namespace()
+    lower, upper = basis.domain
+    points = xp.reshape(t, (-1,))
+    edges = xp.unique_values(
+        xp.concat([asarray(list(basis._natural_breaks()), xp), points, asarray([lower, upper], xp)])
+    )
+    edges = edges[(edges >= lower) & (edges <= upper)]
+    nodes, weights = _linalg.composite_gauss_legendre(to_numpy(edges), _WARP_QUAD_DEGREE)
+    n_panels = int(edges.shape[0]) - 1
+    latent = xp.matmul(basis(asarray(nodes, xp)), coefs)
+    offset = xp.max(latent, axis=0, keepdims=True)
+    weighted = xp.exp(latent - offset) * asarray(weights, xp)[:, None]
+    panels = xp.sum(xp.reshape(weighted, (n_panels, _WARP_QUAD_DEGREE, -1)), axis=1)
+    zero = xp.zeros((1, panels.shape[1]), dtype=panels.dtype)
+    cumulative = xp.concat([zero, xp.cumulative_sum(panels, axis=0)])
+    values = xp.take(cumulative, xp.searchsorted(edges, points), axis=0)
+    return values, cumulative[-1:, :], offset
+
+
+def _check_finite(values: Array, name: str) -> None:
+    """Reject NaN or infinite entries, which no registration criterion survives."""
+    xp = default_namespace()
+    if not bool(xp.all(xp.isfinite(values))):
+        raise ValueError(f"{name} must be finite (no NaN or infinite entries)")
+
+
 def _warp_values(basis: Basis, coefs: Array, t: Array) -> Array:
     """Exact ``h(t) = a + (b - a) H(t) / H(b)`` for every column of ``coefs``."""
     xp = default_namespace()
     lower, upper = basis.domain
-    points = xp.concat([t, asarray([upper], xp)])
-    cumulative, _ = _cumulative_exp(basis, coefs, points, derivative=False)
-    values = cumulative[:-1, ...]
-    total = cumulative[-1:, ...]
+    values, total, _ = _relative_cumulative(basis, coefs, t)
     return xp.clip(lower + (upper - lower) * values / total, lower, upper)
 
 
@@ -325,9 +368,8 @@ def _warp_slopes(basis: Basis, coefs: Array, t: Array) -> Array:
     """Exact ``h'(t) = (b - a) e^{W(t)} / H(b)`` for every column of ``coefs``."""
     xp = default_namespace()
     lower, upper = basis.domain
-    ends = asarray([lower, upper], xp)
-    cumulative, _ = _cumulative_exp(basis, coefs, ends, derivative=False)
-    return (upper - lower) * xp.exp(xp.matmul(basis(t), coefs)) / cumulative[-1:, ...]
+    _, total, offset = _relative_cumulative(basis, coefs, asarray([upper], xp))
+    return (upper - lower) * xp.exp(xp.matmul(basis(t), coefs) - offset) / total
 
 
 def _project(basis: Basis, grid: Array, values: Array) -> FData:
@@ -370,10 +412,17 @@ class _WarpQuadrature:
         self.span = (float(lower), float(upper))
 
     def moments(self, coefs: Array) -> tuple[Array, Array, Array, Array, Array, Array]:
-        """Return ``H, H_k, H_kl`` at the grid points and their totals at ``b``."""
+        """Return ``H, H_k, H_kl`` at the grid points and their totals at ``b``.
+
+        The integrals are of ``e^{W - m}`` with ``m`` the largest value of
+        ``W`` at the quadrature nodes, so the integrand is at most one (no
+        overflow) and equals one at some node (the totals cannot underflow).
+        Every ratio built from the moments is the same as for ``e^W``.
+        """
         xp = default_namespace()
         n_basis = self.phi.shape[1]
-        weighted = xp.exp(xp.matmul(self.phi, coefs)) * self.weights
+        latent = xp.matmul(self.phi, coefs)
+        weighted = xp.exp(latent - xp.max(latent)) * self.weights
         order0 = xp.sum(xp.reshape(weighted, (self.n_panels, _QUAD_DEGREE)), axis=1)
         first = weighted[:, None] * self.phi
         order1 = xp.sum(xp.reshape(first, (self.n_panels, _QUAD_DEGREE, n_basis)), axis=1)
@@ -538,10 +587,22 @@ def _min_eigenvalue(
 
 
 def _newton_step(hess: Array, grad: Array) -> Array:
-    """Newton step with the Hessian's non-positive curvature reflected upward."""
+    """Newton step with the Hessian's non-positive curvature reflected upward.
+
+    Falls back to the steepest-descent step ``-grad`` when the Hessian is not
+    finite, is zero, or its eigendecomposition fails.
+    """
     xp = default_namespace()
     sym = 0.5 * (hess + xp.matrix_transpose(hess))
-    values, vectors = xp.linalg.eigh(sym)
+    if not bool(xp.all(xp.isfinite(sym))):
+        # A Hessian that overflowed carries no usable curvature.
+        return -grad
+    try:
+        values, vectors = xp.linalg.eigh(sym)
+    except ValueError:
+        # LAPACK's eigensolver can fail to converge on badly scaled matrices
+        # (numpy's LinAlgError is a ValueError): take a steepest-descent step.
+        return -grad
     scale = float(xp.max(xp.abs(values))) if values.shape[0] else 0.0
     if scale == 0.0:
         # No curvature information at all: fall back to steepest descent.
@@ -557,8 +618,25 @@ def _minimise(
     max_iter: int,
     tol: float,
 ) -> tuple[Array, float, int, bool]:
-    """Safeguarded Newton descent with an Armijo backtracking line search."""
+    """Safeguarded Newton descent with an Armijo backtracking line search.
+
+    A trial point whose criterion, gradient or Hessian is not finite is
+    rejected like one that does not decrease the criterion, so the line search
+    shortens the step instead of accepting an overflowed point.
+
+    Raises
+    ------
+    ValueError
+        If the criterion, gradient or Hessian is not finite at ``start``.
+    """
     xp = default_namespace()
+
+    def finite(point_value: float, point_grad: Array, point_hess: Array) -> bool:
+        return (
+            isfinite(point_value)
+            and bool(xp.all(xp.isfinite(point_grad)))
+            and bool(xp.all(xp.isfinite(point_hess)))
+        )
 
     def stationary(point_value: float, point_grad: Array) -> bool:
         if not point_grad.shape[0]:
@@ -567,6 +645,8 @@ def _minimise(
 
     params = start
     value, grad, hess = evaluate(params)
+    if not finite(value, grad, hess):
+        raise ValueError("the registration criterion is not finite at the starting point")
     for iteration in range(max_iter + 1):
         if stationary(value, grad):
             return params, value, iteration, True
@@ -582,6 +662,9 @@ def _minimise(
         while scale * reach > floor:
             candidate = params + scale * step
             new_value, new_grad, new_hess = evaluate(candidate)
+            if not finite(new_value, new_grad, new_hess):
+                scale *= 0.5
+                continue
             if new_value <= value + _ARMIJO * scale * slope:
                 accepted = True
                 break
@@ -623,6 +706,7 @@ def _initial_latent(init: Any, warp_basis: Basis, n_curves: int) -> tuple[Array,
         coefs = xp.tile(coefs, (1, n_curves))
     if coefs.shape[1] != n_curves:
         raise ValueError(f"init must have 1 or {n_curves} columns, got {coefs.shape[1]}")
+    _check_finite(coefs, "init")
     # Adding a constant to W leaves h unchanged; pin the first coefficient to 0.
     return coefs - coefs[:1, :], basis
 
@@ -649,6 +733,7 @@ def _continuous(
     n_curves = fd.n_curves
     goal = fd.mean() if target is None else _as_numpy_fdata(target)
     _check_univariate(goal, "target")
+    _check_finite(goal.coefs, "target")
     if goal.n_curves not in (1, n_curves):
         raise ValueError(f"target must hold 1 or {n_curves} curves, got {goal.n_curves}")
     default_basis = BSpline(domain=fd.domain, n_basis=2, order=2)
@@ -664,6 +749,7 @@ def _continuous(
         if init_shift is None
         else xp.reshape(asarray(to_numpy(init_shift), xp), (-1,)) * xp.ones(n_curves)
     )
+    _check_finite(shifts, "init_shift")
     grid = _fine_grid(fd.domain, fd.basis.n_basis)
     goal_values = goal(grid)
     quadrature = _WarpQuadrature(basis, grid)
@@ -735,6 +821,7 @@ def _landmark_matrix(landmarks: Any, n_curves: int, domain: tuple[float, float])
         raise ValueError(
             f"landmarks must have one row per curve ({n_curves}), got shape {tuple(marks.shape)}"
         )
+    _check_finite(marks, "landmarks")
     lower, upper = domain
     if bool(xp.any((marks <= lower) | (marks >= upper))):
         raise ValueError(f"landmarks must lie strictly inside the domain {domain}")
@@ -953,12 +1040,21 @@ def register(
     ------
     ValueError
         On multivariate curves, a non-B-spline warp basis, badly shaped
-        landmarks or targets, an unknown criterion or a negative ``lam``.
+        landmarks or targets, an unknown criterion, a negative ``lam``, or NaN
+        or infinite values in ``fd``, ``target``, ``init`` or ``init_shift``.
 
     Warns
     -----
     RuntimeWarning
-        If some curve has not converged after ``max_iter`` iterations.
+        If some curve has not converged after ``max_iter`` iterations.  This
+        includes a criterion without a finite minimum: with ``lam=0`` the
+        eigenvalue criterion can keep decreasing as the warp squeezes a curve
+        into a vanishing stretch of the domain, and ``W`` grows without bound.
+        The line search rejects steps at which the criterion or its
+        derivatives overflow and a failed eigendecomposition of the Hessian
+        falls back to steepest descent, so such curves stop at the last finite
+        iterate (a strictly increasing warp) with this warning rather than an
+        exception.  A positive ``lam`` keeps ``W`` bounded.
 
     Examples
     --------
@@ -976,6 +1072,7 @@ def register(
     """
     _check_univariate(fd, "fd")
     data = _as_numpy_fdata(fd)
+    _check_finite(data.coefs, "fd")
     if landmarks is not None:
         weight = _DEFAULT_LANDMARK_LAMBDA if lam is None else float(lam)
         if weight < 0.0:

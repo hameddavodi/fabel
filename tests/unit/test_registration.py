@@ -182,6 +182,62 @@ def test_minimise_empty_parameter_vector() -> None:
     assert value == 1.0
 
 
+def test_newton_step_non_finite_hessian_is_steepest_descent() -> None:
+    grad = np.array([1.0, -2.0])
+    np.testing.assert_array_equal(_newton_step(np.full((2, 2), np.nan), grad), -grad)
+    np.testing.assert_array_equal(_newton_step(np.diag([np.inf, 1.0]), grad), -grad)
+
+
+def test_newton_step_falls_back_when_eigh_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    from fabel._backend import default_namespace
+
+    def broken(_: Any) -> Any:
+        raise np.linalg.LinAlgError("Eigenvalues did not converge")
+
+    monkeypatch.setattr(default_namespace().linalg, "eigh", broken)
+    grad = np.array([3.0, -1.0])
+    np.testing.assert_array_equal(_newton_step(np.eye(2), grad), -grad)
+
+
+def test_minimise_rejects_non_finite_steps() -> None:
+    def cliff(p: np.ndarray) -> tuple[float, np.ndarray, np.ndarray]:
+        # Finite below 1.5, overflowing beyond: the full Newton step (to 2.0)
+        # lands on the non-finite side and must be shortened, not accepted.
+        if p[0] > 1.5:
+            return float("nan"), np.full(1, np.nan), np.full((1, 1), np.nan)
+        d = p - 2.0
+        return float(d @ d), 2.0 * d, 2.0 * np.eye(1)
+
+    params, value, _, _ = _minimise(cliff, np.zeros(1), 50, 1e-12)
+    assert np.isfinite(value)
+    assert 1.0 <= params[0] <= 1.5
+
+
+def test_minimise_rejects_a_non_finite_start() -> None:
+    def broken(p: np.ndarray) -> tuple[float, np.ndarray, np.ndarray]:
+        return float("inf"), np.zeros(1), np.eye(1)
+
+    with pytest.raises(ValueError, match="not finite"):
+        _minimise(broken, np.zeros(1), 5, 1e-12)
+
+
+def test_warp_quadrature_survives_huge_latent_coefficients() -> None:
+    # exp(900) overflows float64; the warp only depends on W up to a constant,
+    # so the moments are taken relative to the largest latent coefficient.
+    basis = BSpline(domain=DOMAIN, n_basis=5)
+    grid = _fine_grid(DOMAIN, 10)
+    coefs = np.array([0.0, 300.0, 900.0, 600.0, 0.0])
+    h, grad, hess = _WarpQuadrature(basis, grid).warp(coefs)
+    assert np.all(np.isfinite(h))
+    assert np.all(np.isfinite(grad))
+    assert np.all(np.isfinite(hess))
+    shifted, _, _ = _WarpQuadrature(basis, grid).warp(coefs - 900.0)
+    np.testing.assert_allclose(h, shifted, rtol=0, atol=1e-12)
+    assert np.all(np.diff(h) >= 0.0)
+    values = _warp_values(basis, coefs[:, None], grid)
+    np.testing.assert_allclose(values[:, 0], h, rtol=0, atol=1e-10)
+
+
 # --------------------------------------------------------------------------- #
 # continuous registration
 # --------------------------------------------------------------------------- #
@@ -412,6 +468,59 @@ def test_decompose_sub_interval_and_errors() -> None:
     single = _result(fd[0], fd[0], res.warp[0])
     with pytest.raises(ValueError, match="two curves"):
         single.decompose()
+
+
+def _growth_accelerations() -> FData:
+    from fabel.datasets import load_growth
+    from fabel.smoothing import smooth
+
+    growth = load_growth()
+    age = np.asarray(growth.age, dtype=float)
+    basis = BSpline(domain=(float(age[0]), float(age[-1])), order=6, breaks=age.tolist())
+    heights = np.asarray(growth.hgtf, dtype=float)[:, :10]
+    return smooth(heights, age, basis=basis, lam=0.01, penalty=4).fd.derivative(2)
+
+
+@pytest.mark.parametrize("n_warp", [6, 8])
+def test_register_unpenalised_eigen_on_growth_accelerations(n_warp: int) -> None:
+    # Regression: lam=0 with the eigen criterion used to crash with a raw
+    # numpy LinAlgError ("Eigenvalues did not converge") after exp(W) overflowed.
+    acc = _growth_accelerations()
+    warp_basis = BSpline(domain=acc.domain, n_basis=n_warp)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", category=RuntimeWarning, message="(?!registration)")
+        warnings.filterwarnings("ignore", "registration did not converge", RuntimeWarning)
+        res = register(acc, warp_basis=warp_basis, lam=0.0)
+    assert res.criterion is not None
+    assert np.all(np.isfinite(res.criterion))
+    assert np.all(np.isfinite(np.asarray(res.latent.coefs)))
+    assert np.all(np.isfinite(np.asarray(res.registered.coefs)))
+    t = np.linspace(*acc.domain, 501)
+    warps = res.warp_values(t)
+    assert np.all(np.isfinite(warps))
+    assert np.all(np.diff(warps, axis=0) >= 0.0)
+    start = register(acc, warp_basis=warp_basis, lam=0.0, max_iter=0)
+    assert start.criterion is not None
+    assert np.all(res.criterion <= start.criterion + 1e-12)
+
+
+def test_register_rejects_non_finite_input() -> None:
+    fd = bumps([0.45, 0.55])
+    coefs = np.array(fd.coefs, dtype=float)
+    coefs[3, 1] = np.nan
+    bad = FData(coefs, fd.basis)
+    with pytest.raises(ValueError, match="finite"):
+        register(bad)
+    with pytest.raises(ValueError, match="finite"):
+        register(fd, bad[1])
+    with pytest.raises(ValueError, match="finite"):
+        register(fd, init=np.array([0.0, np.inf]))
+    with pytest.raises(ValueError, match="finite"):
+        register(fd, periodic=True, init_shift=np.nan)
+    with pytest.raises(ValueError, match="finite"):
+        register(bad, landmarks=[0.4, 0.5])
+    with pytest.raises(ValueError, match="finite"):
+        register(fd, landmarks=[0.4, np.nan])
 
 
 # --------------------------------------------------------------------------- #
