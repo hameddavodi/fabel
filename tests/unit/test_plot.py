@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import matplotlib
 import numpy as np
 import pytest
@@ -9,6 +11,7 @@ import pytest
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 
 from fabel import BSpline, FData
 
@@ -23,7 +26,7 @@ def fd() -> FData:
 
 
 @pytest.fixture(autouse=True)
-def _close_figures() -> None:
+def _close_figures() -> Iterator[None]:
     """Close every figure the test opened."""
     yield
     plt.close("all")
@@ -31,7 +34,7 @@ def _close_figures() -> None:
 
 def test_plot_returns_axes_with_one_line_per_curve(fd: FData) -> None:
     ax = fd.plot()
-    assert isinstance(ax, plt.Axes)
+    assert isinstance(ax, Axes)
     assert len(ax.lines) == fd.n_curves
     assert ax.get_xlabel() == "t"
 
@@ -75,13 +78,15 @@ def test_plot_line_data_are_the_curve_values(fd: FData) -> None:
     """
     ax = fd.plot()
     for index, line in enumerate(ax.lines):
-        t, values = line.get_xydata().T
+        t, values = np.asarray(line.get_xydata()).T
         np.testing.assert_allclose(values, fd(t)[:, index], rtol=1e-12, atol=1e-12)
 
 
 def test_plot_deriv_line_data_are_the_derivative_values(fd: FData) -> None:
     ax = fd.plot(deriv=2)
-    t = ax.lines[0].get_xydata()[:, 0]
+    t = np.asarray(ax.lines[0].get_xydata())[:, 0]
     expected = fd(t, 2)
     for index, line in enumerate(ax.lines):
-        np.testing.assert_allclose(line.get_ydata(), expected[:, index], rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(
+            np.asarray(line.get_ydata()), expected[:, index], rtol=1e-12, atol=1e-12
+        )

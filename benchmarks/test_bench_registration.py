@@ -9,6 +9,8 @@ Run with ``pytest benchmarks --benchmark-only``.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -33,7 +35,7 @@ def curves() -> FData:
 
 @pytest.mark.benchmark(group="registration")
 @pytest.mark.parametrize("criterion", ["eigen", "least_squares"])
-def test_bench_register_continuous(benchmark, curves: FData, criterion: str) -> None:
+def test_bench_register_continuous(benchmark: Any, curves: FData, criterion: str) -> None:
     warp_basis = BSpline(domain=DOMAIN, n_basis=5)
     result: RegistrationResult = benchmark(
         register, curves, warp_basis=warp_basis, lam=1.0, criterion=criterion
@@ -42,7 +44,7 @@ def test_bench_register_continuous(benchmark, curves: FData, criterion: str) -> 
 
 
 @pytest.mark.benchmark(group="registration")
-def test_bench_register_landmarks(benchmark, curves: FData) -> None:
+def test_bench_register_landmarks(benchmark: Any, curves: FData) -> None:
     marks = np.linspace(10.5, 12.5, N_CURVES)
     result: RegistrationResult = benchmark(register, curves, landmarks=marks)
     assert result.warp_inverse is not None

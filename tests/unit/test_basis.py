@@ -537,10 +537,12 @@ def test_monomial_and_power_products_sum_exponents() -> None:
     mono = Monomial(domain=(0.0, 1.0), exponents=[0, 2]) * Monomial(
         domain=(0.0, 1.0), exponents=[1, 3]
     )
+    assert isinstance(mono, Monomial)
     assert mono.exponents == (1, 3, 5)
     power = Power(domain=(1.0, 2.0), exponents=[0.5]) * Power(
         domain=(1.0, 2.0), exponents=[0.5, 1.0]
     )
+    assert isinstance(power, Power)
     assert power.exponents == (1.0, 1.5)
 
 
@@ -548,6 +550,7 @@ def test_exponential_product_sums_rates() -> None:
     product = Exponential(domain=(0.0, 1.0), rates=[0.0, 1.0]) * Exponential(
         domain=(0.0, 1.0), rates=[2.0]
     )
+    assert isinstance(product, Exponential)
     assert product.rates == (2.0, 3.0)
 
 
