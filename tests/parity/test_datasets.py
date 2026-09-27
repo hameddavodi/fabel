@@ -58,13 +58,26 @@ def _assert_strings(values: list[str], component: dict[str, Any]) -> None:
     assert values[-3:] == component["tail3"]
 
 
-@pytest.fixture(autouse=True)
+def _skip_without(release_dir: Path) -> None:
+    """Skip the calling test when the gitignored ``data_release/`` staging files are absent.
+
+    ``data_release/`` is built locally by ``tools/build_data_release.py`` from the
+    gitignored ``data_export/`` dump, so a fresh checkout, a worktree or the CI
+    parity job has neither; the dataset parity tests then skip, as
+    ``tests/unit/test_datasets.py`` does.
+    """
+    if not release_dir.is_dir():
+        pytest.skip(f"{release_dir.name}/ fixtures missing; run tools/build_data_release.py first")
+
+
+@pytest.fixture
 def _local_downloads(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Redirect every dataset "download" to the local ``data_release/`` staging files.
 
     No network: this is the fixture required by WORKFLOW.md so parity tests
-    never hit the real GitHub release.
+    never hit the real GitHub release.  Skips when the staging files are absent.
     """
+    _skip_without(DATA_RELEASE_DIR)
 
     def _copy_local(url: str, dest: Path) -> None:
         name_ext = url.rsplit("/", 1)[-1]
@@ -75,6 +88,7 @@ def _local_downloads(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_canadian_weather() -> None:
     case = _case("dataset_CanadianWeather")
     comps = case["output"]["components"]
@@ -91,6 +105,7 @@ def test_canadian_weather() -> None:
     _assert_strings(cw.region, comps["region"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_growth() -> None:
     case = _case("dataset_growth")
     comps = case["output"]["components"]
@@ -101,6 +116,7 @@ def test_growth() -> None:
     _assert_numeric(g.age, comps["age"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_gait() -> None:
     case = _case("dataset_gait")
     comps = case["output"]["components"]
@@ -109,6 +125,7 @@ def test_gait() -> None:
     _assert_numeric(gait.value, comps["value"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_handwrit() -> None:
     case = _case("dataset_handwrit")
     comps = case["output"]["components"]
@@ -117,6 +134,7 @@ def test_handwrit() -> None:
     _assert_numeric(hw.value, comps["value"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_handwrit_time() -> None:
     case = _case("dataset_handwritTime")
     comps = case["output"]["components"]
@@ -125,6 +143,7 @@ def test_handwrit_time() -> None:
     _assert_numeric(hw.t, comps["value"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_pinch() -> None:
     case = _case("dataset_pinch")
     comps = case["output"]["components"]
@@ -133,6 +152,7 @@ def test_pinch() -> None:
     _assert_numeric(p.pinch, comps["value"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_melanoma() -> None:
     case = _case("dataset_melanoma")
     comps = case["output"]["components"]
@@ -141,6 +161,7 @@ def test_melanoma() -> None:
     _assert_numeric(m.value, comps["value"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_refinery() -> None:
     case = _case("dataset_refinery")
     comps = case["output"]["components"]
@@ -151,6 +172,7 @@ def test_refinery() -> None:
     _assert_numeric(r.tray47, comps["Tray47"])
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_seabird() -> None:
     case = _case("dataset_seabird")
     comps = case["output"]["components"]
@@ -186,6 +208,7 @@ def test_seabird() -> None:
     assert sb.observ_cond_factor3[-3:] == comps["ObservCondFactor3"]["tail3"]
 
 
+@pytest.mark.usefixtures("_local_downloads")
 def test_regina_precip() -> None:
     case = _case("dataset_ReginaPrecip")
     comps = case["output"]["components"]
@@ -225,3 +248,10 @@ def test_catalog_scope() -> None:
         if entry.endswith("(dateAccessories)"):
             continue
         assert base in covered, f"catalog entry {entry!r} has no Fabel loader"
+
+
+def test_missing_release_dir_skips(tmp_path: Path) -> None:
+    with pytest.raises(pytest.skip.Exception, match="data_release/ fixtures missing"):
+        _skip_without(tmp_path / "data_release")
+    (tmp_path / "data_release").mkdir()
+    _skip_without(tmp_path / "data_release")
