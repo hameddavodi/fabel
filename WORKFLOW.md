@@ -67,7 +67,7 @@ Order matters: `_backend` → `basis` → `core`.
 
 - [x] `registration.py`: `register()` (continuous, Newton on warping coefs), `landmarks=` mode, `.decompose()` (AmpPhaseDecomp)
   - Golden: growth-data registration vs `register.fd` (`rtol=1e-5`); property test: warps strictly monotone
-  - Torch backend: autodiff path benchmarked vs numpy Newton — not done yet (registration runs in NumPy); see PROGRESS.md Remaining work
+  - [x] Torch backend: autodiff path benchmarked vs numpy Newton (2026-09-27: `fabel._internal.registration_torch`, `benchmarks/test_bench_registration.py`; torch about 4x slower)
 - [x] `dynamics.py`: `PDA`, `phase_plane()`, ODE solve via scipy `solve_ivp`
   - Golden: vs `pda.fd` on lip/handwriting data
 
