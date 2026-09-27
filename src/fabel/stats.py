@@ -1180,6 +1180,17 @@ def f_test(
         a raw response, or ``x``, ``basis``, ``lam`` or ``penalty`` is given
         with a fitted model.
 
+    Notes
+    -----
+    Weights differ from R.  ``f_test(model)`` on a model fitted with
+    ``fregress(..., weights=w)`` refits it by weighted least squares under
+    every permutation, so the statistic and the null distribution change with
+    the weights (unit weights give the unweighted test).  R's
+    ``Fperm.fd(..., wt = w)`` accepts weights but returns the same ``Fobs`` and
+    null distribution as with no weights at all.  To reproduce an R
+    ``Fperm.fd`` result, test a model fitted without ``weights``.  The raw form
+    ``f_test(y, x, ...)`` has no weights and matches R.
+
     Examples
     --------
     >>> import numpy as np

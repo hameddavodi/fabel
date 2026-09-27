@@ -52,10 +52,10 @@ True
 
 from __future__ import annotations
 
+import operator
 from math import atan2, cos, sin, sqrt
-from numbers import Integral
 from types import ModuleType
-from typing import Any
+from typing import Any, SupportsIndex
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, validate_data
@@ -100,10 +100,22 @@ def _coefficients(fd: FData) -> Array:
 
 
 def _positive_int(value: object) -> int:
-    """Return ``value`` as an ``int`` if it is a positive integer, else raise."""
-    if isinstance(value, bool) or not isinstance(value, Integral) or int(value) < 1:
+    """Return ``value`` as an ``int`` if it is a positive integer, else raise.
+
+    Any object with ``__index__`` counts (``int``, ``numpy.int64``, ...), so
+    the value is normalised with :func:`operator.index`.  Booleans (Python and
+    NumPy, whose ``__index__`` raises) and floats -- even integral ones such
+    as ``2.0`` -- are rejected.
+    """
+    if isinstance(value, bool):
         raise ValueError(f"n must be a positive integer, got {value!r}")
-    return int(value)
+    try:
+        index = operator.index(value)  # type: ignore[arg-type]
+    except TypeError:
+        raise ValueError(f"n must be a positive integer, got {value!r}") from None
+    if index < 1:
+        raise ValueError(f"n must be a positive integer, got {value!r}")
+    return index
 
 
 def _default_basis(n_basis: int) -> Basis:
@@ -217,8 +229,9 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
 
     Parameters
     ----------
-    n : int, optional
-        Number of harmonics to keep.  Default ``2``.
+    n : int or SupportsIndex, optional
+        Number of harmonics to keep.  Default ``2``.  Any integer-like value
+        (``numpy.int64``, ...) works; booleans and floats are rejected.
     lam : float or str, optional
         Roughness penalty on the harmonics.  ``0.0`` (default) is the
         unpenalised problem; ``"gcv"`` picks the penalty by leave-one-curve-out
@@ -275,7 +288,7 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
 
     def __init__(
         self,
-        n: int = 2,
+        n: SupportsIndex = 2,
         *,
         lam: float | str = 0.0,
         penalty: int | LDO = 2,
@@ -735,8 +748,10 @@ class FCCA(BaseEstimator):  # type: ignore[misc]
 
     Parameters
     ----------
-    n : int, optional
-        Number of canonical variate pairs to keep.  Default ``2``.
+    n : int or SupportsIndex, optional
+        Number of canonical variate pairs to keep.  Default ``2``.  Any
+        integer-like value (``numpy.int64``, ...) works; booleans and floats
+        are rejected.
     lam1, lam2 : float, optional
         Roughness penalties on the first and second set of canonical weights.
         Without a penalty the problem is degenerate whenever there are fewer
@@ -775,7 +790,7 @@ class FCCA(BaseEstimator):  # type: ignore[misc]
 
     def __init__(
         self,
-        n: int = 2,
+        n: SupportsIndex = 2,
         *,
         lam1: float = 0.0,
         lam2: float = 0.0,

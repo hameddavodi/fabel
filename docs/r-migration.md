@@ -164,6 +164,17 @@ checksum, and cached in `~/.cache/fabel` (override with `FABEL_DATA_DIR`).
 - Internal helpers (`wtcheck`, `symsolve`, `polintmat`, `lnsrch`, ...): private
   in Fabel or replaced by SciPy.
 
+## Behaviour differences from R
+
+| Topic | R `fda` 6.3.0 | Fabel |
+|---|---|---|
+| Weights in `fRegress` | `fRegress(y, xfdlist, betalist, wt = w)` fits by weighted least squares, scalar and functional response alike. The argument is `wt`: `wtvec = w` falls into `...` and is ignored without a warning, so R returns the unweighted fit. | `fb.fregress(y, x, weights=w)` fits by weighted least squares and agrees with R's `wt = w` to the accuracy of R's integration. Drop `weights` when porting a script that passed `wtvec` to `fRegress`. |
+| Weights in `Fperm.fd` | `Fperm.fd(..., wt = w)` accepts weights but ignores them: `Fobs` and the null distribution are the same as with no weights. | `fb.stats.f_test(model)` refits a weighted model with its weights under every permutation, so the statistic changes with the weights. Test a model fitted without `weights` to reproduce R. The raw form `f_test(y, x)` takes no weights. |
+
+With a roughness penalty, only the relative size of the weights and `lam`
+matters: multiplying every weight by `c` has the same effect as dividing `lam`
+by `c`. With unit weights both functions give exactly the unweighted result.
+
 ## Where Fabel and R disagree on purpose
 
 Fabel matches R to `rtol = 1e-8` (`1e-5` for iterative fits) on every golden
