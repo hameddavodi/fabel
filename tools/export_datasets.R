@@ -30,7 +30,9 @@ dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 dataset_names <- c(
   "CanadianWeather", "growth", "gait", "handwrit", "handwritTime",
-  "pinch", "melanoma", "refinery", "seabird", "ReginaPrecip"
+  "pinch", "melanoma", "refinery", "seabird", "ReginaPrecip",
+  "MontrealTemp", "daily", "infantGrowth", "nondurables",
+  "lip", "liptime", "lipmarks", "pinchtime", "pinchraw"
 )
 
 for (nm in dataset_names) {
