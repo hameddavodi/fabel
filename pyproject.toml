@@ -90,7 +90,7 @@ ignore = ["D203", "D213", "ANN401", "S101", "D105", "D107"]
 "tests/**" = ["D", "ANN", "S", "PT011"]
 "benchmarks/**" = ["D", "ANN"]
 "tools/**" = ["S603", "S607"]
-"notebooks/**" = ["D", "ANN", "E402"]
+"notebooks/**" = ["D", "ANN", "E402", "B018"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

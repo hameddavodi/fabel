@@ -6,7 +6,6 @@
 # refinery data and gradient matching for a simulated stirred-tank chemical reactor.
 
 # %%
-# ruff: noqa: B018
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import solve_ivp

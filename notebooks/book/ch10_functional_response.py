@@ -6,7 +6,6 @@
 # and the concurrent model of knee angle on hip angle in the gait data.
 
 # %%
-# ruff: noqa: B018
 import matplotlib.pyplot as plt
 import numpy as np
 

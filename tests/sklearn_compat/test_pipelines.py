@@ -314,7 +314,9 @@ def test_registrator_accepts_few_coefficients() -> None:
     # Three coefficients give a quadratic B-spline curve; same shape, different size.
     rows = np.outer([1.0, 1.5, 2.0, 2.5, 3.0], [0.0, 1.0, 0.0])
     est = Registrator().fit(rows)
-    assert est.target_.basis.n_basis == 3
-    assert est.target_.basis.order == 3
+    basis = est.target_.basis
+    assert isinstance(basis, BSpline)
+    assert basis.n_basis == 3
+    assert basis.order == 3
     assert est.n_iter_ >= 0
     np.testing.assert_allclose(est.transform(rows), rows, atol=1e-8)

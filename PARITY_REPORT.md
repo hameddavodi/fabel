@@ -10,13 +10,13 @@ that are zero up to rounding). The summary columns show
 the worst value over **passing** cases only; strict xfails (cases where R is
 demonstrably the less accurate side) are listed with their measured reason below.
 
-**Totals:** 677 parity checks -- 523 pass, 154 strict xfail (R defect), 0 fail, 0 skipped.
+**Totals:** 679 parity checks -- 525 pass, 154 strict xfail (R defect), 0 fail, 0 skipped.
 
 ## By public symbol
 
 | Symbol | R counterpart | Golden cases | Checks | Max abs err | Max rel err | Status |
 |---|---|---:|---:|---:|---:|---|
-| `FData` | fd, eval.fd, mean.fd, sd.fd, center.fd, deriv.fd, +.fd | 17 | 21 | 3.41e-12 | 1.77e-15 | pass, 3 xfail (R defect) |
+| `FData` | fd, eval.fd, mean.fd, sd.fd, center.fd, deriv.fd, +.fd | 17 | 22 | 3.41e-12 | 1.77e-15 | pass, 3 xfail (R defect) |
 | `BiFData` | bifd, eval.bifd | 1 | 1 | 0 | 0 | pass |
 | `LDO` | Lfd, int2Lfd, vec2Lfd | 3 | 3 | 4.55e-13 | 5.31e-15 | pass |
 | `inprod` | inprod, inprod.bspline | 8 | 8 | 9.95e-14 | 1.63e-15 | pass, 4 xfail (R defect) |
@@ -49,7 +49,7 @@ demonstrably the less accurate side) are listed with their measured reason below
 | `stats.boxplot` | fbplot, boxplot.fd | 1 | 2 | 7.82e-14 | 1.38e-14 | pass |
 | `stats.f_test` | Fperm.fd | 1 | 5 | 0 | 0 | pass, 3 xfail (R defect) |
 | `stats.t_test` | tperm.fd | 1 | 5 | 3.38e-14 | 1.44e-14 | pass |
-| `datasets.load_*` | data(package='fda') | 11 | 11 | 3.21e-09 | 5.94e-14 | pass |
+| `datasets.load_*` | data(package='fda') | 11 | 12 | 3.21e-09 | 5.94e-14 | pass |
 | `nn.BasisLayer` | (new: PyTorch layer) | 0 | 0 | — | — | no golden cases |
 | `nn.FDataDataset` | (new: PyTorch dataset) | 0 | 0 | — | — | no golden cases |
 | `from_pandas` | (new) | 0 | 0 | — | — | no golden cases |
@@ -513,6 +513,7 @@ demonstrably the less accurate side) are listed with their measured reason below
 | datasets | `test_seabird` | `datasets.load_*` | 1.00e-12 | 9.09e-12 | 7.37e-16 | pass |
 | datasets | `test_regina_precip` | `datasets.load_*` | 1.00e-12 | 4.55e-13 | 2.15e-16 | pass |
 | datasets | `test_catalog_scope` | `datasets.load_*` | — | — | — | pass |
+| datasets | `test_missing_release_dir_skips` | `datasets.load_*` | — | — | — | pass |
 | decomposition | `test_every_golden_case_is_replayed` | `FPCA` | — | — | — | pass |
 | decomposition | `pca_fd_weather_nharm2_harmlambda0-values` | `FPCA` | 1.00e-08 | 5.36e-08 | 3.53e-12 | pass |
 | decomposition | `pca_fd_weather_nharm2_harmlambda0-harmonics` | `FPCA` | 1.00e-08 | 3.25e-09 | 3.52e-09 | xfail |
@@ -895,3 +896,4 @@ demonstrably the less accurate side) are listed with their measured reason below
 | stats | `test_permutation_tests[fperm_fd_weather_temp_atlantic_dummy-pval]` | `stats.f_test` | 1.00e-08 | 0 | 0 | pass |
 | stats | `test_permutation_tests[fperm_fd_weather_temp_atlantic_dummy-qval]` | `stats.f_test` | 1.00e-08 | 6.58e-07 | 1.11e-04 | xfail |
 | stats | `test_permutation_tests[fperm_fd_weather_temp_atlantic_dummy-argvals]` | `stats.f_test` | 1.00e-08 | 0 | 0 | pass |
+| stats | `test_fperm_through_a_fitted_model` | `FData` | 1.00e-08 | 0 | 0 | pass |

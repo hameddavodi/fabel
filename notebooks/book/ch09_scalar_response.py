@@ -6,7 +6,6 @@
 # y_i = alpha + integral of x_i(t) beta(t) dt + e_i.
 
 # %%
-# ruff: noqa: B018
 import matplotlib.pyplot as plt
 import numpy as np
 

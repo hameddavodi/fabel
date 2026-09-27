@@ -28,8 +28,13 @@ pytestmark = pytest.mark.filterwarnings("ignore:registration did not converge:Ru
 
 ESTIMATORS = [Smoother(), FPCA(), FRegress(), Registrator()]
 
+# sklearn ships no type hints; give the decorator a typed name.
+_with_checks: Callable[[Callable[..., None]], Callable[..., None]] = parametrize_with_checks(
+    ESTIMATORS
+)
 
-@parametrize_with_checks(ESTIMATORS)  # type: ignore[misc]
+
+@_with_checks
 def test_sklearn_estimator_checks(estimator: Any, check: Callable[[Any], None]) -> None:
     """Every scikit-learn estimator check passes, with no exemptions."""
     check(estimator)

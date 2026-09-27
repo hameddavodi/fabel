@@ -7,7 +7,6 @@
 # amplitude and phase parts.
 
 # %%
-# ruff: noqa: B018
 import matplotlib.pyplot as plt
 import numpy as np
 

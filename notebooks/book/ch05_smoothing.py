@@ -6,7 +6,6 @@
 # precipitation data, and constrained fits (positive, monotone, density).
 
 # %%
-# ruff: noqa: B018 -- every figure cell ends with the bare expression `fig` (notebook display)
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize

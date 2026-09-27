@@ -7,7 +7,6 @@
 # linear differential operator to them.
 
 # %%
-# ruff: noqa: B018 -- each figure cell ends with a bare `fig` so the notebook shows it
 import matplotlib.pyplot as plt
 import numpy as np
 
