@@ -44,7 +44,7 @@ try:
 except ImportError as error:
     raise ImportError(
         "fdatools.nn requires PyTorch; install the torch extra: "
-        'uv add "fdatools[torch] @ git+https://github.com/hameddavodi/fdatools"'
+        'uv add "fdatools[torch]"'
     ) from error
 
 from fdatools import _linalg

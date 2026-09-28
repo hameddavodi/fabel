@@ -5,10 +5,16 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+- fdatools is on PyPI: `uv add fdatools`. Releases are published by
+  `.github/workflows/release.yml` with PyPI trusted publishing (no API token);
+  it uploads the files attached to the GitHub release.
+
 ### Changed
-- Install instructions use uv and GitHub (`uv add "fdatools @ git+https://github.com/hameddavodi/fdatools@v1.1.0"`):
-  fdatools is not on PyPI yet, so `pip install fdatools` does not work. The
-  README badges read the GitHub release instead of PyPI.
+- Install instructions use uv only (`uv add fdatools`, extras as
+  `uv add "fdatools[plot]"`), also in the hints of missing-extra errors.
+- The CI dependency audit uses the OSV database and skips the project itself,
+  so it does not depend on pypi.org being up.
 
 ## [1.1.0] - 2026-09-28
 

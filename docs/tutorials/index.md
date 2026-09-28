@@ -29,4 +29,4 @@ another folder, for example one you copied to a machine without internet.
 
 The tutorials draw with matplotlib (the `plot` extra). The machine learning
 tutorial also needs PyTorch (the `torch` extra):
-`uv add "fdatools[plot,torch] @ git+https://github.com/hameddavodi/fdatools@v1.1.0"`.
+`uv add "fdatools[plot,torch]"`.

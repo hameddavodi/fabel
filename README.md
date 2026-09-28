@@ -1,8 +1,8 @@
 # fdatools
 
 [![CI](https://github.com/hameddavodi/fdatools/actions/workflows/ci.yml/badge.svg)](https://github.com/hameddavodi/fdatools/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/hameddavodi/fdatools)](https://github.com/hameddavodi/fdatools/releases/latest)
-[![Python versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://github.com/hameddavodi/fdatools/blob/main/pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/fdatools.svg)](https://pypi.org/project/fdatools/)
+[![Python versions](https://img.shields.io/pypi/pyversions/fdatools.svg)](https://pypi.org/project/fdatools/)
 [![License: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://github.com/hameddavodi/fdatools/blob/main/LICENSE)
 [![Docs](https://img.shields.io/badge/docs-hameddavodi.github.io%2Ffdatools-blue.svg)](https://hameddavodi.github.io/fdatools)
 
@@ -23,11 +23,11 @@ functional regression, curve registration and principal differential analysis.
 ## Install
 
 ```bash
-uv add "fdatools @ git+https://github.com/hameddavodi/fdatools@v1.1.0"
+uv add fdatools
 ```
 
-fdatools is installed from GitHub with [uv](https://docs.astral.sh/uv/). With an
-extra, put it in brackets: `uv add "fdatools[plot] @ git+https://github.com/hameddavodi/fdatools@v1.1.0"`.
+With [uv](https://docs.astral.sh/uv/). For an extra, put it in brackets:
+`uv add "fdatools[plot]"`.
 
 Optional extras: `fdatools[plot]` (matplotlib), `fdatools[pandas]` (pandas + xarray),
 `fdatools[io]` (read R `.rds` files), `fdatools[torch]` (PyTorch). Python 3.10 to 3.13.
