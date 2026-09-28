@@ -73,7 +73,7 @@ __all__ = [
 _IN_PACKAGE = frozenset({"growth", "gait", "pinch"})
 
 #: GitHub release asset URL template for every other dataset.
-_RELEASE_URL = "https://github.com/AISMAsrl/fabel/releases/download/data-v1/{name}.{ext}"
+_RELEASE_URL = "https://github.com/hameddavodi/fabel/releases/download/data-v1/{name}.{ext}"
 
 #: SHA-256 of every ``data_release/<name>.{npz,json}`` file (see
 #: ``tools/build_data_release.py``, which prints this table). Verified after

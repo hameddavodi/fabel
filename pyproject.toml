@@ -10,7 +10,7 @@ readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
-authors = [{ name = "AISMA", email = "hamed.davoodi@aisma.it" }]
+authors = [{ name = "Hamed Davodi", email = "hamed.davodi94@gmail.com" }]
 keywords = ["functional data analysis", "fda", "splines", "smoothing", "fpca"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -62,11 +62,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/AISMAsrl/fabel"
-Documentation = "https://aismasrl.github.io/fabel"
-Source = "https://github.com/AISMAsrl/fabel"
-Issues = "https://github.com/AISMAsrl/fabel/issues"
-Changelog = "https://github.com/AISMAsrl/fabel/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/hameddavodi/fabel"
+Documentation = "https://hameddavodi.github.io/fabel"
+Source = "https://github.com/hameddavodi/fabel"
+Issues = "https://github.com/hameddavodi/fabel/issues"
+Changelog = "https://github.com/hameddavodi/fabel/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fabel"]

@@ -1,9 +1,9 @@
 site_name: Fabel
 site_description: Functional data analysis for Python — a clean-room rewrite of R's fda.
-site_url: https://aismasrl.github.io/fabel/
-repo_url: https://github.com/AISMAsrl/fabel
-repo_name: AISMAsrl/fabel
-copyright: Copyright &copy; 2026 AISMA S.r.l. — BSD-3-Clause
+site_url: https://hameddavodi.github.io/fabel/
+repo_url: https://github.com/hameddavodi/fabel
+repo_name: hameddavodi/fabel
+copyright: Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
 docs_dir: docs
 strict: true
 theme:

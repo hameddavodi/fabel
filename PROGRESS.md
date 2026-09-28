@@ -11,15 +11,15 @@
 Run from the repo root on the tagged commit (`git checkout v1.0.0`).
 1. Add the remote and push (the repo has no remote yet):
    ```
-   git remote add origin git@github.com:AISMAsrl/fabel.git
+   git remote add origin git@github.com:hameddavodi/fabel.git
    git push origin main
    git push origin v1.0.0
    ```
-2. Upload the dataset assets (docs/dev/data-release.md). Needs the GitHub CLI logged in to AISMAsrl:
+2. Upload the dataset assets (docs/dev/data-release.md). Needs the GitHub CLI logged in to hameddavodi:
    ```
    .venv/bin/python tools/build_data_release.py   # only if data_export/ changed; compare the table with _CHECKSUMS
    gh release create data-v1 data_release/*.npz data_release/*.json \
-     --repo AISMAsrl/fabel \
+     --repo hameddavodi/fabel \
      --title "fabel dataset assets v1" \
      --notes "Dataset arrays for fabel.datasets lazy loaders. See docs/dev/data-release.md."
    FABEL_RUN_NETWORK_TESTS=1 .venv/bin/pytest -m network tests/unit/test_datasets.py -v
@@ -55,7 +55,7 @@ Run from the repo root on the tagged commit (`git checkout v1.0.0`).
 
 ## Remaining work
 - **Cleanup wave (next):**
-  - Remove the AISMA references once the user names the new owner: `pyproject.toml` (authors, URLs), `README.md` (badges, links), `mkdocs.yml` (site_url, repo_url, repo_name, copyright), `CITATION.cff`, `docs/dev/data-release.md`, PROGRESS.md "Human steps", and `fabel.datasets._RELEASE_URL`.
+  - Done 2026-09-28: AISMA references replaced with the personal owner `hameddavodi` (author Hamed Davodi <hamed.davodi94@gmail.com>) in pyproject.toml, README.md, mkdocs.yml, CITATION.cff, LICENSE, docs/dev/data-release.md and fabel.datasets._RELEASE_URL.
   - Independent review of the enhancement-round code (7 builders).
   - Re-run GATE 5 on main, then move the local `v1.0.0` tag to the new release commit (it now points at a709e6e, before the enhancement round).
 - **Still missing compared with R fda (candidates, not yet audited one by one):** surprisal smoothing (`smooth.surp`, `eval.surp`), Winsorized regression (`lmWinsor`, `lmeWinsor`), `varmx.cca.fd`, `register.fd0`, the ramp and exponential scenarios of `CSTR2in` (any input can be passed as a callable today). Also check whether R `pca.fd` signs harmonics with the whitened rule sum(chol_upper(W + lambda R) b) > 0 that `pcaPACE` uses (FPCA uses the plain positive coefficient sum, measured on 18 harmonics).

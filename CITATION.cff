@@ -11,10 +11,11 @@ version: 1.0.0
 date-released: 2026-09-27
 license: BSD-3-Clause
 authors:
-  - name: "AISMA S.r.l."
-    email: hamed.davoodi@aisma.it
-repository-code: "https://github.com/AISMAsrl/fabel"
-url: "https://aismasrl.github.io/fabel"
+  - family-names: Davodi
+    given-names: Hamed
+    email: hamed.davodi94@gmail.com
+repository-code: "https://github.com/hameddavodi/fabel"
+url: "https://hameddavodi.github.io/fabel"
 keywords:
   - functional data analysis
   - fda

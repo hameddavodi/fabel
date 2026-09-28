@@ -31,7 +31,7 @@ place datasets live long-term.
 1. Confirm `data_release/*.npz` and `data_release/*.json` are up to date
    (re-run steps 1-2 above if `data_export/` changed).
 2. Create (or update) the GitHub release tagged **`data-v1`** on
-   `AISMAsrl/fabel`, either via the GitHub UI or:
+   `hameddavodi/fabel`, either via the GitHub UI or:
    ```
    gh release create data-v1 data_release/*.npz data_release/*.json \
      --title "fabel dataset assets v1" \
@@ -41,7 +41,7 @@ place datasets live long-term.
    `gh release upload data-v1 data_release/<name>.{npz,json} --clobber`
    for just the changed files.
 3. Verify `_download_file`'s URL template matches the uploaded asset names:
-   `https://github.com/AISMAsrl/fabel/releases/download/data-v1/<name>.<ext>`
+   `https://github.com/hameddavodi/fabel/releases/download/data-v1/<name>.<ext>`
    (`_RELEASE_URL` in `datasets.py`).
 4. Verify `_CHECKSUMS` in `datasets.py` matches the just-uploaded bytes exactly
    (re-run `build_data_release.py` and diff its printed table against

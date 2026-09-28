@@ -1,10 +1,10 @@
 # Fabel
 
-[![CI](https://github.com/AISMAsrl/fabel/actions/workflows/ci.yml/badge.svg)](https://github.com/AISMAsrl/fabel/actions/workflows/ci.yml)
+[![CI](https://github.com/hameddavodi/fabel/actions/workflows/ci.yml/badge.svg)](https://github.com/hameddavodi/fabel/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/fabel.svg)](https://pypi.org/project/fabel/)
 [![Python versions](https://img.shields.io/pypi/pyversions/fabel.svg)](https://pypi.org/project/fabel/)
-[![License: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://github.com/AISMAsrl/fabel/blob/main/LICENSE)
-[![Docs](https://img.shields.io/badge/docs-aismasrl.github.io%2Ffabel-blue.svg)](https://aismasrl.github.io/fabel)
+[![License: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://github.com/hameddavodi/fabel/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-hameddavodi.github.io%2Ffabel-blue.svg)](https://hameddavodi.github.io/fabel)
 
 **Functional data analysis for Python.** Fabel is a clean-room Python rewrite of
 R's [`fda`](https://cran.r-project.org/package=fda) package (Ramsay, Hooker &
@@ -13,7 +13,7 @@ functional regression, curve registration and principal differential analysis.
 
 - **Same numbers as R.** Every public function is tested against golden output
   from R `fda` 6.3.0 at `rtol = 1e-8` (`1e-5` for iterative fits). See the
-  [parity report](https://github.com/AISMAsrl/fabel/blob/main/PARITY_REPORT.md).
+  [parity report](https://github.com/hameddavodi/fabel/blob/main/PARITY_REPORT.md).
 - **About 40 symbols instead of 515 functions.** Curves are callable (`fd(t)`),
   arithmetic is plain Python (`fd1 + fd2`, `fd1 @ fd2`), and there is one
   `smooth()`, one `register()`, one `.plot()`.
@@ -45,18 +45,18 @@ print(fb.inprod(girls[0], girls[0]))                 # L2 inner product of one c
 ```
 
 Next steps: penalised smoothing with automatic λ (`smooth`), functional PCA
-(`FPCA`) and more in the [quickstart guide](https://aismasrl.github.io/fabel/quickstart/).
-Coming from R? The [migration table](https://aismasrl.github.io/fabel/r-migration/)
+(`FPCA`) and more in the [quickstart guide](https://hameddavodi.github.io/fabel/quickstart/).
+Coming from R? The [migration table](https://hameddavodi.github.io/fabel/r-migration/)
 maps every `fda` function to its Fabel equivalent.
 
 ## Documentation
 
-Full documentation, API reference and tutorials: <https://aismasrl.github.io/fabel>.
+Full documentation, API reference and tutorials: <https://hameddavodi.github.io/fabel>.
 
 ## Citing
 
 If you use Fabel in published work, please cite it together with Ramsay &
-Silverman (2005); see [`CITATION.cff`](https://github.com/AISMAsrl/fabel/blob/main/CITATION.cff).
+Silverman (2005); see [`CITATION.cff`](https://github.com/hameddavodi/fabel/blob/main/CITATION.cff).
 
 ## License
 
