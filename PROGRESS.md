@@ -55,7 +55,7 @@ Run from the repo root on the tagged commit (`git checkout v1.0.0`).
 
 ## Remaining work
 - **Cleanup wave (next):**
-  - Replace the placeholder owner references once the user names the new owner: `pyproject.toml` (authors, URLs), `README.md` (badges, links), `mkdocs.yml` (site_url, repo_url, repo_name, copyright), `CITATION.cff`, `docs/dev/data-release.md`, PROGRESS.md "Human steps", and `fabel.datasets._RELEASE_URL`.
+  - Done 2026-09-28: ownership set to the personal owner `hameddavodi` (author Hamed Davodi <hamed.davodi94@gmail.com>) in pyproject.toml, README.md, mkdocs.yml, CITATION.cff, LICENSE, docs/dev/data-release.md and fabel.datasets._RELEASE_URL.
   - Independent review of the enhancement-round code (7 builders).
   - Re-run GATE 5 on main, then move the local `v1.0.0` tag to the new release commit (it now points at a709e6e, before the enhancement round).
 - **Still missing compared with R fda (candidates, not yet audited one by one):** surprisal smoothing (`smooth.surp`, `eval.surp`), Winsorized regression (`lmWinsor`, `lmeWinsor`), `varmx.cca.fd`, `register.fd0`, the ramp and exponential scenarios of `CSTR2in` (any input can be passed as a callable today). Also check whether R `pca.fd` signs harmonics with the whitened rule sum(chol_upper(W + lambda R) b) > 0 that `pcaPACE` uses (FPCA uses the plain positive coefficient sum, measured on 18 harmonics).
