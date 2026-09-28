@@ -19,6 +19,10 @@ Constrained fits reuse the same penalty on a latent function ``W``:
 ``constraint="positive"`` fits ``x = exp W``, ``constraint="monotone"`` fits
 ``x(t) = β₀ + β₁ ∫ₐᵗ exp W(u) du``, and ``constraint="morph"`` is the monotone
 fit with ``β`` pinned so that the fitted curve maps the domain onto itself.
+Their derivatives of any order are exact: with ``w_j = D^j W``, Faà di Bruno's
+formula gives ``Dⁿ exp W = exp(W) Bₙ(w_1, …, w_n)`` for the complete Bell
+polynomial ``Bₙ`` (``B₀ = 1``, ``B_{n+1} = Σ_{i=0}^{n} C(n, i) B_{n-i} w_{i+1}``),
+and ``Dⁿ x = β₁ D^{n-1} exp W`` for a monotone fit.
 
 Examples
 --------
@@ -36,7 +40,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from math import inf, isfinite, sqrt
+from math import comb, inf, isfinite, sqrt
 from types import ModuleType
 from typing import Any
 
@@ -105,8 +109,9 @@ class SmoothResult:
     ----------
     fd : FData
         The fitted curves.  For a constrained fit this holds the *latent*
-        function ``W``; call the result itself (``result(t)``) to evaluate the
-        constrained curve ``exp W`` or ``β₀ + β₁ ∫ exp W``.
+        function ``W``; call the result itself (``result(t, deriv)``) to
+        evaluate the constrained curve ``exp W`` or ``β₀ + β₁ ∫ exp W`` and
+        its derivatives of any order.
     df : float
         Equivalent degrees of freedom, ``tr H``.  For a constrained fit this is
         the trace of the hat matrix of the final Gauss-Newton linearisation, and
@@ -154,15 +159,21 @@ class SmoothResult:
     constraint: str | None = None
 
     def __call__(self, t: Any, deriv: int = 0) -> Array:
-        """Evaluate the fitted curves, honouring the constraint.
+        """Evaluate the fitted curves or one of their derivatives.
+
+        For a constrained fit the derivatives are exact to rounding error, for
+        any order: ``Dⁿ exp W = exp(W) Bₙ(DW, …, DⁿW)`` with the complete Bell
+        polynomial ``Bₙ`` (Faà di Bruno's formula), and a monotone curve has
+        ``Dⁿ x = β₁ D^{n-1} exp W`` for ``n >= 1``.  The value itself
+        (``deriv=0``) of a monotone curve is ``β₀ + β₁ ∫ₐᵗ exp W``, integrated by
+        Gauss-Legendre quadrature between the basis break points.
 
         Parameters
         ----------
         t : array
             Points at which to evaluate.
         deriv : int, optional
-            Derivative order.  Only ``0`` and ``1`` are supported for a
-            constrained fit.
+            Derivative order, ``0`` (the default) or more.
 
         Returns
         -------
@@ -172,26 +183,54 @@ class SmoothResult:
         Raises
         ------
         ValueError
-            If ``deriv`` exceeds ``1`` for a constrained fit.
+            If ``deriv`` is negative, or a monotone fit carries no ``beta``.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from fabel.smoothing import smooth
+        >>> t = np.linspace(0.0, 1.0, 40)
+        >>> fit = smooth(np.exp(2 * t), t, constraint="positive", lam=1e-8)
+        >>> np.round(fit(np.array([0.5]), 3)[:, 0] / np.exp(1.0), 2)  # D³ e^{2t} = 8 e^{2t}
+        array([8.])
         """
         if self.constraint is None:
             return self.fd(t, deriv)
-        if deriv > 1:
-            raise ValueError(f"constrained fits support deriv 0 or 1, got {deriv}")
+        if deriv < 0:
+            raise ValueError(f"deriv must be non-negative, got {deriv}")
         xp = array_namespace(self.fd.coefs)
         points = asarray(t, xp)
-        latent = xp.exp(self.fd(points))
         if self.constraint == "positive":
-            return latent * self.fd(points, 1) if deriv else latent
-        values, _ = _cumulative_exp(self.fd.basis, self.fd.coefs, points, derivative=False)
+            return _exp_derivative(self.fd, points, deriv, xp)
         if self.beta is None:
             raise ValueError("a monotone fit must carry its beta coefficients")
         beta: Array = self.beta
         if deriv:
-            return _broadcast_curve(latent, beta[1], xp)
+            return _broadcast_curve(_exp_derivative(self.fd, points, deriv - 1, xp), beta[1], xp)
+        values, _ = _cumulative_exp(self.fd.basis, self.fd.coefs, points, derivative=False)
         return _broadcast_curve(values, beta[1], xp) + _broadcast_curve(
             xp.ones_like(values), beta[0], xp
         )
+
+
+def _exp_derivative(latent: FData, points: Array, order: int, xp: ModuleType) -> Array:
+    """Return ``Dⁿ exp W`` at ``points`` for ``n = order``, exactly.
+
+    Faà di Bruno's formula for the exponential: ``Dⁿ exp W = exp(W) Bₙ`` where
+    the complete Bell polynomials in ``w_j = D^j W`` satisfy ``B₀ = 1`` and
+    ``B_{k+1} = Σ_{i=0}^{k} C(k, i) B_{k-i} w_{i+1}``.
+    """
+    values = xp.exp(latent(points))
+    if order == 0:
+        return values
+    slopes = [latent(points, j) for j in range(1, order + 1)]
+    bell = [xp.ones_like(values)]
+    for k in range(order):
+        total = xp.zeros_like(values)
+        for i in range(k + 1):
+            total = total + comb(k, i) * bell[k - i] * slopes[i]
+        bell.append(total)
+    return values * bell[order]
 
 
 # --------------------------------------------------------------------------- #
