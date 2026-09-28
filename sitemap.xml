@@ -1,115 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://hameddavodi.github.io/fabel/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/quickstart/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/quickstart/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/r-migration/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/r-migration/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/basis/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/basis/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/core/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/core/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/datasets/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/datasets/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/decomposition/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/decomposition/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/density/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/density/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/dynamics/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/dynamics/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/io/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/io/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/nn/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/nn/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/profiling/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/profiling/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/registration/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/registration/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/regression/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/regression/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/smoothing/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/smoothing/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/sparse/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/sparse/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/api/stats/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/api/stats/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/dev/conventions/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/dev/conventions/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/dev/data-release/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/dev/data-release/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/dev/reviews/phase1-review/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/dev/reviews/phase1-review/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/tutorials/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/tutorials/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/tutorials/dynamics/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/tutorials/dynamics/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/tutorials/fpca/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/tutorials/fpca/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/tutorials/machine-learning/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/tutorials/machine-learning/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/tutorials/registration/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/tutorials/registration/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/tutorials/regression/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/tutorials/regression/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://hameddavodi.github.io/fabel/tutorials/smoothing/</loc>
+         <loc>https://hameddavodi.github.io/fdatools/tutorials/smoothing/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
 </urlset>
