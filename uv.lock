@@ -1283,12 +1283,14 @@ dev = [
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-cov" },
-    { name = "rpy2" },
     { name = "ruff" },
     { name = "scipy-stubs", version = "1.15.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scipy-stubs", version = "1.17.1.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "scipy-stubs", version = "1.18.1.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "twine" },
+]
+golden = [
+    { name = "rpy2" },
 ]
 io = [
     { name = "rdata", version = "0.11.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -1329,7 +1331,7 @@ requires-dist = [
     { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "rdata", marker = "extra == 'io'", specifier = ">=0.11" },
-    { name = "rpy2", marker = "extra == 'dev'", specifier = ">=3.5" },
+    { name = "rpy2", marker = "extra == 'golden'", specifier = ">=3.5" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "scikit-learn", specifier = ">=1.4" },
     { name = "scipy", specifier = ">=1.14" },
@@ -1338,7 +1340,7 @@ requires-dist = [
     { name = "twine", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "xarray", marker = "extra == 'pandas'", specifier = ">=2024.1" },
 ]
-provides-extras = ["torch", "pandas", "plot", "io", "dev"]
+provides-extras = ["torch", "pandas", "plot", "io", "golden", "dev"]
 
 [[package]]
 name = "fastjsonschema"
