@@ -306,8 +306,7 @@ def read_rds(path: Any) -> Basis | FData | BiFData:
         import rdata
     except ImportError as exc:  # pragma: no cover - exercised only without the extra
         raise ImportError(
-            "read_rds requires the 'rdata' package; install the io extra: "
-            'uv add "fdatools[io]"'
+            "read_rds requires the 'rdata' package; install the io extra: uv add \"fdatools[io]\""
         ) from exc
 
     from rdata.conversion import DEFAULT_CLASS_MAP
