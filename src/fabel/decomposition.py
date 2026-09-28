@@ -107,7 +107,9 @@ def _positive_int(value: object) -> int:
     NumPy, whose ``__index__`` raises) and floats -- even integral ones such
     as ``2.0`` -- are rejected.
     """
-    if isinstance(value, bool):
+    # NumPy bools (type name ``bool`` / ``bool_``) are caught by name: NumPy < 2.3
+    # warns instead of raising when one is passed to ``operator.index``.
+    if isinstance(value, bool) or type(value).__name__ in {"bool", "bool_"}:
         raise ValueError(f"n must be a positive integer, got {value!r}")
     try:
         index = operator.index(value)  # type: ignore[arg-type]
