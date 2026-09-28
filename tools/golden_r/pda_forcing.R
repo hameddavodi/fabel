@@ -211,7 +211,7 @@ forced_order2_case <- function() {
 
 # ---- (6) help example 6: two forced first-order equations ---------------
 # The help page gives beta_22 a monomial (linear) basis; here every weight is
-# constant, because Fabel's PDA takes one weight basis per derivative order,
+# constant, because fdatools' PDA takes one weight basis per derivative order,
 # shared by all variables and equations.
 
 forced_system_case <- function() {

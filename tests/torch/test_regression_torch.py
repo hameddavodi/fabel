@@ -1,7 +1,7 @@
-"""Torch backend behaviour of :mod:`fabel.regression`.
+"""Torch backend behaviour of :mod:`fdatools.regression`.
 
-A PyTorch tensor among the inputs of :func:`~fabel.regression.fregress` or
-:func:`~fabel.regression.linmod` (response, covariates or weights) makes the
+A PyTorch tensor among the inputs of :func:`~fdatools.regression.fregress` or
+:func:`~fdatools.regression.linmod` (response, covariates or weights) makes the
 whole fit run in PyTorch: the coefficients, fitted values and predictions are
 tensors equal to the NumPy results, and gradients reach the inputs.
 """
@@ -14,8 +14,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import LDO, BSpline, FData, Fourier
-from fabel.regression import FRegressResult, fregress, linmod
+from fdatools import LDO, BSpline, FData, Fourier
+from fdatools.regression import FRegressResult, fregress, linmod
 
 torch = pytest.importorskip("torch", reason="torch extra not installed")
 

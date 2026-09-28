@@ -10,17 +10,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 
-growth = fb.datasets.load_growth()
-weather = fb.datasets.load_canadian_weather()
+growth = fdt.datasets.load_growth()
+weather = fdt.datasets.load_canadian_weather()
 age = growth.age
 hgtf = growth.hgtf
 day5 = weather.t - 0.5  # the book's day.5: mid-day points 0.5, ..., 364.5
-harmonic = fb.LDO.harmonic(period=365.0)
-daybasis = fb.Fourier(domain=(0.0, 365.0), n_basis=365)
+harmonic = fdt.LDO.harmonic(period=365.0)
+daybasis = fdt.Fourier(domain=(0.0, 365.0), n_basis=365)
 
 # %% [markdown]
 # ### Figure 5.1
@@ -29,11 +29,11 @@ daybasis = fb.Fourier(domain=(0.0, 365.0), n_basis=365)
 # criterion is summed over girls.
 
 # %%
-growthbasis = fb.BSpline(domain=(1.0, 18.0), order=6, breaks=age)
+growthbasis = fdt.BSpline(domain=(1.0, 18.0), order=6, breaks=age)
 loglam = np.arange(-6.0, 0.01, 0.25)
 gcvsave = np.array(
     [
-        float(np.sum(fb.smooth(hgtf, age, basis=growthbasis, lam=10.0**ll, penalty=4).gcv))
+        float(np.sum(fdt.smooth(hgtf, age, basis=growthbasis, lam=10.0**ll, penalty=4).gcv))
         for ll in loglam
     ]
 )
@@ -54,7 +54,7 @@ fig
 # derivative rough); the heavy dashed line is the mean acceleration of all 54 girls.
 
 # %%
-growthfit = fb.smooth(hgtf, age, basis=growthbasis, lam=0.1, penalty=4)
+growthfit = fdt.smooth(hgtf, age, basis=growthbasis, lam=0.1, penalty=4)
 print(f"growth: lambda = 0.1, df = {growthfit.df:.2f}")
 agefine = np.linspace(1.0, 18.0, 401)
 accel = np.asarray(growthfit.fd(agefine, deriv=2))
@@ -79,12 +79,12 @@ fig
 logprec = weather.log10precip
 precgcv = np.array(
     [
-        float(np.sum(fb.smooth(logprec, day5, basis=daybasis, lam=10.0**ll, penalty=harmonic).gcv))
+        float(np.sum(fdt.smooth(logprec, day5, basis=daybasis, lam=10.0**ll, penalty=harmonic).gcv))
         for ll in range(4, 10)
     ]
 )
 prec_lam = 10.0 ** (4 + int(np.argmin(precgcv)))
-logprecfit = fb.smooth(logprec, day5, basis=daybasis, lam=prec_lam, penalty=harmonic)
+logprecfit = fdt.smooth(logprec, day5, basis=daybasis, lam=prec_lam, penalty=harmonic)
 print(f"log precipitation: lambda = {prec_lam:.0e}, df = {logprecfit.df:.2f}")
 
 fig, ax = plt.subplots(figsize=(7, 4))
@@ -102,7 +102,7 @@ fig
 # %%
 vancouver = weather.stations.index("Vancouver")
 vanprec = weather.precip[:, vancouver]
-vanfit = fb.smooth(vanprec, day5, basis=daybasis, lam=1e4, penalty=harmonic, constraint="positive")
+vanfit = fdt.smooth(vanprec, day5, basis=daybasis, lam=1e4, penalty=harmonic, constraint="positive")
 print(f"Vancouver positive smooth: lambda = 1e4, df = {vanfit.df:.2f}")
 dayfine = np.linspace(0.0, 365.0, 731)
 
@@ -121,9 +121,9 @@ fig
 # x(t) = b0 + b1 int exp W (order-6 B-splines, knots at every day, D^3 penalty on W).
 
 # %%
-infant = fb.datasets.load_infant_growth()
-tibiabasis = fb.BSpline(domain=(1.0, 40.0), order=6, breaks=infant.day)
-tibiafit = fb.smooth(
+infant = fdt.datasets.load_infant_growth()
+tibiabasis = fdt.BSpline(domain=(1.0, 40.0), order=6, breaks=infant.day)
+tibiafit = fdt.smooth(
     infant.tibia_length,
     infant.day,
     basis=tibiabasis,
@@ -161,7 +161,7 @@ fig
 # heights can never decrease.
 
 # %%
-girlsfit = fb.smooth(
+girlsfit = fdt.smooth(
     hgtf[:, :10], age, basis=growthbasis, lam=1e-1, penalty=3, constraint="monotone"
 )
 velocity = np.asarray(girlsfit(agefine, deriv=1))
@@ -176,13 +176,13 @@ fig
 # %% [markdown]
 # ### Figure 5.8
 # Estimated density of June daily precipitation in Regina (days with 2 to 45 mm),
-# p(x) = exp W(x) / int exp W. Fabel's smooth() has no density constraint, so the
+# p(x) = exp W(x) / int exp W. fdatools' smooth() has no density constraint, so the
 # penalised log-likelihood is maximised here from the public Basis primitives.
 
 # %%
-regina = fb.datasets.load_regina_precip().value
+regina = fdt.datasets.load_regina_precip().value
 rain = np.sort(regina[(regina > 2.0) & (regina <= 45.0)])
-densbasis = fb.BSpline(domain=(2.0, 45.0), n_basis=13)
+densbasis = fdt.BSpline(domain=(2.0, 45.0), n_basis=13)
 densgrid = np.linspace(2.0, 45.0, 861)
 phi_data = np.asarray(densbasis(rain))
 phi_grid = np.asarray(densbasis(densgrid))

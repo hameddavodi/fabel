@@ -1,4 +1,4 @@
-"""Unit tests for ``fabel.profiling`` (generalized profiling of ODE parameters)."""
+"""Unit tests for ``fdatools.profiling`` (generalized profiling of ODE parameters)."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-import fabel as fb
-from fabel.profiling import (
+import fdatools as fdt
+from fdatools.profiling import (
     CSTR_CONDITIONS,
     CSTR_PARAMETERS,
     InnerFit,
@@ -41,8 +41,8 @@ def fhn_data() -> tuple[np.ndarray, np.ndarray]:
 
 
 @pytest.fixture(scope="module")
-def fhn_basis() -> fb.BSpline:
-    return fb.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201).tolist())
+def fhn_basis() -> fdt.BSpline:
+    return fdt.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201).tolist())
 
 
 # --------------------------------------------------------------------- model
@@ -154,11 +154,11 @@ def test_from_torch_matches_analytic() -> None:
     assert auto.state_names == ("V", "R")
 
 
-def test_import_fabel_profiling_does_not_import_torch() -> None:
+def test_import_fdatools_profiling_does_not_import_torch() -> None:
     import subprocess
     import sys
 
-    code = "import sys, fabel.profiling; print('torch' in sys.modules)"
+    code = "import sys, fdatools.profiling; print('torch' in sys.modules)"
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
     assert out.stdout.strip() == "False"
 
@@ -252,7 +252,7 @@ def test_simpson_is_exact_for_cubics(edges: list[float], half: int, coefs: list[
 
 def test_problem_input_forms_agree(fhn_data: Any) -> None:
     t, x = fhn_data
-    basis = fb.BSpline(domain=(0.0, 20.0), n_basis=30)
+    basis = fdt.BSpline(domain=(0.0, 20.0), n_basis=30)
     y = x.copy()
     y[::3, 1] = np.nan
     a = ProfiledODE(fitzhugh_nagumo_model(), t, y, basis, lam=10.0)
@@ -270,13 +270,13 @@ def test_problem_input_forms_agree(fhn_data: Any) -> None:
 def test_problem_validation(fhn_data: Any) -> None:
     t, x = fhn_data
     fhn = fitzhugh_nagumo_model()
-    b = fb.BSpline(domain=(0.0, 20.0), n_basis=10)
+    b = fdt.BSpline(domain=(0.0, 20.0), n_basis=10)
     with pytest.raises(ValueError, match="one entry per state"):
         ProfiledODE(fhn, t, x, [b])
     with pytest.raises(ValueError, match="Basis objects"):
         ProfiledODE(fhn, t, x, [b, "b"])  # type: ignore[list-item]
     with pytest.raises(ValueError, match="share one domain"):
-        ProfiledODE(fhn, t, x, [b, fb.BSpline(domain=(0.0, 21.0), n_basis=10)])
+        ProfiledODE(fhn, t, x, [b, fdt.BSpline(domain=(0.0, 21.0), n_basis=10)])
     with pytest.raises(ValueError, match="lam must be"):
         ProfiledODE(fhn, t, x, b, lam=-1.0)
     with pytest.raises(ValueError, match="state_weights must be"):
@@ -306,13 +306,13 @@ def test_problem_validation(fhn_data: Any) -> None:
 
 def test_one_dimensional_y_for_one_state() -> None:
     t = np.linspace(0, 1, 11)
-    p = ProfiledODE(decay_model(), t, np.exp(-t), fb.BSpline(n_basis=6))
+    p = ProfiledODE(decay_model(), t, np.exp(-t), fdt.BSpline(n_basis=6))
     assert p.n_obs == 11
 
 
 def test_non_spline_basis_uses_even_panels() -> None:
     t = np.linspace(0, 1, 11)
-    p = ProfiledODE(decay_model(), t, np.exp(-t)[:, None], fb.Monomial(n_basis=4))
+    p = ProfiledODE(decay_model(), t, np.exp(-t)[:, None], fdt.Monomial(n_basis=4))
     assert p.nodes.shape == (4 * 4 * 5,)
     assert float(p.weights.sum()) == pytest.approx(1.0)
 
@@ -324,7 +324,7 @@ def test_custom_quadrature() -> None:
         decay_model(),
         t,
         np.exp(-t)[:, None],
-        fb.BSpline(n_basis=8),
+        fdt.BSpline(n_basis=8),
         lam=1e2,
         quadrature=((nodes + 1) / 2, weights / 2),
     )
@@ -337,7 +337,7 @@ def test_linear_ode_inner_fit_is_exact_smoother() -> None:
     """For f = 0 the inner problem is a penalised least-squares smoother."""
     t = np.linspace(0, 1, 15)
     y = np.sin(3 * t)
-    basis = fb.BSpline(n_basis=9)
+    basis = fdt.BSpline(n_basis=9)
     zero = ODEModel(lambda x, t, th: 0.0 * x, 1, 1)
     p = ProfiledODE(zero, t, y[:, None], basis, lam=0.01)
     inner = p.fit_states([0.0])
@@ -416,7 +416,7 @@ def test_cstr_recovery_from_temperature_only() -> None:
     rng = np.random.default_rng(11)
     y = x + rng.standard_normal(x.shape) * [0.02, 0.5]
     y[:, 0] = np.nan
-    basis = fb.BSpline(domain=(0.0, 24.0), breaks=np.arange(0.0, 24.001, 0.5).tolist())
+    basis = fdt.BSpline(domain=(0.0, 24.0), breaks=np.arange(0.0, 24.001, 0.5).tolist())
     wt = [0.02, float(np.nanvar(y[:, 1]))]
     fit = profile_ode(
         cstr_model("all.cool.step", estimate=("kref", "EoverR")),
@@ -433,14 +433,14 @@ def test_cstr_recovery_from_temperature_only() -> None:
 
 
 def test_fit_needs_more_observations_than_parameters() -> None:
-    p = ProfiledODE(decay_model(), [0.0], [[1.0]], fb.BSpline(n_basis=4))
+    p = ProfiledODE(decay_model(), [0.0], [[1.0]], fdt.BSpline(n_basis=4))
     with pytest.raises(ValueError, match="more observations"):
         p.fit([1.0])
 
 
 def test_exact_data_converges_by_offset() -> None:
     t = np.linspace(0.0, 1.0, 21)
-    basis = fb.BSpline(domain=(0.0, 1.0), breaks=np.linspace(0.0, 1.0, 11).tolist())
+    basis = fdt.BSpline(domain=(0.0, 1.0), breaks=np.linspace(0.0, 1.0, 11).tolist())
     p = ProfiledODE(decay_model(), t, (2 * np.exp(-0.7 * t))[:, None], basis, lam=1e4)
     fit = p.fit([0.2], coef0=np.zeros(p.n_coefs))
     assert fit.converged

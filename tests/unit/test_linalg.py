@@ -1,4 +1,4 @@
-"""Unit tests for fabel._linalg (banded solvers, quadrature, Gram cache)."""
+"""Unit tests for fdatools._linalg (banded solvers, quadrature, Gram cache)."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from fabel import _linalg as la
-from fabel._backend import to_numpy
+from fdatools import _linalg as la
+from fdatools._backend import to_numpy
 
 torch = pytest.importorskip("torch", reason="torch extra not installed")
 

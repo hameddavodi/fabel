@@ -137,9 +137,9 @@ def test_symbol_status_branches() -> None:
     assert pr.symbol_status(bs, [_node("xfail")], 1) == "all 1 checks xfail (R defect)"
     assert pr.symbol_status(bs, [], 4) == "golden cases exist, no parity test yet"
     assert pr.symbol_status(bs, [], 0) == "no golden cases"
-    ghost = pr.Symbol("ghost", "fabel.no_such_module", "X", "none")
+    ghost = pr.Symbol("ghost", "fdatools.no_such_module", "X", "none")
     assert pr.symbol_status(ghost, [], 3) == "not built on this branch"
-    missing_attr = pr.Symbol("ghost", "fabel.core", "NoSuchThing", "none")
+    missing_attr = pr.Symbol("ghost", "fdatools.core", "NoSuchThing", "none")
     assert not pr.available(missing_attr)
 
 

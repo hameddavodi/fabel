@@ -1,6 +1,6 @@
 """Functional data objects: :class:`FData`, :class:`BiFData` and :func:`inprod`.
 
-An :class:`FData` pairs a coefficient array with a :class:`~fabel.basis.Basis`;
+An :class:`FData` pairs a coefficient array with a :class:`~fdatools.basis.Basis`;
 everything else -- evaluation, derivatives, statistics, arithmetic and inner
 products -- follows from that pair.  All operations stay inside the array
 namespace of their inputs, so NumPy arrays give NumPy results and PyTorch
@@ -14,11 +14,17 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 
-from fabel import _linalg
-from fabel._backend import array_namespace, asarray, default_namespace, result_namespace, to_numpy
-from fabel._operator import LDO
-from fabel._plot import PlotMixin
-from fabel.basis import Basis, BSpline, Constant, _same_domain
+from fdatools import _linalg
+from fdatools._backend import (
+    array_namespace,
+    asarray,
+    default_namespace,
+    result_namespace,
+    to_numpy,
+)
+from fdatools._operator import LDO
+from fdatools._plot import PlotMixin
+from fdatools.basis import Basis, BSpline, Constant, _same_domain
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import numpy as np
@@ -190,8 +196,8 @@ class FData(PlotMixin):
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> fd = fb.FData(np.eye(5), fb.BSpline(domain=(0.0, 1.0), n_basis=5))
+    >>> import fdatools as fdt
+    >>> fd = fdt.FData(np.eye(5), fdt.BSpline(domain=(0.0, 1.0), n_basis=5))
     >>> fd.n_curves
     5
     >>> fd(np.array([0.0, 1.0])).shape
@@ -228,8 +234,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fb.FData(np.ones((4, 3)), fb.BSpline(n_basis=4)).n_curves
+        >>> import fdatools as fdt
+        >>> fdt.FData(np.ones((4, 3)), fdt.BSpline(n_basis=4)).n_curves
         3
         """
         return int(self.coefs.shape[1])
@@ -246,8 +252,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fb.FData(np.ones((4, 3, 2)), fb.BSpline(n_basis=4)).n_vars
+        >>> import fdatools as fdt
+        >>> fdt.FData(np.ones((4, 3, 2)), fdt.BSpline(n_basis=4)).n_vars
         2
         """
         return int(self.coefs.shape[2]) if len(self.coefs.shape) == 3 else 1
@@ -264,8 +270,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fb.FData(np.ones((4, 1)), fb.BSpline(domain=(0.0, 2.0), n_basis=4)).domain
+        >>> import fdatools as fdt
+        >>> fdt.FData(np.ones((4, 1)), fdt.BSpline(domain=(0.0, 2.0), n_basis=4)).domain
         (0.0, 2.0)
         """
         return self.basis.domain
@@ -309,8 +315,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.eye(4), fb.BSpline(n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.eye(4), fdt.BSpline(n_basis=4))
         >>> len(fd[1:3])
         2
         >>> len(fd[-1])
@@ -354,8 +360,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.ones((4, 1)), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.ones((4, 1)), fdt.BSpline(domain=(0.0, 1.0), n_basis=4))
         >>> float(fd(np.array([0.5]))[0, 0])
         1.0
         """
@@ -382,8 +388,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.ones((4, 1)), fb.BSpline(n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.ones((4, 1)), fdt.BSpline(n_basis=4))
         >>> fd.to_numpy(np.array([0.5])).shape
         (1, 1)
         """
@@ -411,8 +417,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.ones((4, 1)), fb.BSpline(n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.ones((4, 1)), fdt.BSpline(n_basis=4))
         >>> fd.to_torch(np.array([0.5])).shape  # doctest: +SKIP
         torch.Size([1, 1])
         """
@@ -449,8 +455,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.arange(6.0), fb.BSpline(domain=(0.0, 1.0), n_basis=6))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.arange(6.0), fdt.BSpline(domain=(0.0, 1.0), n_basis=6))
         >>> fd.derivative().basis.order
         3
         """
@@ -476,8 +482,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fb.FData(np.eye(4), fb.BSpline(n_basis=4)).mean().n_curves
+        >>> import fdatools as fdt
+        >>> fdt.FData(np.eye(4), fdt.BSpline(n_basis=4)).mean().n_curves
         1
         """
         xp = array_namespace(self.coefs)
@@ -494,8 +500,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.eye(4), fb.BSpline(n_basis=4)).center()
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.eye(4), fdt.BSpline(n_basis=4)).center()
         >>> bool(abs(float(fd.coefs.sum())) < 1e-12)
         True
         """
@@ -524,8 +530,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fb.FData(np.eye(4), fb.BSpline(n_basis=4)).std().n_curves
+        >>> import fdatools as fdt
+        >>> fdt.FData(np.eye(4), fdt.BSpline(n_basis=4)).std().n_curves
         1
         """
         if self.n_curves < 2:
@@ -564,8 +570,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fb.FData(np.eye(4), fb.BSpline(n_basis=4)).cov().coefs.shape
+        >>> import fdatools as fdt
+        >>> fdt.FData(np.eye(4), fdt.BSpline(n_basis=4)).cov().coefs.shape
         (4, 4)
         """
         if self.n_curves < 2:
@@ -702,8 +708,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.ones((4, 1)), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.ones((4, 1)), fdt.BSpline(domain=(0.0, 1.0), n_basis=4))
         >>> round(float((fd**2)(np.array([0.5]))[0, 0]), 10)
         1.0
         """
@@ -740,8 +746,8 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.eye(4), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.eye(4), fdt.BSpline(domain=(0.0, 1.0), n_basis=4))
         >>> (fd @ fd).shape
         (4, 4)
         """
@@ -750,7 +756,7 @@ class FData(PlotMixin):
     def to_pandas(self, t: Any) -> Any:
         """Evaluate on ``t`` and return a long-format :class:`pandas.DataFrame`.
 
-        Thin delegation to :func:`fabel.io.to_pandas`; requires the ``pandas``
+        Thin delegation to :func:`fdatools.io.to_pandas`; requires the ``pandas``
         extra.
 
         Parameters
@@ -766,19 +772,19 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.eye(4), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.eye(4), fdt.BSpline(domain=(0.0, 1.0), n_basis=4))
         >>> list(fd.to_pandas(np.array([0.0, 1.0])).columns)
         ['t', 'curve', 'value']
         """
-        from fabel.io import to_pandas as _to_pandas
+        from fdatools.io import to_pandas as _to_pandas
 
         return _to_pandas(self, t)
 
     def to_xarray(self, t: Any) -> Any:
         """Evaluate on ``t`` and return an :class:`xarray.DataArray`.
 
-        Thin delegation to :func:`fabel.io.to_xarray`; requires the ``pandas``
+        Thin delegation to :func:`fdatools.io.to_xarray`; requires the ``pandas``
         extra (which pulls in ``xarray``).
 
         Parameters
@@ -795,12 +801,12 @@ class FData(PlotMixin):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.eye(4), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.eye(4), fdt.BSpline(domain=(0.0, 1.0), n_basis=4))
         >>> fd.to_xarray(np.array([0.0, 1.0])).dims
         ('t', 'curve')
         """
-        from fabel.io import to_xarray as _to_xarray
+        from fdatools.io import to_xarray as _to_xarray
 
         return _to_xarray(self, t)
 
@@ -813,7 +819,7 @@ def inprod(
 ) -> Array:
     """Return the matrix of inner products ``integral (lfd1 x_i)(lfd2 y_j) dt``.
 
-    Replaces R's ``inprod`` and ``inprod.bspline``.  A :class:`~fabel.basis.Basis`
+    Replaces R's ``inprod`` and ``inprod.bspline``.  A :class:`~fdatools.basis.Basis`
     may be passed in place of an :class:`FData`, in which case its basis
     functions play the role of the curves.
 
@@ -837,9 +843,9 @@ def inprod(
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> b = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
-    >>> fb.inprod(b, b).shape
+    >>> import fdatools as fdt
+    >>> b = fdt.BSpline(domain=(0.0, 1.0), n_basis=5)
+    >>> fdt.inprod(b, b).shape
     (5, 5)
     """
     left = first.basis if isinstance(first, FData) else first
@@ -886,9 +892,9 @@ class BiFData:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> b = fb.BSpline(domain=(0.0, 1.0), n_basis=4)
-    >>> bifd = fb.BiFData(np.eye(4), b, b)
+    >>> import fdatools as fdt
+    >>> b = fdt.BSpline(domain=(0.0, 1.0), n_basis=4)
+    >>> bifd = fdt.BiFData(np.eye(4), b, b)
     >>> bifd(np.array([0.0, 1.0]), np.array([0.0, 0.5, 1.0])).shape
     (2, 3)
     """
@@ -920,9 +926,9 @@ class BiFData:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> b = fb.BSpline(domain=(0.0, 1.0), n_basis=4)
-        >>> fb.BiFData(np.eye(4), b, b).domain
+        >>> import fdatools as fdt
+        >>> b = fdt.BSpline(domain=(0.0, 1.0), n_basis=4)
+        >>> fdt.BiFData(np.eye(4), b, b).domain
         ((0.0, 1.0), (0.0, 1.0))
         """
         return self.sbasis.domain, self.tbasis.domain
@@ -953,9 +959,9 @@ class BiFData:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> b = fb.BSpline(domain=(0.0, 1.0), n_basis=4)
-        >>> fb.BiFData(np.eye(4), b, b)(np.array([0.5]), np.array([0.5])).shape
+        >>> import fdatools as fdt
+        >>> b = fdt.BSpline(domain=(0.0, 1.0), n_basis=4)
+        >>> fdt.BiFData(np.eye(4), b, b)(np.array([0.5]), np.array([0.5])).shape
         (1, 1)
         """
         xp = result_namespace(s, t, self.coefs)
@@ -983,9 +989,9 @@ class BiFData:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> b = fb.BSpline(domain=(0.0, 1.0), n_basis=4)
-        >>> fb.BiFData(np.eye(4), b, b).transpose().coefs.shape
+        >>> import fdatools as fdt
+        >>> b = fdt.BSpline(domain=(0.0, 1.0), n_basis=4)
+        >>> fdt.BiFData(np.eye(4), b, b).transpose().coefs.shape
         (4, 4)
         """
         xp = array_namespace(self.coefs)

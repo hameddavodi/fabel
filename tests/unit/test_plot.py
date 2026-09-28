@@ -13,12 +13,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from fabel import BSpline, FData, Fourier
-from fabel._plot import zerofind
-from fabel.decomposition import FPCA
-from fabel.regression import FRegressResult, fregress
-from fabel.smoothing import smooth
-from fabel.stats import ConfidenceBand, confidence_band, cycleplot, plot_beta, plot_scores
+from fdatools import BSpline, FData, Fourier
+from fdatools._plot import zerofind
+from fdatools.decomposition import FPCA
+from fdatools.regression import FRegressResult, fregress
+from fdatools.smoothing import smooth
+from fdatools.stats import ConfidenceBand, confidence_band, cycleplot, plot_beta, plot_scores
 
 RNG = np.random.default_rng(7)
 

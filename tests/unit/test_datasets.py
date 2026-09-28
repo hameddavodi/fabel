@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.datasets`: shape/dtype sanity, storage/cache mechanics."""
+"""Unit tests for :mod:`fdatools.datasets`: shape/dtype sanity, storage/cache mechanics."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from typing import Any, TypeVar
 import numpy as np
 import pytest
 
-import fabel.datasets as ds
+import fdatools.datasets as ds
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_RELEASE_DIR = REPO_ROOT / "data_release"
@@ -22,7 +22,7 @@ _F = TypeVar("_F", bound=Callable[..., Any])
 
 def offline(func: _F) -> _F:
     """Mark a test that needs no ``data_release/`` files, so it always runs."""
-    func._fabel_offline = True  # type: ignore[attr-defined]
+    func._fdatools_offline = True  # type: ignore[attr-defined]
     return func
 
 
@@ -35,7 +35,7 @@ def _local_downloads(
     Tests that need those files are skipped when ``data_release/`` is missing;
     tests marked :func:`offline` still run.
     """
-    if not DATA_RELEASE_DIR.exists() and not getattr(request.function, "_fabel_offline", False):
+    if not DATA_RELEASE_DIR.exists() and not getattr(request.function, "_fdatools_offline", False):
         pytest.skip("data_release/ fixtures missing; run tools/build_data_release.py first")
 
     def _copy_local(url: str, dest: Path) -> None:
@@ -44,7 +44,7 @@ def _local_downloads(
         shutil.copy(DATA_RELEASE_DIR / name_ext, dest)
 
     monkeypatch.setattr(ds, "_download_file", _copy_local)
-    monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("FDATOOLS_DATA_DIR", str(tmp_path))
 
 
 # --------------------------------------------------------------------------- #
@@ -184,19 +184,19 @@ def test_load_lip_shapes() -> None:
 
 
 def test_cache_dir_honours_env_var(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path / "custom"))
+    monkeypatch.setenv("FDATOOLS_DATA_DIR", str(tmp_path / "custom"))
     assert ds._cache_dir() == tmp_path / "custom"
 
 
 def test_cache_dir_defaults_to_home_cache(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("FABEL_DATA_DIR", raising=False)
-    assert ds._cache_dir() == Path.home() / ".cache" / "fabel"
+    monkeypatch.delenv("FDATOOLS_DATA_DIR", raising=False)
+    assert ds._cache_dir() == Path.home() / ".cache" / "fdatools"
 
 
 def test_second_load_reuses_cache_without_downloading(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("FDATOOLS_DATA_DIR", str(tmp_path))
     calls = []
 
     def _copy_local(url: str, dest: Path) -> None:
@@ -212,7 +212,7 @@ def test_second_load_reuses_cache_without_downloading(
 
 
 def test_checksum_mismatch_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("FDATOOLS_DATA_DIR", str(tmp_path))
 
     def _corrupt(url: str, dest: Path) -> None:
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -233,17 +233,17 @@ def test_download_file_rejects_non_https(tmp_path: Path, monkeypatch: pytest.Mon
 
 @pytest.mark.network
 @pytest.mark.skipif(
-    os.environ.get("FABEL_RUN_NETWORK_TESTS") != "1",
-    reason="hits the real network; set FABEL_RUN_NETWORK_TESTS=1 to run",
+    os.environ.get("FDATOOLS_RUN_NETWORK_TESTS") != "1",
+    reason="hits the real network; set FDATOOLS_RUN_NETWORK_TESTS=1 to run",
 )
 def test_real_download_from_github_release(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Hits the real GitHub release URL. Skipped by default.
 
-    Run explicitly with ``FABEL_RUN_NETWORK_TESTS=1 pytest -m network`` once
+    Run explicitly with ``FDATOOLS_RUN_NETWORK_TESTS=1 pytest -m network`` once
     ``data-v1`` has been published (see ``docs/dev/data-release.md``).
     """
     monkeypatch.undo()  # use the real _download_file, not the local-fixture stand-in
-    monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("FDATOOLS_DATA_DIR", str(tmp_path))
     rp = ds.load_regina_precip()
     assert rp.value.shape == (1006,)
 

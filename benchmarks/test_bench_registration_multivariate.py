@@ -16,8 +16,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline, FData, Fourier
-from fabel.registration import RegistrationResult, register
+from fdatools import BSpline, FData, Fourier
+from fdatools.registration import RegistrationResult, register
 
 DOMAIN = (0.0, 20.0)
 N_CURVES = 5

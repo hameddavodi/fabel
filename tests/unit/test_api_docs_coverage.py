@@ -1,19 +1,19 @@
-"""Every public symbol of Fabel is rendered by some ``docs/api/*.md`` page.
+"""Every public symbol of fdatools is rendered by some ``docs/api/*.md`` page.
 
-mkdocstrings renders a ``::: fabel.module`` directive as every name in the
+mkdocstrings renders a ``::: fdatools.module`` directive as every name in the
 module's ``__all__`` (or only the names of a ``members:`` option), and a
-``::: fabel.module.Name`` directive as that one object.  This test reads those
+``::: fdatools.module.Name`` directive as that one object.  This test reads those
 directives and checks that the union covers:
 
-* every name in ``fabel.__all__`` (for the ``datasets`` and ``stats`` modules
+* every name in ``fdatools.__all__`` (for the ``datasets`` and ``stats`` modules
   listed there: every name in their ``__all__``);
 * every name in the ``__all__`` of each public module, including
-  ``fabel.stats``, ``fabel.datasets``, ``fabel.io`` and ``fabel.nn``;
+  ``fdatools.stats``, ``fdatools.datasets``, ``fdatools.io`` and ``fdatools.nn``;
 * every public result class, named explicitly below so that dropping one from
   a module's ``__all__`` cannot hide it.
 
 Objects are compared by identity, so a re-exported name (``LDO`` lives in a
-private module and is exported by ``fabel.core``) counts wherever it is shown.
+private module and is exported by ``fdatools.core``) counts wherever it is shown.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from typing import Any
 
 import pytest
 
-import fabel
+import fdatools
 
 yaml = pytest.importorskip("yaml", reason="the docs toolchain (mkdocs) brings PyYAML")
 
@@ -38,43 +38,43 @@ API_DIR = REPO_ROOT / "docs" / "api"
 DIRECTIVE = re.compile(r"^:::\s+([\w.]+)\s*$")
 
 PUBLIC_MODULES = [
-    "fabel.basis",
-    "fabel.core",
-    "fabel.smoothing",
-    "fabel.decomposition",
-    "fabel.regression",
-    "fabel.registration",
-    "fabel.dynamics",
-    "fabel.stats",
-    "fabel.sparse",
-    "fabel.density",
-    "fabel.profiling",
-    "fabel.datasets",
-    "fabel.io",
+    "fdatools.basis",
+    "fdatools.core",
+    "fdatools.smoothing",
+    "fdatools.decomposition",
+    "fdatools.regression",
+    "fdatools.registration",
+    "fdatools.dynamics",
+    "fdatools.stats",
+    "fdatools.sparse",
+    "fdatools.density",
+    "fdatools.profiling",
+    "fdatools.datasets",
+    "fdatools.io",
 ]
-# fabel.nn imports torch at the top; without the extra it cannot be inspected.
+# fdatools.nn imports torch at the top; without the extra it cannot be inspected.
 HAS_TORCH = importlib.util.find_spec("torch") is not None
 if HAS_TORCH:
-    PUBLIC_MODULES.append("fabel.nn")
+    PUBLIC_MODULES.append("fdatools.nn")
 RESULT_CLASSES = [
-    "fabel.smoothing.SmoothResult",
-    "fabel.regression.FRegressResult",
-    "fabel.regression.FRegressStderr",
-    "fabel.regression.FRegressCV",
-    "fabel.regression.LinmodResult",
-    "fabel.registration.RegistrationResult",
-    "fabel.registration.AmpPhaseDecomposition",
-    "fabel.stats.DepthResult",
-    "fabel.stats.BoxplotResult",
-    "fabel.stats.PermutationTestResult",
-    "fabel.stats.ConfidenceBand",
-    "fabel.dynamics.PDAStability",
-    "fabel.sparse.SparseCov",
-    "fabel.density.DensityResult",
-    "fabel.density.IntensityResult",
-    "fabel.profiling.ProfileResult",
-    "fabel.profiling.InnerFit",
-    "fabel.io.LongData",
+    "fdatools.smoothing.SmoothResult",
+    "fdatools.regression.FRegressResult",
+    "fdatools.regression.FRegressStderr",
+    "fdatools.regression.FRegressCV",
+    "fdatools.regression.LinmodResult",
+    "fdatools.registration.RegistrationResult",
+    "fdatools.registration.AmpPhaseDecomposition",
+    "fdatools.stats.DepthResult",
+    "fdatools.stats.BoxplotResult",
+    "fdatools.stats.PermutationTestResult",
+    "fdatools.stats.ConfidenceBand",
+    "fdatools.dynamics.PDAStability",
+    "fdatools.sparse.SparseCov",
+    "fdatools.density.DensityResult",
+    "fdatools.density.IntensityResult",
+    "fdatools.profiling.ProfileResult",
+    "fdatools.profiling.InnerFit",
+    "fdatools.io.LongData",
 ]
 
 
@@ -126,7 +126,7 @@ def module_exports(module: ModuleType) -> list[str]:
 
 
 def needs_torch(path: str) -> bool:
-    return path == "fabel.nn" or path.startswith("fabel.nn.")
+    return path == "fdatools.nn" or path.startswith("fdatools.nn.")
 
 
 def resolve(path: str) -> Any:
@@ -167,15 +167,15 @@ def all_directives() -> list[Directive]:
 def required_symbols() -> dict[str, Any]:
     """Every symbol the API reference must render, by dotted name."""
     required: dict[str, Any] = {}
-    for name in fabel.__all__:
+    for name in fdatools.__all__:
         if name == "__version__":
             continue
-        value = getattr(fabel, name)
+        value = getattr(fdatools, name)
         if isinstance(value, ModuleType):
             for member in module_exports(value):
                 required[f"{value.__name__}.{member}"] = getattr(value, member)
         else:
-            required[f"fabel.{name}"] = value
+            required[f"fdatools.{name}"] = value
     for module_name in PUBLIC_MODULES:
         module = importlib.import_module(module_name)
         for member in module_exports(module):
@@ -183,9 +183,9 @@ def required_symbols() -> dict[str, Any]:
     for path in RESULT_CLASSES:
         required[path] = resolve(path)
     if HAS_TORCH:
-        nn = importlib.import_module("fabel.nn")
+        nn = importlib.import_module("fdatools.nn")
         for member in module_exports(nn):
-            required[f"fabel.nn.{member}"] = getattr(nn, member)
+            required[f"fdatools.nn.{member}"] = getattr(nn, member)
     return required
 
 
@@ -196,43 +196,47 @@ def required_symbols() -> dict[str, Any]:
 
 def test_parse_bare_and_restricted_directives() -> None:
     text = (
-        "# Page\n\n::: fabel.core\n\ntext\n\n"
-        "::: fabel.smoothing\n    options:\n      members:\n        - smooth\n\n"
-        "::: fabel.core.FData\n"
+        "# Page\n\n::: fdatools.core\n\ntext\n\n"
+        "::: fdatools.smoothing\n    options:\n      members:\n        - smooth\n\n"
+        "::: fdatools.core.FData\n"
     )
     directives = parse_directives(text)
-    assert [d.target for d in directives] == ["fabel.core", "fabel.smoothing", "fabel.core.FData"]
+    assert [d.target for d in directives] == [
+        "fdatools.core",
+        "fdatools.smoothing",
+        "fdatools.core.FData",
+    ]
     assert directives[0].members is None
     assert directives[1].members == ["smooth"]
 
 
 def test_members_false_renders_no_members() -> None:
-    import fabel.smoothing
+    import fdatools.smoothing
 
-    (directive,) = parse_directives("::: fabel.smoothing\n    options:\n      members: false\n")
+    (directive,) = parse_directives("::: fdatools.smoothing\n    options:\n      members: false\n")
     assert directive.members is False
-    assert id(fabel.smoothing.smooth) not in covered_objects([directive])
+    assert id(fdatools.smoothing.smooth) not in covered_objects([directive])
 
 
 def test_restricted_directive_covers_only_its_members() -> None:
-    import fabel.smoothing
+    import fdatools.smoothing
 
-    covered = covered_objects([Directive("fabel.smoothing", members=["smooth"])])
-    assert id(fabel.smoothing.smooth) in covered
-    assert id(fabel.smoothing.Smoother) not in covered
+    covered = covered_objects([Directive("fdatools.smoothing", members=["smooth"])])
+    assert id(fdatools.smoothing.smooth) in covered
+    assert id(fdatools.smoothing.Smoother) not in covered
 
 
 def test_object_directive_and_reexport_by_identity() -> None:
-    import fabel.core
+    import fdatools.core
 
-    covered = covered_objects([Directive("fabel.core.LDO")])
-    assert id(fabel.LDO) in covered
-    assert id(fabel.core.FData) not in covered
+    covered = covered_objects([Directive("fdatools.core.LDO")])
+    assert id(fdatools.LDO) in covered
+    assert id(fdatools.core.FData) not in covered
 
 
 def test_resolve_reports_missing_symbols() -> None:
     with pytest.raises(AttributeError):
-        resolve("fabel.core.NoSuchThing")
+        resolve("fdatools.core.NoSuchThing")
 
 
 # --------------------------------------------------------------------------- #

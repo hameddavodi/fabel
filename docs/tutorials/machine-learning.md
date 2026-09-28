@@ -1,13 +1,13 @@
 # Machine learning: scikit-learn pipelines and PyTorch layers
 
-Fabel's estimators follow the scikit-learn API (`fit`, `transform`,
+fdatools' estimators follow the scikit-learn API (`fit`, `transform`,
 `predict`), so they drop into a `Pipeline` and a `GridSearchCV` with no
-wrappers. The optional `fabel.nn` module adds PyTorch layers, so a smoothing
+wrappers. The optional `fdatools.nn` module adds PyTorch layers, so a smoothing
 step or a basis evaluation can sit inside a neural network and be trained
 with the rest of it.
 
 Our task: tell boys from girls using only their height curves from the
-Berkeley growth study (it ships with Fabel). Boys grow for longer and have a
+Berkeley growth study (it ships with fdatools). Boys grow for longer and have a
 later, stronger growth spurt, so the curves carry the answer.
 
 ## 1. The data as a table
@@ -18,9 +18,9 @@ columns are the heights at the 31 ages.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import fabel as fb
+import fdatools as fdt
 
-growth = fb.datasets.load_growth()
+growth = fdt.datasets.load_growth()
 age = growth.age
 X = np.hstack([growth.hgtm, growth.hgtf]).T            # (93, 31): 39 boys, 54 girls
 y = np.r_[np.zeros(39), np.ones(54)]                   # 0 = boy, 1 = girl
@@ -32,11 +32,11 @@ X.shape, y.mean().round(2)
 The pipeline has three steps:
 
 1. `Smoother` turns each row of raw heights into basis coefficients
-   (penalised smoothing, as in `fb.smooth`).
+   (penalised smoothing, as in `fdt.smooth`).
 2. `FPCA` turns the coefficients into a few principal component scores.
 3. `LogisticRegression` classifies the children from those scores.
 
-Both Fabel steps must use the same basis, so we pass it to both. `FPCA` then
+Both fdatools steps must use the same basis, so we pass it to both. `FPCA` then
 measures distances between curves in the right metric (the integral of the
 squared difference), not just between coefficient vectors.
 
@@ -45,10 +45,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 
-from fabel.decomposition import FPCA
-from fabel.smoothing import Smoother
+from fdatools.decomposition import FPCA
+from fdatools.smoothing import Smoother
 
-basis = fb.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
+basis = fdt.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
 pipe = Pipeline([
     ("smooth", Smoother(basis, t=age, lam=1e-2, penalty=3)),
     ("fpca", FPCA(n=3, basis=basis)),
@@ -93,8 +93,8 @@ this API.
 
 ## 4. PyTorch: a dataset of curves
 
-The rest of this page needs the `torch` extra: `pip install fabel[torch]`.
-`import fabel` never imports PyTorch; `fabel.nn` loads it on first use.
+The rest of this page needs the `torch` extra: `pip install fdatools[torch]`.
+`import fdatools` never imports PyTorch; `fdatools.nn` loads it on first use.
 
 `FDataDataset` serves the curves of an `FData` to a PyTorch `DataLoader`.
 Each item is one curve's coefficients (or its values on a grid, with `t=`)
@@ -103,10 +103,10 @@ together with its label.
 ```python
 # requires: torch
 import torch
-from fabel.nn import BasisLayer, FDataDataset, SmoothingLayer
+from fdatools.nn import BasisLayer, FDataDataset, SmoothingLayer
 
 torch.manual_seed(0)
-curves = fb.smooth(X.T, age, basis=basis, lam=1e-2, penalty=3).fd   # 93 curves
+curves = fdt.smooth(X.T, age, basis=basis, lam=1e-2, penalty=3).fd   # 93 curves
 dataset = FDataDataset(curves, y)
 loader = torch.utils.data.DataLoader(dataset, batch_size=16, shuffle=True)
 
@@ -203,5 +203,5 @@ fit      <- glm(sex ~ scores, family = binomial)
 ```
 
 Tuning then needs your own cross-validation loop, and nothing is
-differentiable end to end. In Fabel the same steps are one `Pipeline`, and
-`fabel.nn` makes them trainable layers.
+differentiable end to end. In fdatools the same steps are one `Pipeline`, and
+`fdatools.nn` makes them trainable layers.

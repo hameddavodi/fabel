@@ -1,4 +1,4 @@
-# WORKFLOW.md — Fabel Autonomous Build Plan
+# WORKFLOW.md — fdatools Autonomous Build Plan
 
 Execute phases in order. Each phase ends with a **GATE** — a shell command that must exit 0.
 Check off tasks here as you complete them. Track details in `PROGRESS.md`.
@@ -7,7 +7,7 @@ Check off tasks here as you complete them. Track details in `PROGRESS.md`.
 
 ## Phase 0 — Repo & Environment
 
-- [x] `src/fabel` layout, `pyproject.toml` (hatchling, extras: `torch`, `pandas`, `plot`, `dev`)
+- [x] `src/fdatools` layout, `pyproject.toml` (hatchling, extras: `torch`, `pandas`, `plot`, `dev`)
 - [x] `Dockerfile` + `docker-compose.yml`: Python 3.11, R 4.x, R `fda` 6.3.0 pinned, `rpy2`
 - [x] Tooling config: ruff (strict), mypy (strict), pytest + pytest-cov + hypothesis + pytest-benchmark
 - [x] CI (GitHub Actions): lint → type → test → parity → bench (regression alert) → docs → build
@@ -31,7 +31,7 @@ Order matters: `_backend` → `basis` → `core`.
   - Golden: vs R `eval.fd`, `inprod`, `mean.fd`, `var.fd`, `deriv.fd`
 - [x] Plotting mixin (matplotlib): `.plot()`, `.plot_fit()` — smoke-tested, image-hash tested
 
-**GATE 1:** `pytest tests/unit tests/parity/test_basis.py tests/parity/test_core.py --cov=fabel --cov-fail-under=90`
+**GATE 1:** `pytest tests/unit tests/parity/test_basis.py tests/parity/test_core.py --cov=fdatools --cov-fail-under=90`
 
 ---
 
@@ -44,8 +44,8 @@ Order matters: `_backend` → `basis` → `core`.
 - [x] `datasets.py`: all 11 loaders, lazy-download + local cache + checksum; ship growth/gait/pinch in-package
 - [x] I/O: `from_pandas`, `to_pandas`, `to_xarray`, `read_rds`
 
-**GATE 2:** `pytest tests/unit tests/parity/test_smoothing.py --cov=fabel --cov-fail-under=90 && pytest benchmarks -k smooth --benchmark-only`
-(2026-09-27: `tests/unit` added. `--cov=fabel` measures the whole package, and one parity file alone covers only 31% of it. The 90% bar is unchanged.)
+**GATE 2:** `pytest tests/unit tests/parity/test_smoothing.py --cov=fdatools --cov-fail-under=90 && pytest benchmarks -k smooth --benchmark-only`
+(2026-09-27: `tests/unit` added. `--cov=fdatools` measures the whole package, and one parity file alone covers only 31% of it. The 90% bar is unchanged.)
 
 ---
 
@@ -58,7 +58,7 @@ Order matters: `_backend` → `basis` → `core`.
 - [x] sklearn compliance: `sklearn.utils.estimator_checks.check_estimator` passes for `Smoother`, `FPCA`, `FRegress` (and `Registrator`; no exemptions)
 - [x] `nn.py` (extra `[torch]`): `BasisLayer`, `SmoothingLayer`, `FDataDataset`; gradcheck on all layers; GPU test skipped-if-unavailable
 
-**GATE 3:** `pytest tests/parity tests/sklearn_compat tests/torch tests/unit --cov=fabel --cov-fail-under=90`
+**GATE 3:** `pytest tests/parity tests/sklearn_compat tests/torch tests/unit --cov=fdatools --cov-fail-under=90`
 (2026-09-27: `tests/unit` added, as for GATE 2. Without it the package coverage is 76%. With it: 98.6%. The 90% bar is unchanged.)
 
 ---
@@ -67,7 +67,7 @@ Order matters: `_backend` → `basis` → `core`.
 
 - [x] `registration.py`: `register()` (continuous, Newton on warping coefs), `landmarks=` mode, `.decompose()` (AmpPhaseDecomp)
   - Golden: growth-data registration vs `register.fd` (`rtol=1e-5`); property test: warps strictly monotone
-  - [x] Torch backend: autodiff path benchmarked vs numpy Newton (2026-09-27: `fabel._internal.registration_torch`, `benchmarks/test_bench_registration.py`; torch about 4x slower)
+  - [x] Torch backend: autodiff path benchmarked vs numpy Newton (2026-09-27: `fdatools._internal.registration_torch`, `benchmarks/test_bench_registration.py`; torch about 4x slower)
 - [x] `dynamics.py`: `PDA`, `phase_plane()`, ODE solve via scipy `solve_ivp`
   - Golden: vs `pda.fd` on lip/handwriting data
 
@@ -81,7 +81,7 @@ Order matters: `_backend` → `basis` → `core`.
   - 2026-09-27: 70 figures (ch 1, 3-11) built from `notebooks/book/ch*.py` by `tools/build_book_notebook.py`; nbmake passes. Open: 6 figures short of 76, numbering not checked against the printed book. See PROGRESS.md
 - [x] Docs: mkdocs-material + mkdocstrings — quickstart, R-migration table (from SPEC.md §3-4), 6 tutorials, full API reference. `mkdocs build --strict` clean
 - [x] `PARITY_REPORT.md`: auto-generated table — every public symbol, R counterpart, max abs/rel error, status
-- [x] Packaging: wheels via `python -m build`, `twine check dist/*` clean, `pip install fabel` smoke test in clean venv, py3.10–3.13 matrix
+- [x] Packaging: wheels via `python -m build`, `twine check dist/*` clean, `pip install fdatools` smoke test in clean venv, py3.10–3.13 matrix
 - [x] `CHANGELOG.md`, `LICENSE` (BSD-3), `CITATION.cff`, README with badges
 - [x] Version `1.0.0` tagged. Publish command prepared but **not executed** (`twine upload` is the only human step)
   - 2026-09-27: GATE 5 green, annotated tag `v1.0.0` (local). Publish commands in PROGRESS.md "Human steps"
@@ -90,7 +90,7 @@ Order matters: `_backend` → `basis` → `core`.
 ```bash
 pytest && \
 pytest tests/parity && \
-mypy --strict src/fabel && \
+mypy --strict src/fdatools && \
 ruff check . && \
 mkdocs build --strict && \
 python -m build && twine check dist/* && \

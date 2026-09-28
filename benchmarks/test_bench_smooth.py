@@ -1,4 +1,4 @@
-"""Micro-benchmarks for the hot paths of :mod:`fabel.smoothing`.
+"""Micro-benchmarks for the hot paths of :mod:`fdatools.smoothing`.
 
 The shapes follow SPEC §6: the canonical weather problem (365 daily points,
 65 basis functions, 35 curves), the 1000-curve smoothing target, and a GCV
@@ -14,8 +14,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline, Fourier
-from fabel.smoothing import Smoother, gcv_curve, smooth
+from fdatools import BSpline, Fourier
+from fdatools.smoothing import Smoother, gcv_curve, smooth
 
 N_POINTS = 365
 N_BASIS = 65

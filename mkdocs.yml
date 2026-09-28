@@ -1,8 +1,8 @@
-site_name: Fabel
+site_name: fdatools
 site_description: Functional data analysis for Python — a clean-room rewrite of R's fda.
-site_url: https://hameddavodi.github.io/fabel/
-repo_url: https://github.com/hameddavodi/fabel
-repo_name: hameddavodi/fabel
+site_url: https://hameddavodi.github.io/fdatools/
+repo_url: https://github.com/hameddavodi/fdatools
+repo_name: hameddavodi/fdatools
 copyright: Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
 docs_dir: docs
 strict: true

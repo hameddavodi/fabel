@@ -1,6 +1,6 @@
 # tools/golden_r/pace.R
 #
-# Golden cases for `fabel.sparse` (sparse / longitudinal FPCA, PACE): R fda's
+# Golden cases for `fdatools.sparse` (sparse / longitudinal FPCA, PACE): R fda's
 # smooth.sparse.mean, covPACE, pcaPACE and scoresPACE on seeded sparse
 # subsamples of two real datasets (growth$hgtf and CanadianWeather daily
 # temperature). Driven by tools/make_golden.py, which sources common.R first

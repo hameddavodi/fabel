@@ -9,17 +9,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 plt.rcParams["figure.autolayout"] = True
 
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day = weather.t - 0.5
 annual_precip = np.log10(weather.precip.sum(axis=0))
-harmonic = fb.LDO.harmonic(365.0)
-temp_basis = fb.Fourier(domain=(0.0, 365.0), n_basis=65)
-temp = fb.smooth(weather.temp, day, basis=temp_basis, lam=1e-2, penalty=harmonic).fd
+harmonic = fdt.LDO.harmonic(365.0)
+temp_basis = fdt.Fourier(domain=(0.0, 365.0), n_basis=65)
+temp = fdt.smooth(weather.temp, day, basis=temp_basis, lam=1e-2, penalty=harmonic).fd
 covariates = {"const": 1.0, "temp": temp}
 t_grid = np.linspace(0.0, 365.0, 366)
 month_ticks = np.cumsum([0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30])
@@ -31,7 +31,7 @@ month_names = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]
 # functions and no roughness penalty is used. The low dimension alone keeps it smooth.
 
 # %%
-model_low = fb.fregress(annual_precip, covariates, beta={"temp": fb.Fourier((0.0, 365.0), 5)})
+model_low = fdt.fregress(annual_precip, covariates, beta={"temp": fdt.Fourier((0.0, 365.0), 5)})
 fig, ax = plt.subplots(figsize=(7, 4))
 ax.plot(t_grid, model_low.beta[1](t_grid)[:, 0], "C0", linewidth=2)
 ax.axhline(0.0, color="k", linestyle=":", linewidth=1)
@@ -47,11 +47,11 @@ fig
 # of log10 lambda, for beta in 35 Fourier functions with a harmonic acceleration penalty.
 
 # %%
-beta_basis = fb.Fourier((0.0, 365.0), 35)
+beta_basis = fdt.Fourier((0.0, 365.0), 35)
 log_lambdas = np.arange(6.0, 15.01, 0.5)
 cv_scores = []
 for log_lambda in log_lambdas:
-    trial = fb.fregress(
+    trial = fdt.fregress(
         annual_precip, covariates, beta={"temp": (beta_basis, 10.0**log_lambda, harmonic)}
     )
     cv_scores.append(trial.cv().sse)
@@ -70,7 +70,7 @@ fig
 # cross-validated lambda: temperature in late autumn and winter predicts precipitation.
 
 # %%
-model = fb.fregress(
+model = fdt.fregress(
     annual_precip, covariates, beta={"temp": (beta_basis, 10.0**best_log_lambda, harmonic)}
 )
 fig, ax = plt.subplots(figsize=(7, 4))
@@ -129,10 +129,10 @@ fig
 # beta(t) = sum_k b_k xi_k(t) is shown with plus and minus two standard errors.
 
 # %%
-pca = fb.FPCA(n=4, lam=1e5, penalty=harmonic).fit(temp)
+pca = fdt.FPCA(n=4, lam=1e5, penalty=harmonic).fit(temp)
 scores = np.asarray(pca.scores)
 score_terms = {"const": 1.0} | {f"pc{k + 1}": scores[:, k] for k in range(4)}
-pcr = fb.fregress(annual_precip, score_terms)
+pcr = fdt.fregress(annual_precip, score_terms)
 score_coefs = np.asarray(pcr.coefficients)[1:]
 score_cov = np.asarray(pcr.stderr().cov)[1:, 1:]
 harmonic_values = np.asarray(pca.harmonics(t_grid))
@@ -157,7 +157,7 @@ fig
 # and the 95% permutation quantile (dashed).
 
 # %%
-test = fb.stats.f_test(
+test = fdt.stats.f_test(
     annual_precip,
     [np.ones(temp.n_curves), temp],
     basis=[None, beta_basis],

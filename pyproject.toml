@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fabel"
+name = "fdatools"
 version = "1.0.0"
 description = "Functional data analysis for Python: a clean-room rewrite of R's fda package."
 readme = "README.md"
@@ -63,17 +63,17 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/hameddavodi/fabel"
-Documentation = "https://hameddavodi.github.io/fabel"
-Source = "https://github.com/hameddavodi/fabel"
-Issues = "https://github.com/hameddavodi/fabel/issues"
-Changelog = "https://github.com/hameddavodi/fabel/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/hameddavodi/fdatools"
+Documentation = "https://hameddavodi.github.io/fdatools"
+Source = "https://github.com/hameddavodi/fdatools"
+Issues = "https://github.com/hameddavodi/fdatools/issues"
+Changelog = "https://github.com/hameddavodi/fdatools/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/fabel"]
+packages = ["src/fdatools"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/fabel", "README.md", "LICENSE", "CHANGELOG.md", "CITATION.cff"]
+include = ["src/fdatools", "README.md", "LICENSE", "CHANGELOG.md", "CITATION.cff"]
 
 [tool.ruff]
 line-length = 100
@@ -170,10 +170,10 @@ markers = [
   "gpu: requires CUDA",
   "network: hits the real network, skipped by default",
 ]
-filterwarnings = ["error::DeprecationWarning:fabel.*"]
+filterwarnings = ["error::DeprecationWarning:fdatools.*"]
 
 [tool.coverage.run]
-source = ["fabel"]
+source = ["fdatools"]
 branch = true
 
 [tool.coverage.report]

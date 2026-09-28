@@ -5,14 +5,14 @@ the string/label metadata R attaches to the object (station names, subject
 ids, factor levels, ...), reproduced exactly as ``fda`` stores them. None of
 these datasets is already a smooth functional object in R (``fda`` stores them
 as plain matrices/arrays/data frames), so none of the dataclasses below carries
-an ``.fd`` property -- fit one with :func:`fabel.smooth` using the raw arrays
+an ``.fd`` property -- fit one with :func:`fdatools.smooth` using the raw arrays
 and the accompanying ``t`` grid.
 
 Storage: ``growth``, ``gait`` and ``pinch`` ship inside the wheel
-(``src/fabel/_data/``, read via :mod:`importlib.resources`). Every other
+(``src/fdatools/_data/``, read via :mod:`importlib.resources`). Every other
 dataset is downloaded on first use from the project's GitHub release
-``data-v1``, SHA-256 verified, and cached under ``$FABEL_DATA_DIR`` (default
-``~/.cache/fabel``). See ``docs/dev/data-release.md`` for how the release
+``data-v1``, SHA-256 verified, and cached under ``$FDATOOLS_DATA_DIR`` (default
+``~/.cache/fdatools``). See ``docs/dev/data-release.md`` for how the release
 archives are built and published.
 
 ``fda`` 6.3.0's dataset catalog has no ``CSTR`` dataset and no separate
@@ -73,7 +73,7 @@ __all__ = [
 _IN_PACKAGE = frozenset({"growth", "gait", "pinch"})
 
 #: GitHub release asset URL template for every other dataset.
-_RELEASE_URL = "https://github.com/hameddavodi/fabel/releases/download/data-v1/{name}.{ext}"
+_RELEASE_URL = "https://github.com/hameddavodi/fdatools/releases/download/data-v1/{name}.{ext}"
 
 #: SHA-256 of every ``data_release/<name>.{npz,json}`` file (see
 #: ``tools/build_data_release.py``, which prints this table). Verified after
@@ -139,9 +139,9 @@ _CHECKSUMS: dict[str, dict[str, str]] = {
 
 
 def _cache_dir() -> Path:
-    """Return the local cache directory, honouring ``$FABEL_DATA_DIR``."""
-    env = os.environ.get("FABEL_DATA_DIR")
-    return Path(env) if env else Path.home() / ".cache" / "fabel"
+    """Return the local cache directory, honouring ``$FDATOOLS_DATA_DIR``."""
+    env = os.environ.get("FDATOOLS_DATA_DIR")
+    return Path(env) if env else Path.home() / ".cache" / "fdatools"
 
 
 def _sha256(path: Path) -> str:
@@ -189,7 +189,7 @@ def _ensure_cached(name: str) -> tuple[Path, Path]:
 
 
 def _load_in_package(name: str) -> tuple[dict[str, NDArray[np.float64]], dict[str, Any]]:
-    pkg = resources.files("fabel._data")
+    pkg = resources.files("fdatools._data")
     npz_bytes = pkg.joinpath(f"{name}.npz").read_bytes()
     meta_text = pkg.joinpath(f"{name}.json").read_text(encoding="utf-8")
     with np.load(io.BytesIO(npz_bytes)) as npz:
@@ -259,8 +259,8 @@ def load_canadian_weather() -> CanadianWeather:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> cw = fb.datasets.load_canadian_weather()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> cw = fdt.datasets.load_canadian_weather()  # doctest: +SKIP
     >>> cw.temp.shape  # doctest: +SKIP
     (365, 35)
     """
@@ -307,8 +307,8 @@ def load_growth() -> Growth:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> g = fb.datasets.load_growth()
+    >>> import fdatools as fdt
+    >>> g = fdt.datasets.load_growth()
     >>> g.hgtm.shape, g.hgtf.shape, g.age.shape
     ((31, 39), (31, 54), (31,))
     """
@@ -356,8 +356,8 @@ def load_gait() -> Gait:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> gait = fb.datasets.load_gait()
+    >>> import fdatools as fdt
+    >>> gait = fdt.datasets.load_gait()
     >>> gait.value.shape
     (20, 39, 2)
     """
@@ -412,8 +412,8 @@ def load_handwriting() -> Handwriting:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> hw = fb.datasets.load_handwriting()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> hw = fdt.datasets.load_handwriting()  # doctest: +SKIP
     >>> hw.value.shape  # doctest: +SKIP
     (1401, 20, 2)
     """
@@ -456,8 +456,8 @@ def load_pinch() -> Pinch:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> p = fb.datasets.load_pinch()
+    >>> import fdatools as fdt
+    >>> p = fdt.datasets.load_pinch()
     >>> p.pinch.shape, p.pinchraw.shape, p.t.shape
     ((151, 20), (151, 20), (151,))
     """
@@ -492,8 +492,8 @@ def load_melanoma() -> Melanoma:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> m = fb.datasets.load_melanoma()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> m = fdt.datasets.load_melanoma()  # doctest: +SKIP
     >>> m.value.shape  # doctest: +SKIP
     (37, 3)
     """
@@ -530,8 +530,8 @@ def load_refinery() -> Refinery:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> r = fb.datasets.load_refinery()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> r = fdt.datasets.load_refinery()  # doctest: +SKIP
     >>> r.time.shape  # doctest: +SKIP
     (194,)
     """
@@ -599,8 +599,8 @@ def load_seabird() -> Seabird:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> sb = fb.datasets.load_seabird()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> sb = fdt.datasets.load_seabird()  # doctest: +SKIP
     >>> sb.year.shape  # doctest: +SKIP
     (3793,)
     """
@@ -637,8 +637,8 @@ def load_regina_precip() -> ReginaPrecip:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> rp = fb.datasets.load_regina_precip()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> rp = fdt.datasets.load_regina_precip()  # doctest: +SKIP
     >>> rp.value.shape  # doctest: +SKIP
     (1006,)
     """
@@ -669,8 +669,8 @@ def load_montreal_temp() -> MontrealTemp:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> mt = fb.datasets.load_montreal_temp()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> mt = fdt.datasets.load_montreal_temp()  # doctest: +SKIP
     >>> mt.value.shape  # doctest: +SKIP
     (34, 365)
     """
@@ -706,8 +706,8 @@ def load_daily() -> Daily:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> d = fb.datasets.load_daily()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> d = fdt.datasets.load_daily()  # doctest: +SKIP
     >>> d.tempav.shape  # doctest: +SKIP
     (365, 35)
     """
@@ -742,8 +742,8 @@ def load_infant_growth() -> InfantGrowth:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> ig = fb.datasets.load_infant_growth()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> ig = fdt.datasets.load_infant_growth()  # doctest: +SKIP
     >>> ig.day.shape  # doctest: +SKIP
     (40,)
     """
@@ -780,8 +780,8 @@ def load_nondurables() -> Nondurables:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> nd = fb.datasets.load_nondurables()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> nd = fdt.datasets.load_nondurables()  # doctest: +SKIP
     >>> nd.value.shape  # doctest: +SKIP
     (1377,)
     """
@@ -820,8 +820,8 @@ def load_lip() -> Lip:
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> lip = fb.datasets.load_lip()  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> lip = fdt.datasets.load_lip()  # doctest: +SKIP
     >>> lip.value.shape  # doctest: +SKIP
     (51, 20)
     """

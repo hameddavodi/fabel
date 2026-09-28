@@ -24,8 +24,8 @@ namespace of their inputs.
 Examples
 --------
 >>> import numpy as np
->>> from fabel import BSpline, FData
->>> from fabel.stats import depth
+>>> from fdatools import BSpline, FData
+>>> from fdatools.stats import depth
 >>> fd = FData(np.random.default_rng(0).normal(size=(6, 9)), BSpline(n_basis=6))
 >>> depth(fd).depth.shape
 (9,)
@@ -40,19 +40,19 @@ from dataclasses import dataclass
 from statistics import NormalDist
 from typing import TYPE_CHECKING, Any, Protocol, overload
 
-from fabel import _linalg, _plot
-from fabel._backend import (
+from fdatools import _linalg, _plot
+from fdatools._backend import (
     array_namespace,
     asarray,
     default_namespace,
     result_namespace,
     to_numpy,
 )
-from fabel._operator import LDO
-from fabel.basis import Basis, _same_domain
-from fabel.core import BiFData, FData, _quadrature, inprod
-from fabel.regression import FRegressResult
-from fabel.smoothing import SmoothResult
+from fdatools._operator import LDO
+from fdatools.basis import Basis, _same_domain
+from fdatools.core import BiFData, FData, _quadrature, inprod
+from fdatools.regression import FRegressResult
+from fdatools.smoothing import SmoothResult
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import numpy as np
@@ -129,7 +129,7 @@ class DepthResult:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.stats import depth
+    >>> from fdatools.stats import depth
     >>> values = np.array([[0.0, 1.0, 2.0], [0.0, 1.0, 2.0]])
     >>> depth(values).median_index
     1
@@ -172,7 +172,7 @@ class BoxplotResult:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.stats import boxplot
+    >>> from fdatools.stats import boxplot
     >>> values = np.vstack([np.arange(7.0), np.arange(7.0)])
     >>> values[:, 6] = 40.0
     >>> boxplot(values).outliers.tolist()
@@ -214,7 +214,7 @@ class BoxplotResult:
         >>> import matplotlib
         >>> matplotlib.use("Agg")
         >>> import numpy as np
-        >>> from fabel.stats import boxplot
+        >>> from fdatools.stats import boxplot
         >>> values = np.vstack([np.arange(7.0), np.arange(7.0) + 1.0])
         >>> len(boxplot(values).plot().lines)
         3
@@ -266,8 +266,8 @@ class PermutationTestResult:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.stats import t_test
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.stats import t_test
     >>> rng = np.random.default_rng(0)
     >>> a = FData(rng.normal(size=(5, 6)), BSpline(n_basis=5))
     >>> b = FData(rng.normal(size=(5, 6)) + 3.0, BSpline(n_basis=5))
@@ -343,8 +343,8 @@ def cov(x: FData, y: FData | None = None) -> BiFData:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.stats import cov
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.stats import cov
     >>> rng = np.random.default_rng(0)
     >>> x = FData(rng.normal(size=(5, 8)), BSpline(n_basis=5))
     >>> y = FData(rng.normal(size=(4, 8)), BSpline(n_basis=4))
@@ -385,7 +385,7 @@ def cor(
     curves, of ``x(s[a])`` and ``y(t[b])``; with ``y`` omitted it is the
     autocorrelation of ``x``.  A correlation is a ratio of covariances, not a
     basis expansion, so it is returned as values rather than as a
-    :class:`~fabel.core.BiFData`.
+    :class:`~fdatools.core.BiFData`.
 
     Parameters
     ----------
@@ -412,8 +412,8 @@ def cor(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.stats import cor
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.stats import cor
     >>> fd = FData(np.random.default_rng(0).normal(size=(5, 8)), BSpline(n_basis=5))
     >>> grid = np.linspace(0.0, 1.0, 3)
     >>> np.round(np.diag(cor(fd, s=grid, t=grid)), 12).tolist()
@@ -613,7 +613,7 @@ def depth(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.stats import depth
+    >>> from fdatools.stats import depth
     >>> values = np.array([[0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0, 3.0]])
     >>> depth(values, method="FM").depth.tolist()
     [0.75, 1.0, 0.75, 0.5]
@@ -680,7 +680,7 @@ def boxplot(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.stats import boxplot
+    >>> from fdatools.stats import boxplot
     >>> rng = np.random.default_rng(1)
     >>> values = rng.normal(size=(20, 15))
     >>> values[:, 4] += 25.0
@@ -834,8 +834,8 @@ def t_test(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.stats import t_test
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.stats import t_test
     >>> rng = np.random.default_rng(0)
     >>> a = FData(rng.normal(size=(5, 8)), BSpline(n_basis=5))
     >>> b = FData(rng.normal(size=(5, 7)), BSpline(n_basis=5))
@@ -1124,7 +1124,7 @@ def f_test(
 
     The model comes either from raw inputs, as in R's
     ``Fperm.fd(yfdPar, xfdlist, betalist)``, or from a model fitted by
-    :func:`fabel.regression.fregress` (``f_test(model)``).  In the raw form no
+    :func:`fdatools.regression.fregress` (``f_test(model)``).  In the raw form no
     intercept is added: include a vector of ones in ``x`` for one, as in R.  In
     the model form the test refits exactly the fitted model -- its response,
     terms (an intercept included), coefficient bases, smoothing parameters,
@@ -1149,7 +1149,7 @@ def f_test(
     ----------
     y : FData, array_like or FRegressResult
         Response: ``n`` curves, or ``n`` numbers.  Or a fitted model returned by
-        :func:`fabel.regression.fregress`, which supplies the response, the
+        :func:`fdatools.regression.fregress`, which supplies the response, the
         covariates and every coefficient setting.
     x : array_like, FData or sequence of them
         Covariates, each a length-``n`` vector or an :class:`FData` of ``n``
@@ -1206,8 +1206,8 @@ def f_test(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import FData, Fourier
-    >>> from fabel.stats import f_test
+    >>> from fdatools import FData, Fourier
+    >>> from fdatools.stats import f_test
     >>> rng = np.random.default_rng(0)
     >>> group = np.repeat([0.0, 1.0], 6)
     >>> y = FData(rng.normal(size=(5, 12)) + 2.0 * group, Fourier(n_basis=5))
@@ -1217,7 +1217,7 @@ def f_test(
 
     The same test on a fitted model, whose intercept term is part of the model:
 
-    >>> from fabel.regression import fregress
+    >>> from fdatools.regression import fregress
     >>> model = fregress(y, {"const": 1.0, "group": group}, lam=1e-4)
     >>> again = f_test(model, n_perm=50, random_state=0)
     >>> again.statistic == result.statistic
@@ -1288,7 +1288,7 @@ def f_test(
 def _model_f_test(
     model: FRegressResult, n_perm: int, q: float, t: Any, random_state: RandomState
 ) -> PermutationTestResult:
-    """Permutation F test of a model fitted by :func:`fabel.regression.fregress`.
+    """Permutation F test of a model fitted by :func:`fdatools.regression.fregress`.
 
     Every term keeps its coefficient basis, smoothing parameter and penalty
     operator (a scalar term of a scalar-response model keeps its constant
@@ -1381,9 +1381,9 @@ class ConfidenceBand:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.smoothing import smooth
-    >>> from fabel.stats import confidence_band
+    >>> from fdatools import BSpline
+    >>> from fdatools.smoothing import smooth
+    >>> from fdatools.stats import confidence_band
     >>> t = np.linspace(0.0, 1.0, 40)
     >>> fit = smooth(np.sin(6.0 * t), t, basis=BSpline(n_basis=8), lam=1e-6)
     >>> band = confidence_band(fit, np.array([0.25, 0.5]), sigma_e=0.01)
@@ -1421,7 +1421,7 @@ class ConfidenceBand:
         >>> import matplotlib
         >>> matplotlib.use("Agg")
         >>> import numpy as np
-        >>> from fabel.stats import ConfidenceBand
+        >>> from fdatools.stats import ConfidenceBand
         >>> t = np.linspace(0.0, 1.0, 5)
         >>> band = ConfidenceBand(t, t, 0.1 + 0 * t, t - 0.2, t + 0.2, 0.95)
         >>> len(band.plot().lines)
@@ -1601,7 +1601,7 @@ def confidence_band(
       ``Var x(t) = φ(t)ᵀ S Σ Sᵀ φ(t)``, with ``φ`` the basis (or its
       ``deriv``-th derivative);
     * a regression has coefficient covariance ``V`` from
-      :meth:`~fabel.regression.FRegressResult.stderr` and
+      :meth:`~fdatools.regression.FRegressResult.stderr` and
       ``Var β_j(t) = θ_j(t)ᵀ V_jj θ_j(t)``, with ``θ_j`` the basis of the
       ``j``-th coefficient.
 
@@ -1613,9 +1613,9 @@ def confidence_band(
     Parameters
     ----------
     fit : SmoothResult or FRegressResult
-        A fit from :func:`~fabel.smoothing.smooth` (unconstrained, with the
+        A fit from :func:`~fdatools.smoothing.smooth` (unconstrained, with the
         observation points shared by every curve) or from
-        :func:`~fabel.regression.fregress`.
+        :func:`~fdatools.regression.fregress`.
     t : array, optional
         Evaluation points.  Default: 101 equally spaced points over the domain
         (of each coefficient, for a regression).
@@ -1625,7 +1625,7 @@ def confidence_band(
         pointwise residual variance across curves) or an ``(n_obs, n_obs)``
         matrix; by default ``σ² I`` with ``σ² = SSE / (N (n_obs - df))`` for
         ``N`` curves.  For a regression it is passed to
-        :meth:`~fabel.regression.FRegressResult.stderr`: optional for a scalar
+        :meth:`~fdatools.regression.FRegressResult.stderr`: optional for a scalar
         response (default ``SSE / (n - df)``), required for a functional one.
     level : float, optional
         Pointwise coverage, strictly between 0 and 1.  Default ``0.95``.
@@ -1633,7 +1633,7 @@ def confidence_band(
         Derivative order of the band.  Default ``0``.
     y2c_map : array, optional
         Regression only: data-to-coefficient map of the response smooth,
-        passed to :meth:`~fabel.regression.FRegressResult.stderr`.
+        passed to :meth:`~fdatools.regression.FRegressResult.stderr`.
 
     Returns
     -------
@@ -1654,8 +1654,8 @@ def confidence_band(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.regression import fregress
-    >>> from fabel.stats import confidence_band
+    >>> from fdatools.regression import fregress
+    >>> from fdatools.stats import confidence_band
     >>> z = np.linspace(-1.0, 1.0, 30)
     >>> model = fregress(1.0 + 2.0 * z + 0.1 * np.cos(9.0 * z), [1.0, z])
     >>> const, slope = confidence_band(model)
@@ -1725,8 +1725,8 @@ def plot_beta(
     >>> import matplotlib
     >>> matplotlib.use("Agg")
     >>> import numpy as np
-    >>> from fabel.regression import fregress
-    >>> from fabel.stats import plot_beta
+    >>> from fdatools.regression import fregress
+    >>> from fdatools.stats import plot_beta
     >>> z = np.linspace(-1.0, 1.0, 30)
     >>> model = fregress(z + 0.1 * np.cos(9.0 * z), [1.0, z])
     >>> [ax.get_title() for ax in plot_beta(model)]
@@ -1791,8 +1791,8 @@ def cycleplot(
     >>> import matplotlib
     >>> matplotlib.use("Agg")
     >>> import numpy as np
-    >>> from fabel import FData, Fourier
-    >>> from fabel.stats import cycleplot
+    >>> from fdatools import FData, Fourier
+    >>> from fdatools.stats import cycleplot
     >>> basis = Fourier(domain=(0.0, 1.0), n_basis=3)
     >>> coefs = np.zeros((3, 2, 2))
     >>> coefs[1, :, 0] = coefs[2, :, 1] = 1.0
@@ -1837,7 +1837,7 @@ def plot_scores(
     Parameters
     ----------
     scores : FPCA or array
-        A fitted :class:`~fabel.decomposition.FPCA` (its ``scores`` are used,
+        A fitted :class:`~fdatools.decomposition.FPCA` (its ``scores`` are used,
         and its ``varprop`` labels the axes) or a score matrix of shape
         ``(n_curves, n_components)``.
     components : tuple of int, optional
@@ -1865,7 +1865,7 @@ def plot_scores(
     >>> import matplotlib
     >>> matplotlib.use("Agg")
     >>> import numpy as np
-    >>> from fabel.stats import plot_scores
+    >>> from fdatools.stats import plot_scores
     >>> ax = plot_scores(np.array([[1.0, 2.0], [3.0, -1.0], [0.0, 0.5]]))
     >>> ax.collections[0].get_offsets().shape
     (3, 2)

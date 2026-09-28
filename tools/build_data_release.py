@@ -1,4 +1,4 @@
-"""Build ``data_release/<name>.npz`` (+ ``.json`` sidecar) for every fabel dataset.
+"""Build ``data_release/<name>.npz`` (+ ``.json`` sidecar) for every fdatools dataset.
 
 Reads the full-precision R dumps in ``data_export/<name>.json`` (produced by
 ``Rscript tools/export_datasets.R``, gitignored, not committed) and writes, for
@@ -13,7 +13,7 @@ each dataset:
 turn regenerated from R) and is the staging area for the human release step
 (see ``docs/dev/data-release.md``). This script also prints the SHA-256 of
 every file it writes -- copy that table into the ``_CHECKSUMS`` constant in
-``src/fabel/datasets.py``.
+``src/fdatools/datasets.py``.
 
 Usage::
 
@@ -228,7 +228,7 @@ def main() -> None:
         print(f"wrote {npz_path} ({npz_path.stat().st_size} bytes)")
         print(f"wrote {json_path} ({json_path.stat().st_size} bytes)")
 
-    print("\n# Copy into src/fabel/datasets.py::_CHECKSUMS\n")
+    print("\n# Copy into src/fdatools/datasets.py::_CHECKSUMS\n")
     print("_CHECKSUMS: dict[str, dict[str, str]] = {")
     for name, sums in checksums.items():
         print(f'    "{name}": {{"npz": "{sums["npz"]}", "json": "{sums["json"]}"}},')

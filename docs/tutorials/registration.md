@@ -15,7 +15,7 @@ curve with a *warping function* h(t), so that the features line up. A warping
 function always increases (time never runs backwards) and keeps the start and
 end of the interval fixed.
 
-This tutorial uses the growth data, which ships with Fabel.
+This tutorial uses the growth data, which ships with fdatools.
 
 ## 1. Growth acceleration curves
 
@@ -25,13 +25,13 @@ derivative, so that the second derivative (the acceleration) is smooth too.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import fabel as fb
-from fabel.registration import landmark_register, register
+import fdatools as fdt
+from fdatools.registration import landmark_register, register
 
-growth = fb.datasets.load_growth()
+growth = fdt.datasets.load_growth()
 age = growth.age
-basis = fb.BSpline(domain=(1.0, 18.0), n_basis=35, order=6)
-fit = fb.smooth(growth.hgtf[:, :20], age, basis=basis, penalty=4, lam=1e-2)
+basis = fdt.BSpline(domain=(1.0, 18.0), n_basis=35, order=6)
+fit = fdt.smooth(growth.hgtf[:, :20], age, basis=basis, penalty=4, lam=1e-2)
 
 velocity = fit.fd.derivative(1)       # cm / year
 accel = fit.fd.derivative(2)          # cm / year^2, exact: a lower-order spline
@@ -98,7 +98,7 @@ The result is a `RegistrationResult`:
 
 Landmarks need you to find a feature by hand. *Continuous registration* does
 not: it warps each curve to be as close as possible to a target curve (the
-mean, by default). Fabel's default criterion is the *minimum eigenvalue*
+mean, by default). fdatools' default criterion is the *minimum eigenvalue*
 criterion of Ramsay and Silverman: it asks each registered curve to be
 proportional to the target, so amplitude differences do not disturb the warp.
 
@@ -107,7 +107,7 @@ The warping functions are built from a latent curve W in a B-spline basis
 penalises rough warps.
 
 ```python
-warp_basis = fb.BSpline(domain=(1.0, 18.0), n_basis=6)
+warp_basis = fdt.BSpline(domain=(1.0, 18.0), n_basis=6)
 continuous = register(accel, warp_basis=warp_basis, lam=1.0)
 
 continuous.n_iter                 # Newton iterations per curve
@@ -152,7 +152,7 @@ target; `transform` registers curves to the same target. It accepts an
 plus the curves' basis:
 
 ```python
-from fabel.registration import Registrator
+from fdatools.registration import Registrator
 
 reg = Registrator(warp_basis, lam=1.0, basis=accel.basis)
 registered_coefs = reg.fit_transform(np.asarray(accel.coefs).T)
@@ -190,7 +190,7 @@ Differences to know:
   `landmarks=` switches between them.
 - `deriv.fd` re-expands the derivative in the original basis and is about 1%
   off; `fd.derivative()` is exact.
-- Fabel's continuous criterion uses the same discretisation as R, so `lam`
+- fdatools' continuous criterion uses the same discretisation as R, so `lam`
   means the same thing. Its Newton method uses the exact Hessian and iterates
   until the gradient is zero; R often stops earlier, so the warps can differ.
 - The default warp basis for landmarks is a cubic spline with knots at the

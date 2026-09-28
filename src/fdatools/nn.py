@@ -1,6 +1,6 @@
-r"""PyTorch building blocks for functional data (the ``fabel[torch]`` extra).
+r"""PyTorch building blocks for functional data (the ``fdatools[torch]`` extra).
 
-Three pieces connect Fabel's basis expansions to :mod:`torch`:
+Three pieces connect fdatools' basis expansions to :mod:`torch`:
 
 - :class:`BasisLayer` maps basis coefficients to curve values,
   ``x(t) = Φ(t) c`` -- a differentiable ``fd(t)`` for use inside a network,
@@ -8,8 +8,8 @@ Three pieces connect Fabel's basis expansions to :mod:`torch`:
   time, to the points too.
 - :class:`SmoothingLayer` maps raw observations on a grid to basis
   coefficients by penalised least squares, ``c = (ΦᵀWΦ + λR)⁻¹ΦᵀW y``, exactly
-  as :func:`fabel.smoothing.smooth` does; ``λ`` can be learned.
-- :class:`FDataDataset` serves the curves of an :class:`~fabel.core.FData`
+  as :func:`fdatools.smoothing.smooth` does; ``λ`` can be learned.
+- :class:`FDataDataset` serves the curves of an :class:`~fdatools.core.FData`
   (coefficients, or values on a grid) and optional labels to a
   :class:`torch.utils.data.DataLoader`.
 
@@ -17,15 +17,15 @@ Basis and penalty matrices depend only on the basis and the grid, so they are
 built once in float64 and stored as buffers: ``layer.to("cuda")`` or
 ``layer.to(torch.float32)`` moves them with the module.
 
-This module imports PyTorch; ``import fabel`` itself never does.
+This module imports PyTorch; ``import fdatools`` itself never does.
 
 Examples
 --------
 >>> import numpy as np
 >>> import torch
->>> import fabel as fb
->>> from fabel.nn import BasisLayer, SmoothingLayer
->>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=8)
+>>> import fdatools as fdt
+>>> from fdatools.nn import BasisLayer, SmoothingLayer
+>>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=8)
 >>> t = np.linspace(0.0, 1.0, 50)
 >>> smoother, evaluate = SmoothingLayer(basis, t, lam=1e-6), BasisLayer(basis, t)
 >>> y = torch.sin(2 * torch.pi * torch.tensor(t))[None, :]
@@ -43,14 +43,14 @@ try:
     import torch
 except ImportError as error:
     raise ImportError(
-        "fabel.nn requires PyTorch; install it with `pip install fabel[torch]`"
+        "fdatools.nn requires PyTorch; install it with `pip install fdatools[torch]`"
     ) from error
 
-from fabel import _linalg
-from fabel._backend import asarray, default_namespace, to_numpy
-from fabel._operator import LDO
-from fabel.basis import Basis
-from fabel.core import FData
+from fdatools import _linalg
+from fdatools._backend import asarray, default_namespace, to_numpy
+from fdatools._operator import LDO
+from fdatools.basis import Basis
+from fdatools.core import FData
 
 __all__ = ["BasisLayer", "FDataDataset", "SmoothingLayer"]
 
@@ -95,9 +95,9 @@ class BasisLayer(torch.nn.Module):
     --------
     >>> import numpy as np
     >>> import torch
-    >>> import fabel as fb
-    >>> from fabel.nn import BasisLayer
-    >>> layer = BasisLayer(fb.BSpline(domain=(0.0, 1.0), n_basis=6), np.linspace(0.0, 1.0, 11))
+    >>> import fdatools as fdt
+    >>> from fdatools.nn import BasisLayer
+    >>> layer = BasisLayer(fdt.BSpline(domain=(0.0, 1.0), n_basis=6), np.linspace(0.0, 1.0, 11))
     >>> layer(torch.ones(4, 6, dtype=torch.float64)).shape
     torch.Size([4, 11])
     """
@@ -157,9 +157,9 @@ class BasisLayer(torch.nn.Module):
         Examples
         --------
         >>> import torch
-        >>> import fabel as fb
-        >>> from fabel.nn import BasisLayer
-        >>> layer = BasisLayer(fb.Fourier(domain=(0.0, 1.0), n_basis=3))
+        >>> import fdatools as fdt
+        >>> from fdatools.nn import BasisLayer
+        >>> layer = BasisLayer(fdt.Fourier(domain=(0.0, 1.0), n_basis=3))
         >>> t = torch.linspace(0.0, 1.0, 5, dtype=torch.float64)
         >>> layer(torch.ones(3, dtype=torch.float64), t).shape
         torch.Size([5])
@@ -182,7 +182,7 @@ class SmoothingLayer(torch.nn.Module):
     r"""Penalised least-squares smoothing: map observations to basis coefficients.
 
     Computes ``c = (ΦᵀWΦ + λR)⁻¹ ΦᵀW y`` for observations ``y`` on a fixed
-    grid -- the fit of :func:`fabel.smoothing.smooth` with a given ``λ`` --
+    grid -- the fit of :func:`fdatools.smoothing.smooth` with a given ``λ`` --
     as a differentiable layer.  With a fixed ``λ`` this is one matrix product
     with a precomputed map; with ``trainable_lam=True`` the parameter
     ``log_lam = log λ`` is learned and the system is solved on every call.
@@ -221,10 +221,10 @@ class SmoothingLayer(torch.nn.Module):
     --------
     >>> import numpy as np
     >>> import torch
-    >>> import fabel as fb
-    >>> from fabel.nn import SmoothingLayer
+    >>> import fdatools as fdt
+    >>> from fdatools.nn import SmoothingLayer
     >>> t = np.linspace(0.0, 1.0, 30)
-    >>> layer = SmoothingLayer(fb.BSpline(domain=(0.0, 1.0), n_basis=8), t, lam=1e-4)
+    >>> layer = SmoothingLayer(fdt.BSpline(domain=(0.0, 1.0), n_basis=8), t, lam=1e-4)
     >>> layer(torch.zeros(5, 30, dtype=torch.float64)).shape
     torch.Size([5, 8])
     """
@@ -289,9 +289,9 @@ class SmoothingLayer(torch.nn.Module):
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.nn import SmoothingLayer
-        >>> b = fb.BSpline(n_basis=5)
+        >>> import fdatools as fdt
+        >>> from fdatools.nn import SmoothingLayer
+        >>> b = fdt.BSpline(n_basis=5)
         >>> SmoothingLayer(b, np.linspace(0, 1, 9), lam=0.5, trainable_lam=True).lam
         0.5
         """
@@ -328,9 +328,9 @@ class SmoothingLayer(torch.nn.Module):
         --------
         >>> import numpy as np
         >>> import torch
-        >>> import fabel as fb
-        >>> from fabel.nn import SmoothingLayer
-        >>> layer = SmoothingLayer(fb.Monomial(n_basis=2), np.linspace(0.0, 1.0, 5))
+        >>> import fdatools as fdt
+        >>> from fdatools.nn import SmoothingLayer
+        >>> layer = SmoothingLayer(fdt.Monomial(n_basis=2), np.linspace(0.0, 1.0, 5))
         >>> y = torch.linspace(1.0, 3.0, 5, dtype=torch.float64)  # y = 1 + 2t
         >>> [round(v, 10) for v in layer(y).tolist()]
         [1.0, 2.0]
@@ -352,7 +352,7 @@ class SmoothingLayer(torch.nn.Module):
 
 
 class FDataDataset(torch.utils.data.Dataset[Any]):
-    """Serve the curves of an :class:`~fabel.core.FData` to a DataLoader.
+    """Serve the curves of an :class:`~fdatools.core.FData` to a DataLoader.
 
     Item ``i`` is curve ``i`` -- its coefficients, or its values on a grid --
     optionally paired with its label.
@@ -375,7 +375,7 @@ class FDataDataset(torch.utils.data.Dataset[Any]):
     Raises
     ------
     TypeError
-        If ``fd`` is not an :class:`~fabel.core.FData`.
+        If ``fd`` is not an :class:`~fdatools.core.FData`.
     ValueError
         If the number of labels differs from the number of curves.
 
@@ -383,9 +383,9 @@ class FDataDataset(torch.utils.data.Dataset[Any]):
     --------
     >>> import numpy as np
     >>> import torch
-    >>> import fabel as fb
-    >>> from fabel.nn import FDataDataset
-    >>> fd = fb.FData(np.eye(5), fb.BSpline(n_basis=5))
+    >>> import fdatools as fdt
+    >>> from fdatools.nn import FDataDataset
+    >>> fd = fdt.FData(np.eye(5), fdt.BSpline(n_basis=5))
     >>> ds = FDataDataset(fd, labels=[0, 1, 0, 1, 0])
     >>> x, y = next(iter(torch.utils.data.DataLoader(ds, batch_size=5)))
     >>> tuple(x.shape), y.tolist()

@@ -12,7 +12,7 @@ Ramsay & Silverman, *Functional Data Analysis* (2nd ed.), chapter 3.
 Examples
 --------
 >>> import numpy as np
->>> from fabel import BSpline
+>>> from fdatools import BSpline
 >>> b = BSpline(domain=(0.0, 1.0), n_basis=6)
 >>> b(np.array([0.0, 0.5, 1.0])).shape
 (3, 6)
@@ -31,9 +31,9 @@ from math import isclose, pi, sqrt
 from types import ModuleType
 from typing import Any, ClassVar
 
-from fabel import _linalg
-from fabel._backend import array_namespace, asarray, default_namespace, to_numpy
-from fabel._operator import LDO
+from fdatools import _linalg
+from fdatools._backend import array_namespace, asarray, default_namespace, to_numpy
+from fdatools._operator import LDO
 
 __all__ = [
     "BSpline",
@@ -185,7 +185,7 @@ def _bspline_eval(t: Array, knots: Array, order: int, deriv: int, xp: ModuleType
 
 @dataclass(frozen=True, init=False)
 class Basis(ABC):
-    """Abstract base class for every Fabel basis system.
+    """Abstract base class for every fdatools basis system.
 
     A basis is a frozen dataclass, so it is hashable, comparable and safe to use
     as a cache key.  Subclasses provide the evaluation rule; this class provides
@@ -265,7 +265,7 @@ class Basis(ABC):
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import Monomial
+        >>> from fdatools import Monomial
         >>> Monomial(domain=(0.0, 1.0), n_basis=3)(np.array([2.0])).tolist()
         [[1.0, 2.0, 4.0]]
         """
@@ -306,7 +306,7 @@ class Basis(ABC):
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import Fourier
+        >>> from fdatools import Fourier
         >>> pen = Fourier(domain=(0.0, 1.0), n_basis=3).penalty(1)
         >>> np.round(np.diag(pen), 6).tolist()
         [0.0, 39.478418, 39.478418]
@@ -344,7 +344,7 @@ class Basis(ABC):
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import Fourier
+        >>> from fdatools import Fourier
         >>> np.round(Fourier(domain=(0.0, 1.0), n_basis=3).gram(), 12).tolist()
         [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         """
@@ -463,7 +463,7 @@ class BSpline(Basis):
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
+    >>> from fdatools import BSpline
     >>> b = BSpline(domain=(0.0, 1.0), n_basis=5, order=3)
     >>> b.n_basis
     5
@@ -516,7 +516,7 @@ class BSpline(Basis):
 
         Examples
         --------
-        >>> from fabel import BSpline
+        >>> from fdatools import BSpline
         >>> BSpline(breaks=[0.0, 0.5, 1.0], order=4).n_basis
         5
         """
@@ -533,7 +533,7 @@ class BSpline(Basis):
 
         Examples
         --------
-        >>> from fabel import BSpline
+        >>> from fdatools import BSpline
         >>> BSpline(n_basis=4).names
         ('bspl4.1', 'bspl4.2', 'bspl4.3', 'bspl4.4')
         """
@@ -550,7 +550,7 @@ class BSpline(Basis):
 
         Examples
         --------
-        >>> from fabel import BSpline
+        >>> from fdatools import BSpline
         >>> BSpline(breaks=[0.0, 1.0], order=2).knots
         (0.0, 0.0, 1.0, 1.0)
         """
@@ -632,7 +632,7 @@ class Fourier(Basis):
 
     Examples
     --------
-    >>> from fabel import Fourier
+    >>> from fdatools import Fourier
     >>> Fourier(domain=(0.0, 365.0), n_basis=4).n_basis
     5
     >>> Fourier(domain=(0.0, 365.0), n_basis=5).period
@@ -672,7 +672,7 @@ class Fourier(Basis):
 
         Examples
         --------
-        >>> from fabel import Fourier
+        >>> from fdatools import Fourier
         >>> Fourier(n_basis=6).n_basis
         7
         """
@@ -689,7 +689,7 @@ class Fourier(Basis):
 
         Examples
         --------
-        >>> from fabel import Fourier
+        >>> from fdatools import Fourier
         >>> Fourier(n_basis=3).names
         ('const', 'sin1', 'cos1')
         """
@@ -869,7 +869,7 @@ class Monomial(Basis):
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import Monomial
+    >>> from fdatools import Monomial
     >>> Monomial(n_basis=3)(np.array([3.0]), deriv=1).tolist()
     [[0.0, 1.0, 6.0]]
     """
@@ -908,7 +908,7 @@ class Monomial(Basis):
 
         Examples
         --------
-        >>> from fabel import Monomial
+        >>> from fdatools import Monomial
         >>> Monomial(exponents=[0, 2, 4]).n_basis
         3
         """
@@ -925,7 +925,7 @@ class Monomial(Basis):
 
         Examples
         --------
-        >>> from fabel import Monomial
+        >>> from fdatools import Monomial
         >>> Monomial(n_basis=2).names
         ('monomial0', 'monomial1')
         """
@@ -992,7 +992,7 @@ class Power(Basis):
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import Power
+    >>> from fdatools import Power
     >>> Power(domain=(1.0, 4.0), exponents=[0.5])(np.array([4.0])).tolist()
     [[2.0]]
     """
@@ -1028,7 +1028,7 @@ class Power(Basis):
 
         Examples
         --------
-        >>> from fabel import Power
+        >>> from fdatools import Power
         >>> Power(exponents=[0.0, 0.5, 1.0]).n_basis
         3
         """
@@ -1045,7 +1045,7 @@ class Power(Basis):
 
         Examples
         --------
-        >>> from fabel import Power
+        >>> from fdatools import Power
         >>> Power(exponents=[0.0, 0.5]).names
         ('power0.0', 'power0.5')
         """
@@ -1125,7 +1125,7 @@ class Exponential(Basis):
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import Exponential
+    >>> from fdatools import Exponential
     >>> Exponential(rates=[0.0, 1.0])(np.array([0.0])).tolist()
     [[1.0, 1.0]]
     """
@@ -1157,7 +1157,7 @@ class Exponential(Basis):
 
         Examples
         --------
-        >>> from fabel import Exponential
+        >>> from fdatools import Exponential
         >>> Exponential(rates=[0.0, 1.0, 2.0]).n_basis
         3
         """
@@ -1174,7 +1174,7 @@ class Exponential(Basis):
 
         Examples
         --------
-        >>> from fabel import Exponential
+        >>> from fdatools import Exponential
         >>> Exponential(rates=[0.0, 1.0]).names
         ('exp0.0', 'exp1.0')
         """
@@ -1226,7 +1226,7 @@ class Constant(Basis):
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import Constant
+    >>> from fdatools import Constant
     >>> Constant(domain=(0.0, 2.0)).gram().tolist()
     [[2.0]]
     """
@@ -1245,7 +1245,7 @@ class Constant(Basis):
 
         Examples
         --------
-        >>> from fabel import Constant
+        >>> from fdatools import Constant
         >>> Constant().n_basis
         1
         """
@@ -1262,7 +1262,7 @@ class Constant(Basis):
 
         Examples
         --------
-        >>> from fabel import Constant
+        >>> from fdatools import Constant
         >>> Constant().names
         ('const',)
         """
@@ -1311,7 +1311,7 @@ class Polygonal(Basis):
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import Polygonal
+    >>> from fdatools import Polygonal
     >>> Polygonal([0.0, 1.0, 2.0])(np.array([0.5])).tolist()
     [[0.5, 0.5, 0.0]]
     """
@@ -1340,7 +1340,7 @@ class Polygonal(Basis):
 
         Examples
         --------
-        >>> from fabel import Polygonal
+        >>> from fdatools import Polygonal
         >>> Polygonal([0.0, 1.0, 2.0]).n_basis
         3
         """
@@ -1357,7 +1357,7 @@ class Polygonal(Basis):
 
         Examples
         --------
-        >>> from fabel import Polygonal
+        >>> from fdatools import Polygonal
         >>> Polygonal([0.0, 1.0]).names
         ('polyg1', 'polyg2')
         """
@@ -1374,7 +1374,7 @@ class Polygonal(Basis):
 
         Examples
         --------
-        >>> from fabel import Polygonal
+        >>> from fdatools import Polygonal
         >>> Polygonal([0.0, 1.0]).order
         2
         """

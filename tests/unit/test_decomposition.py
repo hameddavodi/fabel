@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.decomposition` (FPCA, FCCA)."""
+"""Unit tests for :mod:`fdatools.decomposition` (FPCA, FCCA)."""
 
 from __future__ import annotations
 
@@ -13,9 +13,9 @@ from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-from fabel import LDO, BSpline, FData, Fourier
-from fabel.decomposition import FCCA, FPCA, _block_diagonal, _varimax_rotation
-from fabel.smoothing import Smoother
+from fdatools import LDO, BSpline, FData, Fourier
+from fdatools.decomposition import FCCA, FPCA, _block_diagonal, _varimax_rotation
+from fdatools.smoothing import Smoother
 
 matplotlib.use("Agg")
 

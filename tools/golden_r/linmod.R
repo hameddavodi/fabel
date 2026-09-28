@@ -1,6 +1,6 @@
 # tools/golden_r/linmod.R
 #
-# Golden cases for `fabel.regression.linmod`: R fda's `linmod`, the fully
+# Golden cases for `fdatools.regression.linmod`: R fda's `linmod`, the fully
 # functional linear model
 #
 #     y_i(t) = beta0(t) + int x_i(s) beta1(s, t) ds + e_i(t)

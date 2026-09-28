@@ -6,8 +6,8 @@ curves with two variables: the hip and knee angles of the gait data and the
 
 R's ``register.fd`` fits the warps of multivariate curves to the first variable
 alone (every case records R's univariate first-variable fit too, and the two
-agree to rounding), so Fabel is run with ``var_weights=[1, 0]`` to compare with
-R.  Fabel's default sums the criteria of all variables.  ``landmarkreg`` does
+agree to rounding), so fdatools is run with ``var_weights=[1, 0]`` to compare with
+R.  fdatools' default sums the criteria of all variables.  ``landmarkreg`` does
 not accept multivariate curves; its warps depend only on the landmarks, so the
 golden file runs it on each variable with the same landmarks.
 
@@ -26,9 +26,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel.basis import Basis
-from fabel.core import FData
-from fabel.registration import RegistrationResult, register
+from fdatools.basis import Basis
+from fdatools.core import FData
+from fdatools.registration import RegistrationResult, register
 
 from .conftest import build_basis, case_rtol, compare, golden_cases
 
@@ -60,9 +60,9 @@ _STOPS_SHORT = {
         "With R's discretisation (grid mean over 211 points, crit=2, lambda=0.01, "
         "first variable), R's Wfd scores 4.005844 / 1.376484 / 1.724921 / 3.736952 "
         "/ 7.200670 for the five boys, with gradients of max-norm 0.19 to 2.09 "
-        "there; Fabel's Newton iterate is stationary (gradient < 1e-12) at "
+        "there; fdatools' Newton iterate is stationary (gradient < 1e-12) at "
         "3.993467 / 1.369739 / 1.716418 / 3.722099 / 6.791805 -- lower on every "
-        "curve (checked by test_fabel_optimum_is_below_r_point).  The optima "
+        "curve (checked by test_fdatools_optimum_is_below_r_point).  The optima "
         "differ by up to 2.01 in W."
     ),
     GAIT_PERIODIC: (
@@ -70,9 +70,9 @@ _STOPS_SHORT = {
         "With R's discretisation (grid mean over 211 points, crit=1, lambda=0.01, "
         "periodic shift, first variable), R's (Wfd, shift) scores 4.772789 / "
         "4.817748 / 13.194021 / 18.376605 for the four boys, with gradients of "
-        "max-norm 1.09 to 6.20 there; Fabel's Newton iterate is stationary "
+        "max-norm 1.09 to 6.20 there; fdatools' Newton iterate is stationary "
         "(gradient < 1e-12) at 4.578179 / 3.473667 / 12.702899 / 13.294800 -- "
-        "lower on every curve (checked by test_fabel_optimum_is_below_r_point). "
+        "lower on every curve (checked by test_fdatools_optimum_is_below_r_point). "
         "Shifts differ by up to 2.32 and W by up to 7.6."
     ),
     HANDWRITING: (
@@ -80,9 +80,9 @@ _STOPS_SHORT = {
         "With R's discretisation (grid mean over 211 points, crit=2, lambda=1, "
         "first variable), R's Wfd scores 0.495565 / 0.367009 / 1.008572 / "
         "0.924378 / 1.371460 for the five samples, with gradients of max-norm "
-        "0.064 to 0.26 there; Fabel's Newton iterate is stationary (gradient < "
+        "0.064 to 0.26 there; fdatools' Newton iterate is stationary (gradient < "
         "1e-11) at 0.495236 / 0.366892 / 1.008538 / 0.924099 / 1.371380 -- lower "
-        "on every curve (checked by test_fabel_optimum_is_below_r_point).  The "
+        "on every curve (checked by test_fdatools_optimum_is_below_r_point).  The "
         "optima differ by up to 0.0073 in W."
     ),
 }
@@ -95,7 +95,7 @@ _TRAPEZOID = (
     "(handwriting, of 2300), which moves R's warpfd coefficients by up to 3.9e-5 "
     "/ 3.4e-5 / 6.3e-5 relative and R's register.newfd coefficients by 1.5e-5 / "
     "5.0e-6 / 5.5e-7 normwise, up to 1.5e-2 / 7.4e-3 / 1.8e-5 relative on the "
-    "smallest coefficients.  Fabel integrates exp(W) by Gauss-Legendre to "
+    "smallest coefficients.  fdatools integrates exp(W) by Gauss-Legendre to "
     "rounding error."
 )
 
@@ -111,8 +111,8 @@ _LANDMARK_STOPS_SHORT = (
     "landmarkreg's Wfd does not meet the landmarks it is fitted to: its warps "
     "miss the target landmark by 3.9e-6 / 3.9e-7 / 1.3e-7 / 1.6e-6 / 3.3e-7 / "
     "1.1e-5 for the six boys (smooth.morph objective 1.5e-11 to 1.3e-10), while "
-    "Fabel's meet it to 1e-10 (objective < 1e-23, checked by "
-    "test_fabel_landmark_warps_meet_the_landmarks).  The Wfd of the boy whose "
+    "fdatools' meet it to 1e-10 (objective < 1e-23, checked by "
+    "test_fdatools_landmark_warps_meet_the_landmarks).  The Wfd of the boy whose "
     "landmark is 0.01 from the target is 2.8e-3 in size, so its 1e-6 gap is "
     "3.9e-4 relative; the largest gap is 3.4e-6 in W."
 )
@@ -164,8 +164,8 @@ def _r_latent(case: dict[str, Any]) -> FData:
 
 
 @cache
-def _fabel(name: str) -> RegistrationResult:
-    """Fabel on the golden inputs with R's first-variable weighting."""
+def _fdatools(name: str) -> RegistrationResult:
+    """fdatools on the golden inputs with R's first-variable weighting."""
     case = CASES[name]
     return register(
         _curves(case), _curves(case, "y0fd_coefs"), var_weights=R_VAR_WEIGHTS, **_options(case)
@@ -236,7 +236,7 @@ def test_register_matches_r(name: str, field: str, request: pytest.FixtureReques
     """``register(..., var_weights=[1, 0])`` reproduces multivariate ``register.fd``."""
     _mark(request, R_FDA_DEFECTS.get((name, field)))
     case = CASES[name]
-    compare(_field(_fabel(name), field), case["output"][field], case_rtol(MODULE, case))
+    compare(_field(_fdatools(name), field), case["output"][field], case_rtol(MODULE, case))
 
 
 @pytest.mark.parametrize("name", CONTINUOUS)
@@ -257,7 +257,7 @@ def test_first_variable_weights_are_the_univariate_registration(name: str) -> No
         FData(target.coefs[:, :, 0], target.basis),
         **_options(case),
     )
-    multi = _fabel(name)
+    multi = _fdatools(name)
     np.testing.assert_allclose(multi.latent.coefs, first.latent.coefs, rtol=0, atol=1e-13)
     np.testing.assert_allclose(multi.shift, first.shift, rtol=0, atol=1e-13)
     np.testing.assert_allclose(
@@ -268,13 +268,13 @@ def test_first_variable_weights_are_the_univariate_registration(name: str) -> No
 
 
 @pytest.mark.parametrize("name", CONTINUOUS)
-def test_fabel_optimum_is_below_r_point(name: str) -> None:
+def test_fdatools_optimum_is_below_r_point(name: str) -> None:
     """The measured fact behind the xfails: R stops above a stationary point."""
     at_r = _from_r_latent(name)
-    fabel = _fabel(name)
+    fdatools = _fdatools(name)
     assert at_r.criterion is not None
-    assert fabel.criterion is not None
-    assert np.all(np.asarray(fabel.criterion) < np.asarray(at_r.criterion))
+    assert fdatools.criterion is not None
+    assert np.all(np.asarray(fdatools.criterion) < np.asarray(at_r.criterion))
     restarted = register(
         _curves(CASES[name]),
         _curves(CASES[name], "y0fd_coefs"),
@@ -290,7 +290,7 @@ def test_fabel_optimum_is_below_r_point(name: str) -> None:
     ("name", "field"), [(n, f) for n in CONTINUOUS for f in ("warpfd_coefs", "regfd_coefs")]
 )
 def test_warps_from_r_latent_match_r(name: str, field: str, request: pytest.FixtureRequest) -> None:
-    """R's own ``Wfd`` maps to R's ``warpfd`` / ``regfd`` through Fabel's warps."""
+    """R's own ``Wfd`` maps to R's ``warpfd`` / ``regfd`` through fdatools' warps."""
     _mark(request, R_POSTPROCESS_DEFECTS.get((name, field)))
     case = CASES[name]
     compare(_field(_from_r_latent(name), field), case["output"][field], case_rtol(MODULE, case))
@@ -380,8 +380,8 @@ def test_r_landmark_warps_do_not_depend_on_the_variable() -> None:
     compare(output["Wfd_coefs_hip"], output["Wfd_coefs_knee"], 1e-14)
 
 
-def test_fabel_landmark_warps_meet_the_landmarks() -> None:
-    """The measured fact behind the landmark xfail: Fabel's warps hit the landmarks."""
+def test_fdatools_landmark_warps_meet_the_landmarks() -> None:
+    """The measured fact behind the landmark xfail: fdatools' warps hit the landmarks."""
     case = CASES[LANDMARK]
     inputs = case["input"]
     result = _landmark_result()

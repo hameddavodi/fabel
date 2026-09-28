@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.io`: pandas/xarray round-trips and R ``.rds`` reading."""
+"""Unit tests for :mod:`fdatools.io`: pandas/xarray round-trips and R ``.rds`` reading."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-import fabel as fb
-from fabel.basis import BSpline, Constant, Exponential, Fourier, Monomial, Polygonal, Power
+import fdatools as fdt
+from fdatools.basis import BSpline, Constant, Exponential, Fourier, Monomial, Polygonal, Power
 
 pd = pytest.importorskip("pandas", reason="pandas extra not installed")
 pytest.importorskip("xarray", reason="pandas extra (xarray) not installed")
@@ -26,7 +26,7 @@ def test_from_pandas_shared_grid_returns_arrays() -> None:
     df = pd.DataFrame(
         {"id": ["a", "a", "b", "b"], "t": [0.0, 1.0, 0.0, 1.0], "y": [1.0, 2.0, 3.0, 4.0]}
     )
-    long = fb.from_pandas(df, "id", "t", "y")
+    long = fdt.from_pandas(df, "id", "t", "y")
     assert long.ids == ["a", "b"]
     assert isinstance(long.t, np.ndarray)
     assert isinstance(long.y, np.ndarray)
@@ -38,7 +38,7 @@ def test_from_pandas_shared_grid_returns_arrays() -> None:
 
 def test_from_pandas_irregular_grid_returns_dicts() -> None:
     df = pd.DataFrame({"id": ["a", "a", "b"], "t": [0.0, 1.0, 0.0], "y": [1.0, 2.0, 3.0]})
-    long = fb.from_pandas(df, "id", "t", "y")
+    long = fdt.from_pandas(df, "id", "t", "y")
     assert isinstance(long.t, dict)
     assert isinstance(long.y, dict)
     np.testing.assert_array_equal(long.t["a"], [0.0, 1.0])
@@ -49,13 +49,13 @@ def test_from_pandas_irregular_grid_returns_dicts() -> None:
 def test_from_pandas_missing_column_raises() -> None:
     df = pd.DataFrame({"id": ["a"], "t": [0.0], "y": [1.0]})
     with pytest.raises(ValueError, match="not found"):
-        fb.from_pandas(df, "id", "missing", "y")
+        fdt.from_pandas(df, "id", "missing", "y")
 
 
 def test_from_pandas_empty_raises() -> None:
     df = pd.DataFrame({"id": [], "t": [], "y": []})
     with pytest.raises(ValueError, match="at least one row"):
-        fb.from_pandas(df, "id", "t", "y")
+        fdt.from_pandas(df, "id", "t", "y")
 
 
 # --------------------------------------------------------------------------- #
@@ -64,7 +64,7 @@ def test_from_pandas_empty_raises() -> None:
 
 
 def test_to_pandas_univariate_columns_and_shape() -> None:
-    fd = fb.FData(np.eye(4), BSpline(domain=(0.0, 1.0), n_basis=4))
+    fd = fdt.FData(np.eye(4), BSpline(domain=(0.0, 1.0), n_basis=4))
     t = np.array([0.0, 0.5, 1.0])
     df = fd.to_pandas(t)
     assert list(df.columns) == ["t", "curve", "value"]
@@ -74,14 +74,14 @@ def test_to_pandas_univariate_columns_and_shape() -> None:
 
 def test_to_pandas_multivariate_adds_var_column() -> None:
     coefs = np.random.default_rng(0).normal(size=(4, 3, 2))
-    fd = fb.FData(coefs, BSpline(domain=(0.0, 1.0), n_basis=4))
+    fd = fdt.FData(coefs, BSpline(domain=(0.0, 1.0), n_basis=4))
     df = fd.to_pandas(np.array([0.0, 1.0]))
     assert list(df.columns) == ["t", "curve", "var", "value"]
     assert len(df) == 2 * 3 * 2
 
 
 def test_to_xarray_univariate_dims() -> None:
-    fd = fb.FData(np.eye(4), BSpline(domain=(0.0, 1.0), n_basis=4))
+    fd = fdt.FData(np.eye(4), BSpline(domain=(0.0, 1.0), n_basis=4))
     t = np.array([0.0, 0.5, 1.0])
     da = fd.to_xarray(t)
     assert da.dims == ("t", "curve")
@@ -91,17 +91,17 @@ def test_to_xarray_univariate_dims() -> None:
 
 def test_to_xarray_multivariate_dims() -> None:
     coefs = np.random.default_rng(1).normal(size=(4, 3, 2))
-    fd = fb.FData(coefs, BSpline(domain=(0.0, 1.0), n_basis=4))
+    fd = fdt.FData(coefs, BSpline(domain=(0.0, 1.0), n_basis=4))
     da = fd.to_xarray(np.array([0.0, 1.0]))
     assert da.dims == ("t", "curve", "var")
     assert da.shape == (2, 3, 2)
 
 
 def test_to_pandas_and_to_xarray_agree_on_values() -> None:
-    fd = fb.FData(np.eye(4), BSpline(domain=(0.0, 1.0), n_basis=4))
+    fd = fdt.FData(np.eye(4), BSpline(domain=(0.0, 1.0), n_basis=4))
     t = np.array([0.0, 0.3, 1.0])
-    df = fb.to_pandas(fd, t)
-    da = fb.to_xarray(fd, t)
+    df = fdt.to_pandas(fd, t)
+    da = fdt.to_xarray(fd, t)
     for _, row in df.iterrows():
         expected = da.to_numpy()[int(np.where(t == row["t"])[0][0]), int(row["curve"])]
         assert row["value"] == pytest.approx(expected)
@@ -113,7 +113,7 @@ def test_to_pandas_and_to_xarray_agree_on_values() -> None:
 
 
 def test_read_rds_bspline_basis() -> None:
-    basis = fb.read_rds(FIXTURES / "bspline_basis.rds")
+    basis = fdt.read_rds(FIXTURES / "bspline_basis.rds")
     assert isinstance(basis, BSpline)
     assert basis.domain == (0.0, 10.0)
     assert basis.n_basis == 7
@@ -121,7 +121,7 @@ def test_read_rds_bspline_basis() -> None:
 
 
 def test_read_rds_fourier_basis() -> None:
-    basis = fb.read_rds(FIXTURES / "fourier_basis.rds")
+    basis = fdt.read_rds(FIXTURES / "fourier_basis.rds")
     assert isinstance(basis, Fourier)
     assert basis.domain == (0.0, 12.0)
     assert basis.n_basis == 5
@@ -129,20 +129,20 @@ def test_read_rds_fourier_basis() -> None:
 
 
 def test_read_rds_fd() -> None:
-    fd = fb.read_rds(FIXTURES / "bspline_fd.rds")
-    assert isinstance(fd, fb.FData)
+    fd = fdt.read_rds(FIXTURES / "bspline_fd.rds")
+    assert isinstance(fd, fdt.FData)
     assert fd.coefs.shape == (7, 3)
     assert isinstance(fd.basis, BSpline)
 
 
 def test_read_rds_bifd() -> None:
-    bifd = fb.read_rds(FIXTURES / "bspline_bifd.rds")
-    assert isinstance(bifd, fb.BiFData)
+    bifd = fdt.read_rds(FIXTURES / "bspline_bifd.rds")
+    assert isinstance(bifd, fdt.BiFData)
     assert bifd.coefs.shape == (4, 4, 2, 1)
 
 
 def test_read_rds_rejects_dropind() -> None:
-    from fabel.io import _rds_basis
+    from fdatools.io import _rds_basis
 
     obj = {
         "type": np.array(["bspline"]),
@@ -156,7 +156,7 @@ def test_read_rds_rejects_dropind() -> None:
 
 
 def test_read_rds_rejects_unsupported_basis_type() -> None:
-    from fabel.io import _rds_basis
+    from fdatools.io import _rds_basis
 
     obj = {
         "type": np.array(["nonexistent"]),
@@ -170,7 +170,7 @@ def test_read_rds_rejects_unsupported_basis_type() -> None:
 
 
 def test_basis_roundtrip_matches_direct_construction() -> None:
-    from fabel.io import _rds_basis
+    from fdatools.io import _rds_basis
 
     for basis, obj in [
         (

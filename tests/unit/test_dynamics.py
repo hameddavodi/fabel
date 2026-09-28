@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.dynamics`: principal differential analysis."""
+"""Unit tests for :mod:`fdatools.dynamics`: principal differential analysis."""
 
 from __future__ import annotations
 
@@ -17,9 +17,9 @@ from hypothesis import strategies as st
 from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 
-from fabel import LDO, BSpline, Constant, FData, Fourier, Monomial
-from fabel.dynamics import PDA, PDAStability, phase_plane
-from fabel.smoothing import smooth
+from fdatools import LDO, BSpline, Constant, FData, Fourier, Monomial
+from fdatools.dynamics import PDA, PDAStability, phase_plane
+from fdatools.smoothing import smooth
 
 TWO_PI = 2.0 * np.pi
 

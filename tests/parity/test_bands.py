@@ -1,4 +1,4 @@
-"""Parity of :func:`fabel.stats.confidence_band` against R ``fda`` 6.3.0.
+"""Parity of :func:`fdatools.stats.confidence_band` against R ``fda`` 6.3.0.
 
 ``tests/golden/bands.json`` (``tools/golden_r/bands.R``) records pointwise
 standard errors on ``CanadianWeather``:
@@ -9,9 +9,9 @@ standard errors on ``CanadianWeather``:
 * of ``fRegress`` coefficients, ``sqrt(diag(Θ V Θᵀ))`` with ``V`` the ``bvar``
   R returns when given ``y2cMap`` and ``SigmaE``.
 
-Fabel refits everything itself from the raw data.  The weather arrays come from
-:func:`fabel.datasets.load_canadian_weather`; the tests are skipped when the
-dataset is not in the local cache (``$FABEL_DATA_DIR``).
+fdatools refits everything itself from the raw data.  The weather arrays come from
+:func:`fdatools.datasets.load_canadian_weather`; the tests are skipped when the
+dataset is not in the local cache (``$FDATOOLS_DATA_DIR``).
 """
 
 from __future__ import annotations
@@ -23,11 +23,11 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import Constant, FData
-from fabel.datasets import CanadianWeather, _cache_dir, load_canadian_weather
-from fabel.regression import FRegressResult, fregress
-from fabel.smoothing import SmoothResult, smooth
-from fabel.stats import confidence_band
+from fdatools import Constant, FData
+from fdatools.datasets import CanadianWeather, _cache_dir, load_canadian_weather
+from fdatools.regression import FRegressResult, fregress
+from fdatools.smoothing import SmoothResult, smooth
+from fdatools.stats import confidence_band
 
 from .conftest import build_basis, case_rtol, compare, golden_cases
 
@@ -42,9 +42,9 @@ SCALAR_DESIGN = "band_fregress_logannualprec_on_meantemp_latitude"
 FUNCTIONAL_DESIGN = "band_fregress_logannualprec_on_temp_bspline7"
 
 _FUNCTIONAL_QUADRATURE = (
-    "R integrates int temp_i(t) theta_k(t) dt approximately; Fabel's integrals "
+    "R integrates int temp_i(t) theta_k(t) dt approximately; fdatools' integrals "
     "are exact.  R's own dense trapezoid rule (365001 points) gives "
-    "int temp_1 theta_4 = 943.854155886, Fabel's value to 1e-13, while R's "
+    "int temp_1 theta_4 = 943.854155886, fdatools' value to 1e-13, while R's "
     "inprod() gives 947.596583972 (4.0e-3 off); fRegress's integrals carry the "
     "same kind of error (see tests/parity/test_regression.py).  Downstream, "
     "measured relative to the largest entry: beta1 2.2e-4, df 3.1e-8, sigma2 "
@@ -61,7 +61,7 @@ _FUNCTIONAL_QUADRATURE = (
 @cache
 def _weather() -> CanadianWeather:
     if not (_cache_dir() / "CanadianWeather.npz").exists():
-        pytest.skip("CanadianWeather is not in the local dataset cache ($FABEL_DATA_DIR)")
+        pytest.skip("CanadianWeather is not in the local dataset cache ($FDATOOLS_DATA_DIR)")
     return load_canadian_weather()
 
 

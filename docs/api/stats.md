@@ -1,6 +1,6 @@
 # Statistics
 
-`fabel.stats`: covariance and correlation of functional data, functional
+`fdatools.stats`: covariance and correlation of functional data, functional
 depth, the functional boxplot, and permutation t and F tests.
 
 `f_test` takes either raw regression inputs, `f_test(y, x, basis=, lam=,
@@ -9,4 +9,4 @@ penalty=)` like R's `Fperm.fd`, or a model fitted by
 exact model (its terms, intercept included, coefficient settings and weights)
 under every permutation.
 
-::: fabel.stats
+::: fdatools.stats

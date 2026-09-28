@@ -60,10 +60,10 @@ fitted equation is integrated with :func:`scipy.integrate.solve_ivp`
 Examples
 --------
 >>> import numpy as np
->>> import fabel as fb
->>> from fabel.dynamics import PDA
->>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
->>> curves = fb.FData(np.array([[0.0, 0.0], [1.0, 0.5], [0.0, 2.0]]), basis)
+>>> import fdatools as fdt
+>>> from fdatools.dynamics import PDA
+>>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+>>> curves = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.5], [0.0, 2.0]]), basis)
 >>> pda = PDA(order=2, n_grid=None).fit(curves)  # a sin t + b cos t solve D²x + x = 0
 >>> [round(float(w.coefs[0, 0]), 10) + 0.0 for w in pda.weights_]
 [1.0, 0.0]
@@ -80,11 +80,11 @@ from scipy.integrate import solve_ivp
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from fabel import _linalg
-from fabel._backend import asarray, default_namespace, to_numpy
-from fabel._operator import LDO
-from fabel.basis import Basis, Constant, _same_domain
-from fabel.core import FData, _quadrature
+from fdatools import _linalg
+from fdatools._backend import asarray, default_namespace, to_numpy
+from fdatools._operator import LDO
+from fdatools.basis import Basis, Constant, _same_domain
+from fdatools.core import FData, _quadrature
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -94,7 +94,7 @@ __all__ = ["PDA", "PDAStability", "phase_plane"]
 Array = Any
 
 #: Points on the equally spaced grid R's ``pda.fd`` integrates with the
-#: trapezoidal rule; the default, so that Fabel reproduces ``pda.fd``.
+#: trapezoidal rule; the default, so that fdatools reproduces ``pda.fd``.
 _R_GRID = 501
 
 #: Points used to draw a curve or a weight trajectory.
@@ -282,10 +282,10 @@ class PDAStability:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.dynamics import PDA
-    >>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
-    >>> fd = fb.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
+    >>> import fdatools as fdt
+    >>> from fdatools.dynamics import PDA
+    >>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+    >>> fd = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
     >>> result = PDA(order=2, n_grid=None).fit(fd).stability(n_points=3)
     >>> np.round(result.eigenvalues[0], 10) + 0.0
     array([0.+1.j, 0.-1.j])
@@ -316,10 +316,10 @@ class PDAStability:
         >>> import matplotlib
         >>> matplotlib.use("Agg")
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.dynamics import PDA
-        >>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
-        >>> fd = fb.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
+        >>> import fdatools as fdt
+        >>> from fdatools.dynamics import PDA
+        >>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+        >>> fd = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
         >>> len(PDA(order=2).fit(fd).stability().plot().lines)
         5
         """
@@ -407,7 +407,7 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     n_grid : int or None, optional
         How the integrals are computed.  An integer is the number of equally
         spaced points of a trapezoidal rule; the default ``501`` is the rule
-        R's ``pda.fd`` uses, so Fabel reproduces it.  (R raises its grid to
+        R's ``pda.fd`` uses, so fdatools reproduces it.  (R raises its grid to
         five times the number of basis functions of the curves when that is
         larger; pass that number to reproduce R for curve bases of more than
         100 functions.)  The residual functions are then least-squares fits
@@ -428,7 +428,7 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     ----------
     weights_ : tuple
         For one variable, ``weights_[j]`` is ``β_j`` as a one-curve
-        :class:`~fabel.core.FData`.  For ``d`` variables, ``weights_[i][k][j]``
+        :class:`~fdatools.core.FData`.  For ``d`` variables, ``weights_[i][k][j]``
         multiplies ``D^j x_k`` in equation ``i``.  This mirrors the nesting of
         R's ``bwtlist``.
     forcing_weights_ : tuple
@@ -449,11 +449,11 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.dynamics import PDA
+    >>> import fdatools as fdt
+    >>> from fdatools.dynamics import PDA
     >>> t = np.linspace(0.0, 1.0, 101)
-    >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=24, order=5)
-    >>> from fabel.smoothing import smooth
+    >>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=24, order=5)
+    >>> from fdatools.smoothing import smooth
     >>> fd = smooth(np.exp(-4 * t), t, basis=basis, lam=0.0).fd
     >>> pda = PDA(order=1).fit(fd)  # Dx + βx = 0
     >>> round(float(pda.weights_[0].coefs[0, 0]), 6)
@@ -463,7 +463,7 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     for the constant input ``u = 1``.
 
     >>> fd = smooth(0.5 * (1 - np.exp(-4 * t)), t, basis=basis, lam=0.0).fd
-    >>> u = fb.FData(np.array([1.0]), fb.Constant(domain=(0.0, 1.0)))
+    >>> u = fdt.FData(np.array([1.0]), fdt.Constant(domain=(0.0, 1.0)))
     >>> pda = PDA(order=1).fit(fd, forcing=u)
     >>> (
     ...     round(float(pda.weights_[0].coefs[0, 0]), 6),
@@ -635,14 +635,14 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Parameters
         ----------
         X : FData
-            The curves; a multivariate :class:`~fabel.core.FData` (``n_vars >
+            The curves; a multivariate :class:`~fdatools.core.FData` (``n_vars >
             1``) is fitted as a system of coupled equations.
         y : None
             Ignored; present for scikit-learn compatibility.
         forcing : FData or sequence, optional
             Forcing functions ``u_k`` (R's ``ufdlist``).  For one equation an
-            :class:`~fabel.core.FData` or a sequence of them; for a system one
-            entry per equation, each ``None``, an :class:`~fabel.core.FData` or
+            :class:`~fdatools.core.FData` or a sequence of them; for a system one
+            entry per equation, each ``None``, an :class:`~fdatools.core.FData` or
             a sequence of them.  Each has one variable and either one curve per
             curve of ``X`` or a single curve shared by all of them.
 
@@ -654,17 +654,17 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Raises
         ------
         TypeError
-            If ``X`` or a forcing function is not an :class:`~fabel.core.FData`.
+            If ``X`` or a forcing function is not an :class:`~fdatools.core.FData`.
         ValueError
             If a parameter is invalid or the normal equations are singular.
 
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.dynamics import PDA
-        >>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
-        >>> fd = fb.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
+        >>> import fdatools as fdt
+        >>> from fdatools.dynamics import PDA
+        >>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+        >>> fd = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
         >>> len(PDA(order=2).fit(fd).weights_)
         2
         """
@@ -787,19 +787,19 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Raises
         ------
         TypeError
-            If ``X`` is not an :class:`~fabel.core.FData`.
+            If ``X`` is not an :class:`~fdatools.core.FData`.
         ValueError
             If ``X`` or ``forcing`` does not match the fitted model.
 
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.dynamics import PDA
-        >>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
-        >>> fd = fb.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
+        >>> import fdatools as fdt
+        >>> from fdatools.dynamics import PDA
+        >>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+        >>> fd = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
         >>> pda = PDA(order=2, n_grid=None).fit(fd)
-        >>> new = fb.FData(np.array([0.0, 2.0, -1.0]), basis)
+        >>> new = fdt.FData(np.array([0.0, 2.0, -1.0]), basis)
         >>> bool(np.max(np.abs(pda.transform(new)(np.linspace(0, 6, 7)))) < 1e-10)
         True
         """
@@ -840,10 +840,10 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.dynamics import PDA
-        >>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
-        >>> fd = fb.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
+        >>> import fdatools as fdt
+        >>> from fdatools.dynamics import PDA
+        >>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+        >>> fd = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
         >>> PDA(order=2).fit_transform(fd).n_curves
         2
         """
@@ -910,10 +910,10 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.dynamics import PDA
-        >>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
-        >>> fd = fb.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
+        >>> import fdatools as fdt
+        >>> from fdatools.dynamics import PDA
+        >>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+        >>> fd = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
         >>> pda = PDA(order=2, n_grid=None).fit(fd)
         >>> t = np.linspace(0.0, np.pi, 5)
         >>> bool(np.allclose(pda.solve(t, [0.0, 1.0]), np.sin(t), atol=1e-8))
@@ -1016,13 +1016,13 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.dynamics import PDA
-        >>> from fabel.smoothing import smooth
+        >>> import fdatools as fdt
+        >>> from fdatools.dynamics import PDA
+        >>> from fdatools.smoothing import smooth
         >>> t = np.linspace(0.0, 1.0, 101)
-        >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=24, order=5)
+        >>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=24, order=5)
         >>> fd = smooth(0.5 * (1 - np.exp(-4 * t)), t, basis=basis, lam=0.0).fd
-        >>> u = fb.FData(np.array([1.0]), fb.Constant(domain=(0.0, 1.0)))
+        >>> u = fdt.FData(np.array([1.0]), fdt.Constant(domain=(0.0, 1.0)))
         >>> result = PDA(order=1).fit(fd, forcing=u).stability(n_points=3)
         >>> np.round(result.eigenvalues.real, 6) + 0.0, np.round(result.limits, 6) + 0.0
         (array([[-4.],
@@ -1125,10 +1125,10 @@ class PDA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         >>> import matplotlib
         >>> matplotlib.use("Agg")
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.dynamics import PDA
-        >>> basis = fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
-        >>> fd = fb.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
+        >>> import fdatools as fdt
+        >>> from fdatools.dynamics import PDA
+        >>> basis = fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+        >>> fd = fdt.FData(np.array([[0.0, 0.0], [1.0, 0.3], [0.2, 1.0]]), basis)
         >>> len(PDA(order=2).fit(fd).plot_overlay().lines) >= 2
         True
         """
@@ -1212,10 +1212,10 @@ def phase_plane(
     >>> import matplotlib
     >>> matplotlib.use("Agg")
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.dynamics import phase_plane
-    >>> basis = fb.Fourier(domain=(0.0, 1.0), n_basis=5)
-    >>> fd = fb.FData(np.array([[0.0, 1.0, 0.0, 0.2, 0.0]]).T, basis)
+    >>> import fdatools as fdt
+    >>> from fdatools.dynamics import phase_plane
+    >>> basis = fdt.Fourier(domain=(0.0, 1.0), n_basis=5)
+    >>> fd = fdt.FData(np.array([[0.0, 1.0, 0.0, 0.2, 0.0]]).T, basis)
     >>> len(phase_plane(fd).lines)
     1
     """

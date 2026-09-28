@@ -21,8 +21,8 @@ data in the *phase plane*.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import fabel as fb
-from fabel.dynamics import PDA, phase_plane
+import fdatools as fdt
+from fdatools.dynamics import PDA, phase_plane
 ```
 
 We smooth the 20 lip curves with an order-6 B-spline and a small penalty on
@@ -30,10 +30,10 @@ the fourth derivative, so that the first two derivatives are smooth.
 
 ```python
 # requires-data: lip
-lip = fb.datasets.load_lip()
+lip = fdt.datasets.load_lip()
 t = lip.t                                      # 51 time points, 0 to 0.35 s
-lip_basis = fb.BSpline(domain=(0.0, 0.35), n_basis=31, order=6)
-lip_fd = fb.smooth(lip.value, t, basis=lip_basis, penalty=4, lam=1e-8).fd
+lip_basis = fdt.BSpline(domain=(0.0, 0.35), n_basis=31, order=6)
+lip_fd = fdt.smooth(lip.value, t, basis=lip_basis, penalty=4, lam=1e-8).fd
 
 fig, ax = plt.subplots()
 lip_fd.plot(ax=ax, color="grey", alpha=0.6)
@@ -71,7 +71,7 @@ weights vary with a B-spline basis, with a small roughness penalty:
 
 ```python
 # requires-data: lip
-weight_basis = fb.BSpline(domain=(0.0, 0.35), n_basis=21)
+weight_basis = fdt.BSpline(domain=(0.0, 0.35), n_basis=21)
 pda = PDA(order=2, weight_basis=weight_basis, lam=1e-8).fit(lip_fd)
 
 grid = np.linspace(0.0, 0.35, 200)
@@ -134,14 +134,14 @@ horizontal distance from the origin shows kinetic energy (speed), the
 vertical one potential energy (force).
 
 Here are the height curves of three girls from the growth data (it ships with
-Fabel). The pubertal growth spurt is a large loop: speed rises, peaks when the
+fdatools). The pubertal growth spurt is a large loop: speed rises, peaks when the
 acceleration crosses zero, and falls again.
 
 ```python
-growth = fb.datasets.load_growth()
-girls = fb.smooth(
+growth = fdt.datasets.load_growth()
+girls = fdt.smooth(
     growth.hgtf[:, :3], growth.age,
-    basis=fb.BSpline(domain=(1.0, 18.0), n_basis=35, order=6), penalty=4, lam=1e-2,
+    basis=fdt.BSpline(domain=(1.0, 18.0), n_basis=35, order=6), penalty=4, lam=1e-2,
 ).fd
 
 ages = np.linspace(4.0, 17.0, 300)
@@ -173,7 +173,7 @@ phaseplanePlot(seq(4, 17, length.out = 300), hgtfd[1:3])
 
 Differences to know:
 
-- R's `pda.fd` integrates with the trapezoid rule on 501 points. Fabel does the
+- R's `pda.fd` integrates with the trapezoid rule on 501 points. fdatools does the
   same by default (`n_grid=501`), so the weights match R. `n_grid=None` uses
   exact integrals instead; the results differ from R by about 1e-5.
 - R has no `solve()`; you would call an ODE solver yourself.

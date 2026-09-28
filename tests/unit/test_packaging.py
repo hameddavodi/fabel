@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-import fabel
+import fdatools
 
 # tomllib is standard library from Python 3.11; on 3.10 these checks are skipped
 # (the 3.11-3.13 CI jobs still run them).
@@ -20,7 +20,7 @@ SUPPORTED = ["3.10", "3.11", "3.12", "3.13"]
 
 def test_version_matches_everywhere() -> None:
     version = PYPROJECT["project"]["version"]
-    assert fabel.__version__ == version
+    assert fdatools.__version__ == version
     citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
     assert re.search(rf"^version: {re.escape(version)}$", citation, re.MULTILINE)
     changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
@@ -28,7 +28,7 @@ def test_version_matches_everywhere() -> None:
 
 
 def test_typed_marker_and_package_data_present() -> None:
-    package = REPO_ROOT / "src" / "fabel"
+    package = REPO_ROOT / "src" / "fdatools"
     assert (package / "py.typed").is_file()
     for name in ("growth", "gait", "pinch"):
         assert (package / "_data" / f"{name}.npz").is_file()

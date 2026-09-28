@@ -27,8 +27,8 @@ and ``Dⁿ x = β₁ D^{n-1} exp W`` for a monotone fit.
 Examples
 --------
 >>> import numpy as np
->>> from fabel import BSpline
->>> from fabel.smoothing import smooth
+>>> from fdatools import BSpline
+>>> from fdatools.smoothing import smooth
 >>> t = np.linspace(0.0, 1.0, 21)
 >>> y = np.sin(2 * np.pi * t)
 >>> result = smooth(y, t, basis=BSpline(domain=(0.0, 1.0), n_basis=12), lam=1e-8)
@@ -47,11 +47,11 @@ from typing import Any
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, validate_data
 
-from fabel import _linalg
-from fabel._backend import array_namespace, asarray, default_namespace, to_numpy
-from fabel._operator import LDO
-from fabel.basis import Basis, BSpline
-from fabel.core import FData
+from fdatools import _linalg
+from fdatools._backend import array_namespace, asarray, default_namespace, to_numpy
+from fdatools._operator import LDO
+from fdatools.basis import Basis, BSpline
+from fdatools.core import FData
 
 __all__ = [
     "SmoothResult",
@@ -141,7 +141,7 @@ class SmoothResult:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.smoothing import smooth
+    >>> from fdatools.smoothing import smooth
     >>> t = np.linspace(0.0, 1.0, 15)
     >>> result = smooth(t**2, t, lam=1e-8)
     >>> result.constraint is None and result.beta is None
@@ -188,7 +188,7 @@ class SmoothResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.smoothing import smooth
+        >>> from fdatools.smoothing import smooth
         >>> t = np.linspace(0.0, 1.0, 40)
         >>> fit = smooth(np.exp(2 * t), t, constraint="positive", lam=1e-8)
         >>> np.round(fit(np.array([0.5]), 3)[:, 0] / np.exp(1.0), 2)  # D³ e^{2t} = 8 e^{2t}
@@ -300,7 +300,7 @@ def _gcv_denominator(df: float, n_points: int) -> float:
 
     At ``df = n`` the criterion is ``0 / 0``: the residuals and the denominator
     are both pure rounding, and their ratio is noise (a measured 0.27 for an
-    exact interpolant).  R's ``smooth.basis`` returns no GCV there; Fabel
+    exact interpolant).  R's ``smooth.basis`` returns no GCV there; fdatools
     reports ``inf`` once ``n - df`` is within :data:`_INTERPOLATION_TOL` of
     zero relative to ``n``.
     """
@@ -338,7 +338,7 @@ def _linear_fit(
 class _Pencil:
     """Diagonalised smoothing pencil, giving ``df`` and ``gcv`` at O(K) per lambda.
 
-    With ``μ, V`` from :func:`fabel._linalg.pencil_eigh` applied to
+    With ``μ, V`` from :func:`fdatools._linalg.pencil_eigh` applied to
     ``(ΦᵀWΦ, ΦᵀWΦ + R)`` the inverse ``(ΦᵀWΦ + λR)⁻¹`` is
     ``V diag((μ + λ(1-μ))⁻¹) Vᵀ``, so a whole lambda grid reuses a single
     eigendecomposition.
@@ -492,8 +492,8 @@ def lambda_to_df(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.smoothing import lambda_to_df
+    >>> from fdatools import BSpline
+    >>> from fdatools.smoothing import lambda_to_df
     >>> t = np.linspace(0.0, 1.0, 30)
     >>> round(lambda_to_df(t, BSpline(domain=(0.0, 1.0), n_basis=10), 0.0), 6)
     10.0
@@ -531,8 +531,8 @@ def df_to_lambda(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.smoothing import df_to_lambda, lambda_to_df
+    >>> from fdatools import BSpline
+    >>> from fdatools.smoothing import df_to_lambda, lambda_to_df
     >>> t = np.linspace(0.0, 1.0, 40)
     >>> basis = BSpline(domain=(0.0, 1.0), n_basis=12)
     >>> lam = df_to_lambda(t, basis, 6.0)
@@ -585,8 +585,8 @@ def gcv_curve(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.smoothing import gcv_curve
+    >>> from fdatools import BSpline
+    >>> from fdatools.smoothing import gcv_curve
     >>> t = np.linspace(0.0, 1.0, 40)
     >>> y = np.sin(2 * np.pi * t)
     >>> scores = gcv_curve(y, t, BSpline(domain=(0.0, 1.0), n_basis=10), [1e-6, 1e-2])
@@ -790,7 +790,7 @@ def _constrained_fit(
     phi = basis(t)
     fixed = basis.domain if constraint == "morph" else None
     # R's smooth.pos/smooth.monotone minimise mean(w r^2) + lam * c'Rc, where
-    # smooth.basis minimises sum(w r^2) + lam * c'Rc.  Fabel keeps one criterion
+    # smooth.basis minimises sum(w r^2) + lam * c'Rc.  fdatools keeps one criterion
     # (the sum) and rescales the constrained penalty, so `lam` means the same
     # thing here as in R.  Verified against the goldens: the stationarity
     # condition of R's reported coefficients holds at exactly n * lam.
@@ -896,7 +896,7 @@ def smooth(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.smoothing import smooth
+    >>> from fdatools.smoothing import smooth
     >>> t = np.linspace(0.0, 1.0, 60)
     >>> y = np.exp(np.sin(4 * t))
     >>> fit = smooth(y, t, constraint="positive", lam=1e-6)
@@ -1059,7 +1059,7 @@ class Smoother(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.smoothing import Smoother
+    >>> from fdatools.smoothing import Smoother
     >>> rng = np.random.default_rng(0)
     >>> t = np.linspace(0.0, 1.0, 25)
     >>> X = np.sin(2 * np.pi * t) + 0.05 * rng.standard_normal((6, 25))

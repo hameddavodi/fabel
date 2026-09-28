@@ -1,9 +1,9 @@
 cff-version: 1.2.0
-message: "If you use Fabel, please cite it as below, together with Ramsay & Silverman (2005)."
+message: "If you use fdatools, please cite it as below, together with Ramsay & Silverman (2005)."
 type: software
-title: "Fabel: functional data analysis for Python"
+title: "fdatools: functional data analysis for Python"
 abstract: >-
-  Fabel is a clean-room Python rewrite of the R package fda (version 6.3.0):
+  fdatools is a clean-room Python rewrite of the R package fda (version 6.3.0):
   basis expansions, penalised smoothing, functional principal component and
   canonical correlation analysis, functional regression, curve registration
   and principal differential analysis, with numerical parity against R.
@@ -14,8 +14,8 @@ authors:
   - family-names: Davodi
     given-names: Hamed
     email: hamed.davodi94@gmail.com
-repository-code: "https://github.com/hameddavodi/fabel"
-url: "https://hameddavodi.github.io/fabel"
+repository-code: "https://github.com/hameddavodi/fdatools"
+url: "https://hameddavodi.github.io/fdatools"
 keywords:
   - functional data analysis
   - fda

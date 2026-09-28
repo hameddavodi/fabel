@@ -7,37 +7,37 @@ Scratch scripts: `/private/tmp/claude-501/-Users-hamed-work-fda/52508ebb-3a0a-40
 
 ```
 .venv/bin/pytest -q            -> 545 passed, 24 xfailed in 5.59s   (exit 0)
-ruff check . ; ruff format --check . ; mypy --strict src/fabel
+ruff check . ; ruff format --check . ; mypy --strict src/fdatools
                                -> All checks passed! / 20 files already formatted / Success: no issues found in 7 source files
 coverage (unit+parity)         -> basis 96%, core 96%, _linalg 93%, _backend 93%, _operator 100%, _plot 97%, TOTAL 96%
 ```
 
 ## 1. `R_FDA_DEFECTS` verdict table
 
-Method: exact rational integrals via sympy (Bernstein Gram), `scipy.integrate.quad` at 1e-13/1e-14 tolerances (Fourier / power / inprod), symbolic derivatives (monomial / power), central finite differences (polygonal, order-6 D²), and pointwise products of factor curves evaluated by **both** Fabel and R `eval.fd` on a 2001-point grid (`times.fd`, `^.fd`). R live values were regenerated with `Rscript` and match the golden files to 0.0 relative.
+Method: exact rational integrals via sympy (Bernstein Gram), `scipy.integrate.quad` at 1e-13/1e-14 tolerances (Fourier / power / inprod), symbolic derivatives (monomial / power), central finite differences (polygonal, order-6 D²), and pointwise products of factor curves evaluated by **both** fdatools and R `eval.fd` on a 2001-point grid (`times.fd`, `^.fd`). R live values were regenerated with `Rscript` and match the golden files to 0.0 relative.
 
 "rel" = max|a − b| / max|b|.
 
 | Case | Verdict | Numbers |
 |---|---|---|
-| `bspline_penalty_k4_n4_dom0_1_L0` | **R wrong** (not a convention difference) | exact Bernstein Gram [0,0] = 1/7; Fabel rel 7.8e-16; R rel 6.0. R's matrix is exactly the monomial Gram (Hilbert, rel 0.0). R's own `eval.basis` on this basis returns Bernstein values (0.421875 = 0.75³ at t = 0.25) and R's own `inprod(b, b)` returns 1/7 in [0,0] — R's `eval.penalty` is inconsistent with R's own basis functions. |
-| `..._L1` | **R wrong** | exact [0,0] = 9/5; Fabel rel 8.6e-16; R rel 1.33 (first row zero). |
-| `..._L2` | **R wrong** | exact [0,0] = 12; Fabel rel 7.9e-16; R rel 1.0. |
-| `fourier_periodmismatch_penalty_L0` | **R wrong (quadrature error)** | Fabel rel 4.4e-16; R rel 1.38e-6; R[7,7] = 0.499999308 vs exact 0.5. |
-| `..._L1` | **R wrong** | Fabel rel 3.6e-16; R rel 1.38e-6 (max abs 1.1e-4). |
-| `..._L2` | **R wrong** | Fabel rel 4.4e-16; R rel 1.38e-6 (max abs 1.7e-2; R[7,7] 12468.3464 vs 12468.3637). |
-| `monomial_eval_n3_d2` | **R wrong** | D²tᵉ = e(e−1)tᵉ⁻²; Fabel rel 0; R rel 1.0 (R gives 0 for e = 2). |
-| `monomial_eval_n4_d2` / `n5` / `n6` | **R wrong** | Fabel rel 0; R rel 0.5 / 0.33 / 0.25 (R coefficient e(e−2) confirmed: e = 5 gives 15 instead of 20). |
-| `monomial_customexp_eval_d2` | **R wrong** | Fabel rel 0; R rel 0.25. |
-| `power_cfg1_eval_d1` | **R wrong** | Fabel rel 0; R rel 1.0 (R zeroes e = 0.5 and e = 1, returns 4t for e = 2). |
-| `power_cfg2_eval_d1` | **R wrong** | Fabel rel 0; R rel 1.0 (R returns all zeros). |
-| `power_cfg2_penalty_L0` | **R wrong** | exact [0,1] = ln 6 = 1.791759469; Fabel matches to 2e-16; R NaN at [0,1],[1,0]; R's other entries rel 2e-16. |
-| `polygonal_n5_eval_d1` / `n11` / `n20` | **R wrong** | R d1 output == d0 values (rel 0 / 1e-16 / 1e-16); Fabel d1 vs central FD of d0 rel 3e-11; R d1 vs FD rel ≈ 1.1. R's own `eval.penalty(polyg, 1)` uses true slopes (±4 for h = 0.25). |
-| `fd_mul_bspline` | **R wrong** | truth = R `eval.fd(f1)·eval.fd(f2)` (Fabel factor evals agree with R to 6e-16). Fabel product (order 7, n = 31, multiplicity-4 knots) rel 7.5e-15. R `times.fd` (order 7, n = 13) rel 1.28e-1 (max abs 0.254, scale 1.99). Least-squares projection of truth onto R's own basis is 6.1e-2 away from R's coefficients — R is not even the projection. |
-| `fd_power2` | **R wrong** | Fabel rel 1.9e-14; R rel 5.67e-5. |
-| `inprod_fourier_L0_0` / `L1_1` / `L2_2` | **R wrong (Romberg)** | vs quad: Fabel 7e-16 / 4e-16 / 1e-16; R golden 4.3e-5 / 1.2e-4 / 2.0e-4. R's own `t(C) %*% eval.penalty(b, L) %*% C` matches quad to 4e-16 — R's `inprod` disagrees with R's own exact Gram. |
-| `inprod_basis_bspline_x_fourier` | **R wrong (Romberg)** | Fabel rel 9.7e-16; R rel 5.7e-5. |
-| `deriv_fd_bspline_order6_L2` | **R wrong** | Fabel D² (order-4 basis) vs central FD rel 3.5e-7 (h = 1e-4); vs Fabel `fd(t, 2)` 3.9e-16; vs R `eval.fd(t, f, 2)` 3.9e-16. R `deriv.fd` vs R's own `eval.fd(t, f, 2)` rel 1.29e-2 (max abs 60, scale 4655). |
+| `bspline_penalty_k4_n4_dom0_1_L0` | **R wrong** (not a convention difference) | exact Bernstein Gram [0,0] = 1/7; fdatools rel 7.8e-16; R rel 6.0. R's matrix is exactly the monomial Gram (Hilbert, rel 0.0). R's own `eval.basis` on this basis returns Bernstein values (0.421875 = 0.75³ at t = 0.25) and R's own `inprod(b, b)` returns 1/7 in [0,0] — R's `eval.penalty` is inconsistent with R's own basis functions. |
+| `..._L1` | **R wrong** | exact [0,0] = 9/5; fdatools rel 8.6e-16; R rel 1.33 (first row zero). |
+| `..._L2` | **R wrong** | exact [0,0] = 12; fdatools rel 7.9e-16; R rel 1.0. |
+| `fourier_periodmismatch_penalty_L0` | **R wrong (quadrature error)** | fdatools rel 4.4e-16; R rel 1.38e-6; R[7,7] = 0.499999308 vs exact 0.5. |
+| `..._L1` | **R wrong** | fdatools rel 3.6e-16; R rel 1.38e-6 (max abs 1.1e-4). |
+| `..._L2` | **R wrong** | fdatools rel 4.4e-16; R rel 1.38e-6 (max abs 1.7e-2; R[7,7] 12468.3464 vs 12468.3637). |
+| `monomial_eval_n3_d2` | **R wrong** | D²tᵉ = e(e−1)tᵉ⁻²; fdatools rel 0; R rel 1.0 (R gives 0 for e = 2). |
+| `monomial_eval_n4_d2` / `n5` / `n6` | **R wrong** | fdatools rel 0; R rel 0.5 / 0.33 / 0.25 (R coefficient e(e−2) confirmed: e = 5 gives 15 instead of 20). |
+| `monomial_customexp_eval_d2` | **R wrong** | fdatools rel 0; R rel 0.25. |
+| `power_cfg1_eval_d1` | **R wrong** | fdatools rel 0; R rel 1.0 (R zeroes e = 0.5 and e = 1, returns 4t for e = 2). |
+| `power_cfg2_eval_d1` | **R wrong** | fdatools rel 0; R rel 1.0 (R returns all zeros). |
+| `power_cfg2_penalty_L0` | **R wrong** | exact [0,1] = ln 6 = 1.791759469; fdatools matches to 2e-16; R NaN at [0,1],[1,0]; R's other entries rel 2e-16. |
+| `polygonal_n5_eval_d1` / `n11` / `n20` | **R wrong** | R d1 output == d0 values (rel 0 / 1e-16 / 1e-16); fdatools d1 vs central FD of d0 rel 3e-11; R d1 vs FD rel ≈ 1.1. R's own `eval.penalty(polyg, 1)` uses true slopes (±4 for h = 0.25). |
+| `fd_mul_bspline` | **R wrong** | truth = R `eval.fd(f1)·eval.fd(f2)` (fdatools factor evals agree with R to 6e-16). fdatools product (order 7, n = 31, multiplicity-4 knots) rel 7.5e-15. R `times.fd` (order 7, n = 13) rel 1.28e-1 (max abs 0.254, scale 1.99). Least-squares projection of truth onto R's own basis is 6.1e-2 away from R's coefficients — R is not even the projection. |
+| `fd_power2` | **R wrong** | fdatools rel 1.9e-14; R rel 5.67e-5. |
+| `inprod_fourier_L0_0` / `L1_1` / `L2_2` | **R wrong (Romberg)** | vs quad: fdatools 7e-16 / 4e-16 / 1e-16; R golden 4.3e-5 / 1.2e-4 / 2.0e-4. R's own `t(C) %*% eval.penalty(b, L) %*% C` matches quad to 4e-16 — R's `inprod` disagrees with R's own exact Gram. |
+| `inprod_basis_bspline_x_fourier` | **R wrong (Romberg)** | fdatools rel 9.7e-16; R rel 5.7e-5. |
+| `deriv_fd_bspline_order6_L2` | **R wrong** | fdatools D² (order-4 basis) vs central FD rel 3.5e-7 (h = 1e-4); vs fdatools `fd(t, 2)` 3.9e-16; vs R `eval.fd(t, f, 2)` 3.9e-16. R `deriv.fd` vs R's own `eval.fd(t, f, 2)` rel 1.29e-2 (max abs 60, scale 4655). |
 
 All 24 `xfail(strict=True)` entries are justified. No convention difference found; in every case R's stated result is inconsistent with another R entry point on the same object. Reason strings are accurate (the two R-side numbers quoted — 12.8% / 0.254 / 1.99, 1.3% / 59.9 / 4655, 5.7e-5, ~1.4e-6, ~1.3e-4 — all reproduce).
 
@@ -46,14 +46,14 @@ One nit in a reason string: `power_cfg1_eval_d1` says R "returns 4t" for e = 2; 
 ## 2. Confirmed bugs (with reproducers)
 
 ### B1 — `FData[-1]` silently returns an empty object (High)
-`src/fabel/core.py:270` — `self.coefs[:, index : index + 1, ...]` with `index = -1` is `slice(-1, 0)` → shape `(n_basis, 0)`. No error, downstream ops return empty arrays.
+`src/fdatools/core.py:270` — `self.coefs[:, index : index + 1, ...]` with `index = -1` is `slice(-1, 0)` → shape `(n_basis, 0)`. No error, downstream ops return empty arrays.
 ```python
 fd = FData(np.arange(24.0).reshape(8, 3), BSpline(n_basis=8)); fd[-1].coefs.shape  # (8, 0)
 ```
 Fix: normalise `index = range(self.n_curves)[index]` (raises IndexError when out of range), then slice. Also accept `numpy.integer` (`fd[np.int64(1)]` currently raises `TypeError: 'numpy.int64' object is not iterable`): test `isinstance(index, (int, np.integer))` via `operator.index`.
 
 ### B2 — `derivative()` crashes on splines with repeated interior knots (High)
-`src/fabel/basis.py:504-517` — `_derivative_map` builds `BSpline(order=order-n, breaks=self.breaks)`; `_clean_breaks` rejects multiplicity `> order-n`. Fabel's own exact product (`fd * fd` → order 7, multiplicity 4) therefore cannot be differentiated 4 or more times, and a discontinuous spline (multiplicity = order) cannot be differentiated at all.
+`src/fdatools/basis.py:504-517` — `_derivative_map` builds `BSpline(order=order-n, breaks=self.breaks)`; `_clean_breaks` rejects multiplicity `> order-n`. fdatools' own exact product (`fd * fd` → order 7, multiplicity 4) therefore cannot be differentiated 4 or more times, and a discontinuous spline (multiplicity = order) cannot be differentiated at all.
 ```python
 fd = FData(np.arange(24.0).reshape(8, 3), BSpline(n_basis=8))
 (fd * fd).derivative(4)   # ValueError: break 0.2 repeats 4 times, which exceeds the order 3
@@ -99,7 +99,7 @@ Fix: either raise for `n_vars > 1` (as `inprod` does) or return the `(n_basis, n
 4. (Low) `core.py:645-650` the `len(coefs.shape) != 2` guard runs after `_cross_gram` — move it first (wasted quadrature before the error).
 5. (Low) `basis.py:240` `Basis.__call__` silently flattens any 2-D `t` — a `(n, m)` matrix of points becomes `n*m` rows with no error; accept only 1-D or `(n, 1)`.
 6. (Low) `core.py:543` `float(other)` in `__mul__`: rejects a per-curve scalar vector and, for tensor scalars, emits a warning and detaches. Branch on `is_array_api_obj`.
-7. (Low) `core.py:93` `_refined_spline` does a function-local `from fabel.basis import BSpline` although `fabel.basis` is already imported at module top — no cycle exists; hoist it.
+7. (Low) `core.py:93` `_refined_spline` does a function-local `from fdatools.basis import BSpline` although `fdatools.basis` is already imported at module top — no cycle exists; hoist it.
 8. (Low) `_linalg.cached_gram` eviction pops the oldest inserted key (FIFO) but the docstring calls it "memoise"; fine, but note it is process-global and unbounded in key size (an `LDO` with an `FData` weight is a distinct identity key per object → cache pollution on repeated `penalty(LDO(weights=[fd]))` calls). Consider excluding non-hashable-by-value operators from the cache.
 9. (Low) `basis.py:1490-1494` `_product_basis` for `Fourier × Fourier` with matching period gives `n = 2*max(n1, n2) − 1`, exact — fine; but a `Fourier` whose domain is not a whole number of periods multiplied by a `BSpline` hits the fallback (B5).
 10. (Nit) `_bspline_matrix` is dense in `(n_t, n_knots)` through every recursion level; fine for Phase 1, but SPEC §6 promises banded/LRU-cached evaluation — flag for the benchmark task.

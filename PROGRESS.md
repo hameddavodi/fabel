@@ -58,6 +58,11 @@ Run from the repo root on the tagged commit (`git checkout v1.0.0`).
 - `notebooks/tour.py` (percent format) -> `notebooks/tour.ipynb` via `tools/build_tour_notebook.py` (reuses the book tool's `parse_percent`; `--check` detects a stale notebook; `tests/unit/test_tour_notebook.py`). 17 parts, 131 checks, all public modules. Committed without outputs, like the book notebook; `pytest --nbmake notebooks/tour.ipynb` passes.
 - Things the tour showed that are by design, not bugs: `FData.std()` is a basis projection of the pointwise SD (as R's sd.fd); `FCCA.correlations` are penalised correlations (the plain score correlation is higher); R's `inprod`, `pca.fd` scores and `df2lambda` are the less exact side (known, see the parity report).
 
+## Rename to fdatools (2026-09-28)
+- User request: the project name "Fabel" is replaced by `fdatools` (free on PyPI on 2026-09-28; `fabel` was never uploaded to PyPI). Package `src/fdatools`, import alias `fdt` (was `fb`), env vars `FDATOOLS_DATA_DIR` / `FDATOOLS_RUN_NETWORK_TESTS`, cache `~/.cache/fdatools`, URLs `github.com/hameddavodi/fdatools` and `hameddavodi.github.io/fdatools`. `uv.lock` relocked; `PARITY_REPORT.md` regenerated (names only, numbers unchanged).
+- Not renamed on purpose: `tests/golden/` (never edited; contains no old name), the history in this file and the CHANGELOG 1.0.0 entry (they describe the release published as `fabel`).
+- Gate on the renamed tree: full suite 2126 passed, 5 skipped, 211 strict xfail; parity 724 passed, 211 xfail; doctests 217; ruff, `mypy --strict src/fdatools` clean; `mkdocs build --strict` clean; both notebooks pass under nbmake; `python -m build` gives `fdatools-1.0.0` wheel + sdist, `twine check` PASSED; fresh-venv smoke test imports `fdatools` without torch.
+
 ## Remaining work
 - **Cleanup wave (next):**
   - Done 2026-09-28: ownership set to the personal owner `hameddavodi` (author Hamed Davodi <hamed.davodi94@gmail.com>) in pyproject.toml, README.md, mkdocs.yml, CITATION.cff, LICENSE, docs/dev/data-release.md and fabel.datasets._RELEASE_URL.
@@ -241,6 +246,7 @@ Run from the repo root on the tagged commit (`git checkout v1.0.0`).
 - 2026-09-28 (profiling) fda 6.3.0 CSTRfitLS returns Lres with 1 column but DLres with 2*nquad rows, so CSTRfn, CSTRsse and CSTRres always fail ("non-conformable arguments"); the golden file records the errors. References were built in R from R's own pieces (CSTRfitLS residuals and Jacobian, CSTR2 for the T-equation), a Gauss-Newton inner loop and stats::nls (tol 1e-6; profile cases rtol 1e-5, inner cases 1e-8). Measured: residuals/Jacobians 1e-13, inner coefficients 5e-16, theta 4e-7, vcov 1.4e-6.
 - 2026-09-28 (profiling) The CSTR2 right-hand side was found by black-box probing: F/V; alpha = a Fc^(b+1)/(V rho Cp (Fc + a Fc^b/(2 rhoc Cpc))); heat term -delH/(V rho Cp) k(T) C. CSTR2in steps sit on [4k, 4k+4), left-closed; the Tc steps on [2, 12). Weights match R: state_weights = 1/Cwt, 1/Twt; lam = R's lambda.
 - 2026-09-28 The tour notebook runs R through `Rscript` in a subprocess, not rpy2: with torch loaded in the same kernel, Homebrew R and torch each initialise their own libomp and the kernel aborts (OMP Error #15).
+- 2026-09-28 Project renamed fabel -> fdatools (user request, user picked the name). Import alias `fdt`. Local dev after the rename: run `uv sync --all-extras` once so the editable install points at `src/fdatools`.
 ## Failed approaches (do not retry)
 - Naive B-spline penalty Lfdobj bound `Lfdobj < norder` (from initial task heuristic): fails for e.g. order 3, Lfdobj 2. Correct bound is `Lfdobj <= norder - 2`.
 - Passing `fdnames` explicitly to `bifd()` to work around its 3-D `defaultnames` bug: does not help, since the crashing line (`names(defaultnames) <- ...`) never reads the `fdnames` argument. Must avoid ndim==3 arrays entirely (use ndim==2 or ndim==4).

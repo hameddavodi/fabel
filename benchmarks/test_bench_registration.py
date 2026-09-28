@@ -5,10 +5,10 @@ order-6 spline basis on ``[1, 18]`` (a 351-point registration grid) and a
 five-function cubic warp basis.
 
 The continuous benchmarks run twice: ``numpy`` (analytic gradient and Hessian)
-and ``torch`` (the same curves as tensors, so :func:`fabel.registration.register`
+and ``torch`` (the same curves as tensors, so :func:`fdatools.registration.register`
 takes the autodiff path: criterion in PyTorch, gradient and Hessian by
 autograd, the same Newton iteration).  The torch cases skip without the
-``fabel[torch]`` extra.
+``fdatools[torch]`` extra.
 
 Run with ``pytest benchmarks --benchmark-only``.
 """
@@ -21,8 +21,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline, FData
-from fabel.registration import RegistrationResult, register
+from fdatools import BSpline, FData
+from fdatools.registration import RegistrationResult, register
 
 HAS_TORCH = importlib.util.find_spec("torch") is not None
 

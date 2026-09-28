@@ -1,9 +1,9 @@
 r"""Functional principal components and canonical correlation.
 
 Two estimators replace R ``fda``'s ``pca.fd``, ``varmx.pca.fd`` and ``cca.fd``.
-Both work on the basis coefficients of an :class:`~fabel.core.FData` and both
+Both work on the basis coefficients of an :class:`~fdatools.core.FData` and both
 follow the scikit-learn estimator API, so they drop straight into a
-:class:`~sklearn.pipeline.Pipeline` behind :class:`~fabel.smoothing.Smoother`.
+:class:`~sklearn.pipeline.Pipeline` behind :class:`~fdatools.smoothing.Smoother`.
 
 Functional PCA with a roughness penalty (Ramsay & Silverman §9.4) maximises the
 sample variance of the scores :math:`\int \xi(t) x_i(t)\,dt` while charging the
@@ -38,8 +38,8 @@ Every Gram matrix is exact (Gauss-Legendre on the basis breaks), where R's
 Examples
 --------
 >>> import numpy as np
->>> from fabel import BSpline, FData
->>> from fabel.decomposition import FPCA
+>>> from fdatools import BSpline, FData
+>>> from fdatools.decomposition import FPCA
 >>> rng = np.random.default_rng(0)
 >>> basis = BSpline(domain=(0.0, 1.0), n_basis=8)
 >>> fd = FData(rng.standard_normal((8, 30)), basis)
@@ -60,17 +60,17 @@ from typing import Any, SupportsIndex
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, validate_data
 
-from fabel import _linalg
-from fabel._backend import asarray, default_namespace, to_numpy
-from fabel._operator import LDO
-from fabel.basis import Basis, BSpline
-from fabel.core import FData
+from fdatools import _linalg
+from fdatools._backend import asarray, default_namespace, to_numpy
+from fdatools._operator import LDO
+from fdatools.basis import Basis, BSpline
+from fdatools.core import FData
 
 __all__ = ["FCCA", "FPCA"]
 
 Array = Any
 
-#: Number of grid points R's ``varmx.pca.fd`` rotates on, and the value Fabel
+#: Number of grid points R's ``varmx.pca.fd`` rotates on, and the value fdatools
 #: uses so that a rotation is comparable with R's.
 _ROTATION_GRID = 501
 
@@ -163,7 +163,7 @@ def _positive_sum_signs(vectors: Array) -> Array:
 
     Eigenvector signs are arbitrary.  R's ``pca.fd`` reports every harmonic with
     a positive coefficient sum (measured on all 18 harmonics of the golden
-    cases), so Fabel adopts that rule; a zero sum keeps the sign it has.
+    cases), so fdatools adopts that rule; a zero sum keeps the sign it has.
     """
     xp = _xp()
     totals = xp.sum(vectors, axis=0)
@@ -245,7 +245,7 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Subtract the sample mean function before decomposing.  Default ``True``.
     basis : Basis, optional
         Basis to attach to a plain coefficient matrix.  Ignored when ``fit``
-        receives an :class:`~fabel.core.FData`.  ``None`` builds a cubic
+        receives an :class:`~fdatools.core.FData`.  ``None`` builds a cubic
         B-spline on ``(0, 1)`` with one basis function per column, which lets
         the estimator run inside a generic pipeline; pass the smoother's basis
         to decompose in the right metric.
@@ -270,15 +270,15 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
 
     Notes
     -----
-    Eigenvector signs are mathematically arbitrary.  Fabel makes the
+    Eigenvector signs are mathematically arbitrary.  fdatools makes the
     coefficient sum of every harmonic positive -- the rule R's ``pca.fd``
     follows -- so repeated fits give identical output and match R's signs.
 
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.decomposition import FPCA
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.decomposition import FPCA
     >>> rng = np.random.default_rng(1)
     >>> fd = FData(rng.standard_normal((7, 40)), BSpline(domain=(0.0, 1.0), n_basis=7))
     >>> pca = FPCA(n=2).fit(fd)
@@ -418,8 +418,8 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import Fourier, FData
-        >>> from fabel.decomposition import FPCA
+        >>> from fdatools import Fourier, FData
+        >>> from fdatools.decomposition import FPCA
         >>> rng = np.random.default_rng(3)
         >>> fd = FData(rng.standard_normal((5, 20)), Fourier(domain=(0.0, 1.0), n_basis=5))
         >>> FPCA(n=2).fit(fd).harmonics.n_curves
@@ -537,8 +537,8 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import BSpline, FData
-        >>> from fabel.decomposition import FPCA
+        >>> from fdatools import BSpline, FData
+        >>> from fdatools.decomposition import FPCA
         >>> rng = np.random.default_rng(4)
         >>> fd = FData(rng.standard_normal((6, 25)), BSpline(domain=(0.0, 1.0), n_basis=6))
         >>> pca = FPCA(n=2).fit(fd)
@@ -571,8 +571,8 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import BSpline, FData
-        >>> from fabel.decomposition import FPCA
+        >>> from fdatools import BSpline, FData
+        >>> from fdatools.decomposition import FPCA
         >>> rng = np.random.default_rng(5)
         >>> fd = FData(rng.standard_normal((4, 30)), BSpline(domain=(0.0, 1.0), n_basis=4))
         >>> pca = FPCA(n=4).fit(fd)
@@ -629,8 +629,8 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import BSpline, FData
-        >>> from fabel.decomposition import FPCA
+        >>> from fdatools import BSpline, FData
+        >>> from fdatools.decomposition import FPCA
         >>> rng = np.random.default_rng(6)
         >>> fd = FData(rng.standard_normal((8, 30)), BSpline(domain=(0.0, 1.0), n_basis=8))
         >>> rotated = FPCA(n=3).fit(fd).rotate("varimax")
@@ -707,8 +707,8 @@ class FPCA(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         >>> import matplotlib
         >>> matplotlib.use("Agg")
         >>> import numpy as np
-        >>> from fabel import BSpline, FData
-        >>> from fabel.decomposition import FPCA
+        >>> from fdatools import BSpline, FData
+        >>> from fdatools.decomposition import FPCA
         >>> rng = np.random.default_rng(7)
         >>> fd = FData(rng.standard_normal((6, 20)), BSpline(domain=(0.0, 1.0), n_basis=6))
         >>> len(FPCA(n=2).fit(fd).plot())
@@ -778,8 +778,8 @@ class FCCA(BaseEstimator):  # type: ignore[misc]
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.decomposition import FCCA
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.decomposition import FCCA
     >>> rng = np.random.default_rng(2)
     >>> basis = BSpline(domain=(0.0, 1.0), n_basis=6)
     >>> a = rng.standard_normal((6, 25))
@@ -836,7 +836,7 @@ class FCCA(BaseEstimator):  # type: ignore[misc]
         Raises
         ------
         TypeError
-            If either argument is not an :class:`~fabel.core.FData`.
+            If either argument is not an :class:`~fdatools.core.FData`.
         ValueError
             If the samples hold different numbers of curves, are multivariate,
             or a parameter is out of range.
@@ -844,8 +844,8 @@ class FCCA(BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import Fourier, FData
-        >>> from fabel.decomposition import FCCA
+        >>> from fdatools import Fourier, FData
+        >>> from fdatools.decomposition import FCCA
         >>> rng = np.random.default_rng(8)
         >>> basis = Fourier(domain=(0.0, 1.0), n_basis=5)
         >>> x = rng.standard_normal((5, 40))
@@ -971,8 +971,8 @@ class FCCA(BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import Fourier, FData
-        >>> from fabel.decomposition import FCCA
+        >>> from fdatools import Fourier, FData
+        >>> from fdatools.decomposition import FCCA
         >>> rng = np.random.default_rng(9)
         >>> basis = Fourier(domain=(0.0, 1.0), n_basis=5)
         >>> x = FData(rng.standard_normal((5, 30)), basis)

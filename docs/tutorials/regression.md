@@ -22,16 +22,16 @@ This tutorial uses the Canadian weather data (downloaded once, then cached).
 # requires-data: canadian_weather
 import matplotlib.pyplot as plt
 import numpy as np
-import fabel as fb
-from fabel.regression import fregress
-from fabel.stats import f_test
+import fdatools as fdt
+from fdatools.regression import fregress
+from fdatools.stats import f_test
 
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day = weather.t
-fourier = fb.Fourier(domain=(0.0, 365.0), n_basis=65)
-harmonic = fb.LDO.harmonic(period=365.0)
+fourier = fdt.Fourier(domain=(0.0, 365.0), n_basis=65)
+harmonic = fdt.LDO.harmonic(period=365.0)
 
-temp_fit = fb.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam=1e2)
+temp_fit = fdt.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam=1e2)
 temp = temp_fit.fd                                    # 35 temperature curves
 ```
 
@@ -57,7 +57,7 @@ penalty. A covariate given as a number (`1.0`) is the intercept.
 
 ```python
 # requires-data: canadian_weather
-beta_basis = fb.Fourier(domain=(0.0, 365.0), n_basis=35)
+beta_basis = fdt.Fourier(domain=(0.0, 365.0), n_basis=35)
 model = fregress(
     log_precip,
     {"const": 1.0, "temp": temp},
@@ -165,7 +165,7 @@ response, how large would the F statistic be by chance? It shuffles the
 responses many times, refits each time, and compares the real F with the
 shuffled ones.
 
-`fb.stats.f_test` takes the raw regression inputs, like R's `Fperm.fd`. It
+`fdt.stats.f_test` takes the raw regression inputs, like R's `Fperm.fd`. It
 does not add an intercept: pass a column of ones yourself.
 
 ```python
@@ -177,7 +177,7 @@ dummies = [
 test = f_test(
     temp,
     [np.ones(35), *dummies],
-    basis=fb.Fourier(domain=(0.0, 365.0), n_basis=11),
+    basis=fdt.Fourier(domain=(0.0, 365.0), n_basis=11),
     n_perm=100,
     random_state=1,
 )
@@ -248,10 +248,10 @@ Differences to know:
 - `fregress()` replaces `fRegress`, `fRegress.formula`, `fRegress.fd` and
   `fRegress.double`. `.predict()`, `.stderr()` and `.cv()` on the result
   replace `predict.fRegress`, `fRegress.stderr` and `fRegress.CV`.
-- Fabel computes every design integral exactly. R approximates them, so
+- fdatools computes every design integral exactly. R approximates them, so
   coefficients can differ from R's around the sixth digit.
 - `ocv` is the *sum* of squared leave-one-out residuals, as in R, while `gcv`
   is SSE / (n - df)².
-- R's `predict` fails on a functional-response model; Fabel's works.
+- R's `predict` fails on a functional-response model; fdatools' works.
 - `f_test` takes the raw inputs, like `Fperm.fd`. It does not yet accept a
   fitted `fregress` result.

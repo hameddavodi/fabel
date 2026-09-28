@@ -10,16 +10,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 plt.rcParams["figure.autolayout"] = True
 
-growth = fb.datasets.load_growth()
+growth = fdt.datasets.load_growth()
 age = growth.age
 heights = growth.hgtf[:, :10]
-height_basis = fb.BSpline(domain=(1.0, 18.0), breaks=age, order=6)
-height_fit = fb.smooth(heights, age, basis=height_basis, lam=1e-1, penalty=4)
+height_basis = fdt.BSpline(domain=(1.0, 18.0), breaks=age, order=6)
+height_fit = fdt.smooth(heights, age, basis=height_basis, lam=1e-1, penalty=4)
 accel = height_fit.fd.derivative(2)
 
 # Landmark: the age of the pubertal growth spurt (peak velocity, where the
@@ -29,11 +29,11 @@ pgs_age = spurt_grid[np.argmax(height_fit.fd(spurt_grid, 1), axis=0)]
 
 t_plot = np.linspace(3.0, 18.0, 401)
 t_full = np.linspace(1.0, 18.0, 401)
-landmark_fit = fb.landmark_register(accel, pgs_age[:, None])
-continuous_fit = fb.register(
+landmark_fit = fdt.landmark_register(accel, pgs_age[:, None])
+continuous_fit = fdt.register(
     landmark_fit.registered,
     landmark_fit.registered.mean(),
-    warp_basis=fb.BSpline(domain=(1.0, 18.0), n_basis=7),
+    warp_basis=fdt.BSpline(domain=(1.0, 18.0), n_basis=7),
     lam=1e-2,
 )
 

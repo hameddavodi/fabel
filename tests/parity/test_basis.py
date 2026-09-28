@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.basis` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.basis` against golden output from R ``fda`` 6.3.0.
 
 Every case in ``tests/golden/basis.json`` is replayed here.  A handful of cases
 are marked ``xfail`` because R ``fda`` 6.3.0 is demonstrably wrong there; each
@@ -12,7 +12,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import LDO, Basis, BSpline, Constant, Exponential, Fourier, Monomial, Polygonal, Power
+from fdatools import LDO, Basis, BSpline, Constant, Exponential, Fourier, Monomial, Polygonal, Power
 
 from .conftest import case_rtol, golden_cases
 
@@ -20,12 +20,12 @@ pytestmark = pytest.mark.parity
 
 MODULE = "basis"
 
-#: Golden cases where R ``fda`` 6.3.0 disagrees with the mathematics.  Fabel
+#: Golden cases where R ``fda`` 6.3.0 disagrees with the mathematics.  fdatools
 #: implements the correct result, so parity is expected to fail.
 R_FDA_DEFECTS: dict[str, str] = {
     "bspline_penalty_k4_n4_dom0_1_L0": (
         "With no interior knots R returns the monomial Gram (the Hilbert matrix) "
-        "instead of the Bernstein-basis Gram; Fabel's [0, 0] entry is 1/7."
+        "instead of the Bernstein-basis Gram; fdatools' [0, 0] entry is 1/7."
     ),
     "bspline_penalty_k4_n4_dom0_1_L1": (
         "Same zero-interior-knot path as L0: R's first rows are identically zero, "
@@ -67,7 +67,7 @@ R_FDA_DEFECTS: dict[str, str] = {
 
 
 def build_basis(name: str, inp: dict[str, Any]) -> Basis:
-    """Construct the Fabel basis described by one golden case."""
+    """Construct the fdatools basis described by one golden case."""
     family = name.split("_")[0]
     domain: Any = tuple(inp["domain"]) if "domain" in inp else None
     if family == "bspline":

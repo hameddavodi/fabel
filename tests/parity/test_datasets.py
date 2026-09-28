@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.datasets` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.datasets` against golden output from R ``fda`` 6.3.0.
 
 Every golden case in ``tests/golden/datasets.json`` covers one of the ten
 datasets exported by the original ``tools/golden_r/datasets.R`` (see
@@ -7,7 +7,7 @@ those ten; the four extra dataset families added later --
 MontrealTemp/daily/infantGrowth/nondurables/lip -- only have unit tests).
 
 Compared at ``rtol=1e-12``: the golden values were exported from R at full
-(``digits=17``) precision, and Fabel's loaders repackage that same export
+(``digits=17``) precision, and fdatools' loaders repackage that same export
 without recomputation, so any real discrepancy is a bug, not accumulated
 floating-point drift.
 """
@@ -21,7 +21,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-import fabel.datasets as ds
+import fdatools.datasets as ds
 
 from .conftest import golden_cases
 
@@ -85,7 +85,7 @@ def _local_downloads(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         shutil.copy(DATA_RELEASE_DIR / name_ext, dest)
 
     monkeypatch.setattr(ds, "_download_file", _copy_local)
-    monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("FDATOOLS_DATA_DIR", str(tmp_path))
 
 
 @pytest.mark.usefixtures("_local_downloads")
@@ -218,7 +218,7 @@ def test_regina_precip() -> None:
 
 
 def test_catalog_scope() -> None:
-    """Every non-"dateAccessories" catalog entry is covered by a Fabel loader."""
+    """Every non-"dateAccessories" catalog entry is covered by a fdatools loader."""
     case = _case("dataset_catalog")
     catalog = case["output"]["catalog"]
 
@@ -247,7 +247,7 @@ def test_catalog_scope() -> None:
         base = entry.split(" (")[0]
         if entry.endswith("(dateAccessories)"):
             continue
-        assert base in covered, f"catalog entry {entry!r} has no Fabel loader"
+        assert base in covered, f"catalog entry {entry!r} has no fdatools loader"
 
 
 def test_missing_release_dir_skips(tmp_path: Path) -> None:

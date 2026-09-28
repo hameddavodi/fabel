@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.smoothing` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.smoothing` against golden output from R ``fda`` 6.3.0.
 
 Cases are parametrised by ``(case, field)`` rather than by case alone: R's
 ``smooth.basis`` returns seven quantities at once and a defect in one of them
@@ -12,8 +12,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import LDO
-from fabel.smoothing import df_to_lambda, gcv_curve, lambda_to_df, smooth
+from fdatools import LDO
+from fdatools.smoothing import df_to_lambda, gcv_curve, lambda_to_df, smooth
 
 from ._datasets import growth, handwriting, weather_daily
 from .conftest import build_basis, case_rtol, golden_cases
@@ -74,7 +74,7 @@ _HARMONIC_PENALTY_REASON = (
     "constant and the fundamental and maps cos(k w t) to k w^3 (k^2 - 1) "
     "sin(k w t), so on the normalised Fourier basis the penalty is exactly "
     "diagonal with entries k^2 w^6 (k^2 - 1)^2.  Against that closed form "
-    "Fabel is 2.1e-15 (relative) out and R is 1.383e-6: R's worst entry is "
+    "fdatools is 2.1e-15 (relative) out and R is 1.383e-6: R's worst entry is "
     "(64, 64), exact 2.788516685330926e-02 against R's 2.788512828061242e-02."
 )
 
@@ -90,10 +90,10 @@ _GROWTH_CONDITION_REASON = (
     "order-6 B-splines give cond(Phi'Phi + lambda R) = 1.0e7 / 8.3e8 / 7.8e10 "
     "at lambda = 0.01 / 1 / 100.  Both penalty matrices are correct -- against "
     "a 50-digit mpmath integration of the D^4 penalty (exact, since D^4 of an "
-    "order-6 spline is piecewise linear) Fabel is 2.2e-16 out and R 1.7e-16, "
+    "order-6 spline is piecewise linear) fdatools is 2.2e-16 out and R 1.7e-16, "
     "i.e. both sit on the rounding floor.  But solving the two systems in "
     "60-digit arithmetic gives coefficients that differ by 7.3e-10 / 5.4e-8 / "
-    "3.6e-6 -- the same size as the Fabel-vs-R gap being asserted here.  The "
+    "3.6e-6 -- the same size as the fdatools-vs-R gap being asserted here.  The "
     "1e-8 golden tolerance is below the noise floor of the problem, not a sign "
     "that either solver is wrong."
 )
@@ -102,7 +102,7 @@ _DF2LAMBDA_REASON = (
     "R's df2lambda stops its search short of solving df(lambda) = df.  Feeding "
     "R's own answer back through df(lambda) gives 9.998754682 / 20.003244908 / "
     "30.004195052 for the targets 10 / 20 / 30.  df(lambda) is smooth and "
-    "strictly decreasing, so Fabel bisects it to 1e-12 and lands on lambda "
+    "strictly decreasing, so fdatools bisects it to 1e-12 and lands on lambda "
     "3547717.97 / 51683.3869 / 4407.61711, which reproduce the targets to "
     "twelve decimals; the resulting lambdas differ from R's by 7.7e-4 / 9.8e-4 "
     "/ 8.6e-4 (relative)."
@@ -112,7 +112,7 @@ _MONOTONE_SHIFT_REASON = (
     "smooth.monotone has an exactly flat direction, so the coefficients are "
     "not identified: x(t) = beta0 + beta1 * integral exp(W) is unchanged by "
     "W -> W + s together with beta1 -> beta1 * exp(-s), and the roughness "
-    "penalty is unchanged too because D^m annihilates constants.  Fabel and R "
+    "penalty is unchanged too because D^m annihilates constants.  fdatools and R "
     "settle on different members of that one-parameter family: the measured "
     "shift is constant across every coefficient of a curve (-0.08723 / "
     "-0.06885 / -0.05558 for the three girls, -0.01985 for the sigmoid), and "
@@ -125,11 +125,11 @@ _SMOOTH_POS_REASON = (
     "R's smooth.pos returns a point that is not stationary for its own "
     "criterion mean((y - exp(Phi c))^2) + lambda c'Rc.  The gradient there has "
     "norm 2.5e-4 (synthetic) and 1.2e-6 (Prince Rupert) against 2.6e-7 and "
-    "9.6e-13 for Fabel, and R's criterion value is the higher of the two "
+    "9.6e-13 for fdatools, and R's criterion value is the higher of the two "
     "(1.77593716848 against 1.77593715997; 3.19972667966087 against "
     "3.19972667965875).  One Gauss-Newton step from R's coefficients moves "
     "them by 3.43e-6 -- the whole 3.48e-6 gap being asserted -- so R is "
-    "literally one un-taken iteration short of the minimum Fabel reports."
+    "literally one un-taken iteration short of the minimum fdatools reports."
 )
 
 #: ``(case, field)`` pairs where the golden value cannot be matched, either
@@ -225,7 +225,7 @@ _FITS: dict[str, Any] = {}
 
 
 def fit_for(name: str, case: dict[str, Any]) -> Any:
-    """Run (and memoise) the Fabel fit that replays one golden case."""
+    """Run (and memoise) the fdatools fit that replays one golden case."""
     if name not in _FITS:
         inp = case["input"]
         basis = build_basis(inp["basis"])

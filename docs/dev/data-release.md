@@ -1,9 +1,9 @@
 # Data release (`data-v1`) — human step
 
-`src/fabel/datasets.py` ships three small datasets in-package
-(`growth`, `gait`, `pinch`, under `src/fabel/_data/`) and lazy-downloads the
-rest from a GitHub release on first use, caching them at `FABEL_DATA_DIR`
-(default `~/.cache/fabel/`). No dataset or model weight is committed to git —
+`src/fdatools/datasets.py` ships three small datasets in-package
+(`growth`, `gait`, `pinch`, under `src/fdatools/_data/`) and lazy-downloads the
+rest from a GitHub release on first use, caching them at `FDATOOLS_DATA_DIR`
+(default `~/.cache/fdatools/`). No dataset or model weight is committed to git —
 every non-in-package dataset is referenced by URL + SHA-256 checksum only
 (`_CHECKSUMS` in `datasets.py`).
 
@@ -19,7 +19,7 @@ already scripted.
    writes `data_release/<name>.npz` (float64 arrays, `savez_compressed`) +
    `data_release/<name>.json` (string/label metadata) for every dataset, and
    prints a `name -> {npz, json}` SHA-256 table.
-3. Copy that printed table into `_CHECKSUMS` in `src/fabel/datasets.py`
+3. Copy that printed table into `_CHECKSUMS` in `src/fdatools/datasets.py`
    (already done for the current dataset set; re-run only if a dataset's
    content changes).
 
@@ -31,17 +31,17 @@ place datasets live long-term.
 1. Confirm `data_release/*.npz` and `data_release/*.json` are up to date
    (re-run steps 1-2 above if `data_export/` changed).
 2. Create (or update) the GitHub release tagged **`data-v1`** on
-   `hameddavodi/fabel`, either via the GitHub UI or:
+   `hameddavodi/fdatools`, either via the GitHub UI or:
    ```
    gh release create data-v1 data_release/*.npz data_release/*.json \
-     --title "fabel dataset assets v1" \
-     --notes "Dataset arrays for fabel.datasets lazy loaders. See docs/dev/data-release.md."
+     --title "fdatools dataset assets v1" \
+     --notes "Dataset arrays for fdatools.datasets lazy loaders. See docs/dev/data-release.md."
    ```
    If the release already exists and only some files changed, use
    `gh release upload data-v1 data_release/<name>.{npz,json} --clobber`
    for just the changed files.
 3. Verify `_download_file`'s URL template matches the uploaded asset names:
-   `https://github.com/hameddavodi/fabel/releases/download/data-v1/<name>.<ext>`
+   `https://github.com/hameddavodi/fdatools/releases/download/data-v1/<name>.<ext>`
    (`_RELEASE_URL` in `datasets.py`).
 4. Verify `_CHECKSUMS` in `datasets.py` matches the just-uploaded bytes exactly
    (re-run `build_data_release.py` and diff its printed table against
@@ -53,7 +53,7 @@ place datasets live long-term.
 
 - `data_export/`, `data_release/` — both gitignored. Datasets are large,
   regenerable from R, and not source code.
-- Anything under `~/.cache/fabel/` (or `FABEL_DATA_DIR`) — that is the local
+- Anything under `~/.cache/fdatools/` (or `FDATOOLS_DATA_DIR`) — that is the local
   download cache, machine-specific.
 
 ## Testing without the network
@@ -65,9 +65,9 @@ from the local `data_release/` staging directory instead (skipped entirely if
 does hit the real URL,
 `test_datasets.py::test_real_download_from_github_release`, is marked
 `@pytest.mark.network` and additionally skipped unless
-`FABEL_RUN_NETWORK_TESTS=1` is set — run it once after publishing a release to
+`FDATOOLS_RUN_NETWORK_TESTS=1` is set — run it once after publishing a release to
 confirm the public URL and checksums actually work:
 
 ```
-FABEL_RUN_NETWORK_TESTS=1 .venv/bin/pytest -m network tests/unit/test_datasets.py -v
+FDATOOLS_RUN_NETWORK_TESTS=1 .venv/bin/pytest -m network tests/unit/test_datasets.py -v
 ```

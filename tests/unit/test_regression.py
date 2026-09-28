@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.regression`."""
+"""Unit tests for :mod:`fdatools.regression`."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from fabel import LDO, BSpline, Constant, FData, Fourier, inprod
-from fabel.regression import FRegress, FRegressCV, FRegressResult, FRegressStderr, fregress
-from fabel.smoothing import smooth
+from fdatools import LDO, BSpline, Constant, FData, Fourier, inprod
+from fdatools.regression import FRegress, FRegressCV, FRegressResult, FRegressStderr, fregress
+from fdatools.smoothing import smooth
 
 RNG = np.random.default_rng(20260927)
 BASIS = BSpline(domain=(0.0, 1.0), n_basis=7)
@@ -191,7 +191,7 @@ def test_constant_weights_without_penalty_give_the_unweighted_scalar_fit() -> No
 def test_f_test_of_a_weighted_model_uses_the_weights() -> None:
     # R's Fperm.fd returns the same Fobs whatever wt is; f_test(model) refits
     # with the model's weights, so the statistic moves.
-    from fabel.stats import f_test
+    from fdatools.stats import f_test
 
     y, x = _functional_scalar_data()
     weights = np.random.default_rng(9).uniform(0.2, 3.0, size=y.shape[0])

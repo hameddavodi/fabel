@@ -24,7 +24,7 @@ penalised negative log-likelihood of the process,
     F(c) = -\sum_{i=1}^{n} W(x_i) + \int e^{W(u)}\,du + \lambda \int (LW)^2 .
 
 The penalty is ``λ cᵀRc`` with ``R`` the roughness matrix of the linear
-differential operator ``L`` (:meth:`fabel.Basis.penalty`), the same scaling as
+differential operator ``L`` (:meth:`fdatools.Basis.penalty`), the same scaling as
 R.  Both criteria are convex in ``c``.  They are minimised by Newton's method
 with the exact Hessian and a backtracking (Armijo) line search; the integrals
 are computed by composite Gauss-Legendre quadrature, 12 nodes on each of the
@@ -47,11 +47,11 @@ member of that family with ``∫ W = 0`` over the domain; the density itself,
 Examples
 --------
 >>> import numpy as np
->>> import fabel as fb
->>> from fabel.density import fit_density
+>>> import fdatools as fdt
+>>> from fdatools.density import fit_density
 >>> rng = np.random.default_rng(0)
 >>> x = rng.normal(size=300)
->>> basis = fb.BSpline(domain=(-5.0, 5.0), n_basis=11)
+>>> basis = fdt.BSpline(domain=(-5.0, 5.0), n_basis=11)
 >>> result = fit_density(x, basis=basis, lam=1e-2)
 >>> grid = np.linspace(-5.0, 5.0, 2001)
 >>> mass = float(np.sum(result(grid)) * (grid[1] - grid[0]))
@@ -67,11 +67,11 @@ from math import exp, isfinite, log
 from types import ModuleType
 from typing import Any
 
-from fabel import _linalg
-from fabel._backend import array_namespace, asarray, default_namespace, to_numpy
-from fabel._operator import LDO
-from fabel.basis import Basis, BSpline
-from fabel.core import FData
+from fdatools import _linalg
+from fdatools._backend import array_namespace, asarray, default_namespace, to_numpy
+from fdatools._operator import LDO
+from fdatools.basis import Basis, BSpline
+from fdatools.core import FData
 
 __all__ = ["DensityResult", "IntensityResult", "fit_density", "fit_intensity"]
 
@@ -148,10 +148,10 @@ class DensityResult:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.density import fit_density
+    >>> import fdatools as fdt
+    >>> from fdatools.density import fit_density
     >>> x = np.array([0.1, 0.2, 0.25, 0.4, 0.45, 0.5, 0.55, 0.7, 0.8])
-    >>> res = fit_density(x, basis=fb.BSpline(domain=(0.0, 1.0), n_basis=6), lam=1e-3)
+    >>> res = fit_density(x, basis=fdt.BSpline(domain=(0.0, 1.0), n_basis=6), lam=1e-3)
     >>> res.converged
     True
     >>> bool(np.all(res(np.array([0.0, 0.5, 1.0])) > 0))
@@ -185,10 +185,10 @@ class DensityResult:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.density import fit_density
+        >>> import fdatools as fdt
+        >>> from fdatools.density import fit_density
         >>> x = np.array([0.2, 0.3, 0.5, 0.6, 0.65, 0.9])
-        >>> res = fit_density(x, basis=fb.BSpline(domain=(0.0, 1.0), n_basis=5), lam=1.0)
+        >>> res = fit_density(x, basis=fdt.BSpline(domain=(0.0, 1.0), n_basis=5), lam=1.0)
         >>> res(np.array([0.5])).shape
         (1,)
         """
@@ -211,10 +211,10 @@ class DensityResult:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.density import fit_density
+        >>> import fdatools as fdt
+        >>> from fdatools.density import fit_density
         >>> x = np.array([0.2, 0.3, 0.5, 0.6, 0.65, 0.9])
-        >>> res = fit_density(x, basis=fb.BSpline(domain=(0.0, 1.0), n_basis=5), lam=1.0)
+        >>> res = fit_density(x, basis=fdt.BSpline(domain=(0.0, 1.0), n_basis=5), lam=1.0)
         >>> t = np.array([0.25, 0.75])
         >>> bool(np.allclose(np.exp(res.log_density(t)), res(t)))
         True
@@ -253,10 +253,10 @@ class IntensityResult:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.density import fit_intensity
+    >>> import fdatools as fdt
+    >>> from fdatools.density import fit_intensity
     >>> events = np.cumsum(np.full(40, 0.25))
-    >>> res = fit_intensity(events, basis=fb.BSpline(domain=(0.0, 10.0), n_basis=5), lam=10.0)
+    >>> res = fit_intensity(events, basis=fdt.BSpline(domain=(0.0, 10.0), n_basis=5), lam=10.0)
     >>> round(res.expected_count, 6)
     40.0
     """
@@ -288,10 +288,10 @@ class IntensityResult:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.density import fit_intensity
+        >>> import fdatools as fdt
+        >>> from fdatools.density import fit_intensity
         >>> events = np.linspace(0.5, 9.5, 19)
-        >>> basis = fb.BSpline(domain=(0.0, 10.0), n_basis=4)
+        >>> basis = fdt.BSpline(domain=(0.0, 10.0), n_basis=4)
         >>> res = fit_intensity(events, basis=basis, penalty=1, lam=1e6)
         >>> np.round(res(np.array([2.0, 8.0])), 3).tolist()
         [1.9, 1.9]
@@ -651,8 +651,8 @@ def fit_density(
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.density import fit_density
+    >>> import fdatools as fdt
+    >>> from fdatools.density import fit_density
     >>> rng = np.random.default_rng(1)
     >>> x = rng.exponential(size=500)
     >>> res = fit_density(x, domain=(0.0, 10.0), lam=1e-2)
@@ -749,8 +749,8 @@ def fit_intensity(
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.density import fit_intensity
+    >>> import fdatools as fdt
+    >>> from fdatools.density import fit_intensity
     >>> rng = np.random.default_rng(2)
     >>> events = np.cumsum(rng.exponential(scale=0.5, size=200))
     >>> res = fit_intensity(events, penalty=1, lam=10.0)

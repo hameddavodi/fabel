@@ -1,4 +1,4 @@
-"""Unit tests for fabel._operator (the linear differential operator LDO)."""
+"""Unit tests for fdatools._operator (the linear differential operator LDO)."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from math import pi
 import numpy as np
 import pytest
 
-from fabel import LDO
-from fabel._backend import default_namespace
+from fdatools import LDO
+from fdatools._backend import default_namespace
 
 
 def test_order_shorthand_is_a_plain_derivative() -> None:

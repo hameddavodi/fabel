@@ -10,7 +10,7 @@ arguments:
 
   .. math:: y_i = \sum_j \int x_{ij}(t)\,\beta_j(t)\,dt + \varepsilon_i .
 
-* **functional response** (``y`` an :class:`~fabel.core.FData` of ``n``
+* **functional response** (``y`` an :class:`~fdatools.core.FData` of ``n``
   curves).  Scalar covariates give the function-on-scalar model and curves give
   the concurrent model; the two mix freely:
 
@@ -45,7 +45,7 @@ back to the inputs.
 Examples
 --------
 >>> import numpy as np
->>> from fabel.regression import fregress
+>>> from fdatools.regression import fregress
 >>> rng = np.random.default_rng(0)
 >>> z = rng.standard_normal(40)
 >>> y = 1.0 + 2.0 * z + 0.01 * rng.standard_normal(40)
@@ -67,18 +67,18 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils import check_array
 from sklearn.utils.validation import check_is_fitted, column_or_1d, validate_data
 
-from fabel import _linalg
-from fabel._backend import (
+from fdatools import _linalg
+from fdatools._backend import (
     array_namespace,
     asarray,
     default_namespace,
     result_namespace,
     to_numpy,
 )
-from fabel._operator import LDO
-from fabel.basis import Basis, Constant, _same_domain
-from fabel.core import BiFData, FData, _cross_gram, _project, _quadrature, inprod
-from fabel.smoothing import SmoothResult
+from fdatools._operator import LDO
+from fdatools.basis import Basis, Constant, _same_domain
+from fdatools.core import BiFData, FData, _cross_gram, _project, _quadrature, inprod
+from fdatools.smoothing import SmoothResult
 
 __all__ = [
     "FRegress",
@@ -92,7 +92,7 @@ __all__ = [
 
 Array = Any
 
-#: Name R's formula interface gives the intercept term; Fabel keeps it.
+#: Name R's formula interface gives the intercept term; fdatools keeps it.
 INTERCEPT = "const"
 
 _FORMULA = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_.]*)\s*~(.*)$")
@@ -294,7 +294,7 @@ class FRegressStderr:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.regression import fregress
+    >>> from fdatools.regression import fregress
     >>> z = np.linspace(-1.0, 1.0, 20)
     >>> y = 3.0 * z + np.sin(7.0 * z)
     >>> se = fregress(y, [1.0, z]).stderr()
@@ -326,7 +326,7 @@ class FRegressCV:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.regression import fregress
+    >>> from fdatools.regression import fregress
     >>> z = np.linspace(-1.0, 1.0, 20)
     >>> cv = fregress(2.0 * z, [1.0, z]).cv()
     >>> bool(cv.sse < 1e-20)
@@ -346,7 +346,7 @@ class FRegressResult:
     beta : tuple of FData
         Estimated coefficient function of every term, one curve each (R's
         ``betaestlist``).  The coefficient of a scalar term in a scalar-response
-        model lives in a :class:`~fabel.basis.Constant` basis.
+        model lives in a :class:`~fdatools.basis.Constant` basis.
     fitted : array or FData
         Fitted values ``ŷ``: a vector for a scalar response, curves expressed in
         the response basis for a functional one (R's ``yhatfdobj``).
@@ -370,16 +370,16 @@ class FRegressResult:
         residuals (scalar response only).
     y2c_map : array or None
         Data-to-coefficient map of the response smooth, kept when ``y`` was a
-        :class:`~fabel.smoothing.SmoothResult`; used by :meth:`stderr`.
+        :class:`~fdatools.smoothing.SmoothResult`; used by :meth:`stderr`.
 
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.regression import fregress
-    >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=6)
+    >>> import fdatools as fdt
+    >>> from fdatools.regression import fregress
+    >>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=6)
     >>> rng = np.random.default_rng(1)
-    >>> y = fb.FData(rng.standard_normal((6, 12)), basis)
+    >>> y = fdt.FData(rng.standard_normal((6, 12)), basis)
     >>> group = np.repeat([0.0, 1.0], 6)
     >>> model = fregress(y, {"const": 1.0, "group": group})
     >>> model.names
@@ -415,7 +415,7 @@ class FRegressResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.regression import fregress
+        >>> from fdatools.regression import fregress
         >>> fregress(np.arange(5.0), [1.0]).functional_response
         False
         """
@@ -433,7 +433,7 @@ class FRegressResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.regression import fregress
+        >>> from fdatools.regression import fregress
         >>> fregress(np.array([1.0, 2.0, 3.0]), [1.0]).coefficients.tolist()
         [2.0]
         """
@@ -467,7 +467,7 @@ class FRegressResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.regression import fregress
+        >>> from fdatools.regression import fregress
         >>> z = np.linspace(0.0, 1.0, 10)
         >>> model = fregress(1.0 + 2.0 * z, [1.0, z])
         >>> np.round(model.predict([1.0, np.array([0.0, 3.0])]), 8).tolist()
@@ -500,7 +500,7 @@ class FRegressResult:
         y2c_map : array, optional
             Map from observations to response coefficients.  The identity for a
             scalar response.  For a functional response it defaults to the map
-            stored when ``y`` was a :class:`~fabel.smoothing.SmoothResult`.
+            stored when ``y`` was a :class:`~fdatools.smoothing.SmoothResult`.
 
         Returns
         -------
@@ -517,7 +517,7 @@ class FRegressResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.regression import fregress
+        >>> from fdatools.regression import fregress
         >>> z = np.linspace(-1.0, 1.0, 30)
         >>> model = fregress(z + np.cos(9.0 * z), [1.0, z])
         >>> se = model.stderr(sigma_e=0.25)
@@ -543,7 +543,7 @@ class FRegressResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.regression import fregress
+        >>> from fdatools.regression import fregress
         >>> z = np.linspace(0.0, 1.0, 12)
         >>> y = z + 0.1 * np.sin(20.0 * z)
         >>> model = fregress(y, [1.0, z])
@@ -1003,7 +1003,7 @@ def fregress(
     y : array, FData, SmoothResult or str
         The response: ``n`` numbers (scalar response), an :class:`FData` of
         ``n`` curves (functional response), or a
-        :class:`~fabel.smoothing.SmoothResult` whose ``y2c_map`` is then kept for
+        :class:`~fdatools.smoothing.SmoothResult` whose ``y2c_map`` is then kept for
         :meth:`FRegressResult.stderr`.  A string is a formula
         ``"response ~ a + b"``, evaluated against the mapping ``x``: the
         intercept ``const`` is included unless the formula has ``- 1`` or
@@ -1017,11 +1017,11 @@ def fregress(
         ``x0, x1, ...``.  The data mapping of a formula.
     beta : mapping or sequence, optional
         Coefficient specification per term (by name or position): ``None``, a
-        :class:`~fabel.basis.Basis`, ``(basis, lam)`` or
+        :class:`~fdatools.basis.Basis`, ``(basis, lam)`` or
         ``(basis, lam, penalty)``.  A mapping may also be keyed by the variable a
         formula term came from.  The default basis is the response basis for a
         functional response, and for a scalar response the covariate's own basis
-        (curves) or a :class:`~fabel.basis.Constant` (numbers).
+        (curves) or a :class:`~fdatools.basis.Constant` (numbers).
     lam : float, optional
         Smoothing parameter applied to every term that does not give its own.
         Default ``0``.
@@ -1058,10 +1058,10 @@ def fregress(
     called ``wt``, and ``fRegress(..., wtvec = w)`` (the name R's smoothing
     functions use) is swallowed by ``...`` without a warning, so R returns the
     *unweighted* fit.  Scripts that pass ``wtvec`` to ``fRegress`` must drop
-    ``weights`` when ported, or they will get a different answer in Fabel.
+    ``weights`` when ported, or they will get a different answer in fdatools.
     Only the relative weights matter when there is no penalty; with a penalty,
     scaling every weight by ``c`` acts like dividing ``lam`` by ``c``.  R's
-    ``Fperm.fd`` ignores weights, while :func:`fabel.stats.f_test` on a
+    ``Fperm.fd`` ignores weights, while :func:`fdatools.stats.f_test` on a
     weighted model does not -- see its Notes.
 
     Examples
@@ -1069,12 +1069,12 @@ def fregress(
     Scalar response on a functional covariate:
 
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.regression import fregress
+    >>> import fdatools as fdt
+    >>> from fdatools.regression import fregress
     >>> rng = np.random.default_rng(3)
-    >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=7)
-    >>> x = fb.FData(rng.standard_normal((7, 40)), basis)
-    >>> y = np.asarray(fb.inprod(x, fb.FData(np.linspace(-1, 1, 7), basis)))[:, 0]
+    >>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=7)
+    >>> x = fdt.FData(rng.standard_normal((7, 40)), basis)
+    >>> y = np.asarray(fdt.inprod(x, fdt.FData(np.linspace(-1, 1, 7), basis)))[:, 0]
     >>> model = fregress(y, [1.0, x])
     >>> np.round(model.beta[1].coefs[:, 0], 6).tolist()
     [-1.0, -0.666667, -0.333333, 0.0, 0.333333, 0.666667, 1.0]
@@ -1082,7 +1082,7 @@ def fregress(
     The formula interface with a categorical covariate:
 
     >>> region = ["north", "south", "north", "east", "south", "east"]
-    >>> yf = fb.FData(rng.standard_normal((7, 6)), basis)
+    >>> yf = fdt.FData(rng.standard_normal((7, 6)), basis)
     >>> fregress("temp ~ region", {"temp": yf, "region": region}).names
     ('const', 'region.north', 'region.south')
     """
@@ -1322,12 +1322,12 @@ class LinmodResult:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.regression import linmod
-    >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=6)
+    >>> import fdatools as fdt
+    >>> from fdatools.regression import linmod
+    >>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=6)
     >>> rng = np.random.default_rng(0)
-    >>> x = fb.FData(rng.standard_normal((6, 20)), basis)
-    >>> y = fb.FData(rng.standard_normal((6, 20)), basis)
+    >>> x = fdt.FData(rng.standard_normal((6, 20)), basis)
+    >>> y = fdt.FData(rng.standard_normal((6, 20)), basis)
     >>> model = linmod(y, x, lam_s=1e-4, lam_t=1e-4)
     >>> model.beta.coefs.shape
     (6, 6)
@@ -1358,12 +1358,12 @@ class LinmodResult:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.regression import linmod
-        >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
+        >>> import fdatools as fdt
+        >>> from fdatools.regression import linmod
+        >>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=5)
         >>> rng = np.random.default_rng(2)
-        >>> x = fb.FData(rng.standard_normal((5, 15)), basis)
-        >>> y = fb.FData(rng.standard_normal((5, 15)), basis)
+        >>> x = fdt.FData(rng.standard_normal((5, 15)), basis)
+        >>> y = fdt.FData(rng.standard_normal((5, 15)), basis)
         >>> model = linmod(y, x, lam_s=1e-3, lam_t=1e-3)
         >>> bool(np.allclose((model.fitted + model.residuals).coefs, y.coefs))
         True
@@ -1398,12 +1398,12 @@ class LinmodResult:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.regression import linmod
-        >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
+        >>> import fdatools as fdt
+        >>> from fdatools.regression import linmod
+        >>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=5)
         >>> rng = np.random.default_rng(1)
-        >>> x = fb.FData(rng.standard_normal((5, 25)), basis)
-        >>> y = fb.FData(rng.standard_normal((5, 25)), basis)
+        >>> x = fdt.FData(rng.standard_normal((5, 25)), basis)
+        >>> y = fdt.FData(rng.standard_normal((5, 25)), basis)
         >>> model = linmod(y, x, lam_s=1e-3, lam_t=1e-3)
         >>> model.predict(x[:3]).n_curves
         3
@@ -1502,7 +1502,7 @@ def linmod(
     least squares on 201 points, so the two agree to the accuracy of R's
     quadrature: to rounding when R's integrals are exact (polynomial bases),
     about ``1e-6`` on the weather data, ``1e-4`` on cubic B-splines.  R's
-    ``linmod(..., wtvec = w)`` stops with an error in fda 6.3.0; Fabel's
+    ``linmod(..., wtvec = w)`` stops with an error in fda 6.3.0; fdatools'
     ``weights`` give the weighted least-squares fit.
 
     PyTorch coefficients (in ``x``, ``y`` or ``weights``) make the whole fit run
@@ -1513,15 +1513,15 @@ def linmod(
     A surface that the data determine exactly is recovered:
 
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.regression import linmod
-    >>> sbasis = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
-    >>> tbasis = fb.BSpline(domain=(0.0, 2.0), n_basis=4)
+    >>> import fdatools as fdt
+    >>> from fdatools.regression import linmod
+    >>> sbasis = fdt.BSpline(domain=(0.0, 1.0), n_basis=5)
+    >>> tbasis = fdt.BSpline(domain=(0.0, 2.0), n_basis=4)
     >>> rng = np.random.default_rng(3)
-    >>> x = fb.FData(rng.standard_normal((5, 30)), sbasis)
+    >>> x = fdt.FData(rng.standard_normal((5, 30)), sbasis)
     >>> surface = rng.standard_normal((5, 4))
-    >>> z = np.asarray(fb.inprod(x, sbasis))
-    >>> y = fb.FData(1.0 + surface.T @ z.T, tbasis)
+    >>> z = np.asarray(fdt.inprod(x, sbasis))
+    >>> y = fdt.FData(1.0 + surface.T @ z.T, tbasis)
     >>> model = linmod(y, x)
     >>> bool(np.allclose(model.beta.coefs, surface))
     True
@@ -1621,7 +1621,7 @@ class FRegress(RegressorMixin, BaseEstimator):  # type: ignore[misc]
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.regression import FRegress
+    >>> from fdatools.regression import FRegress
     >>> rng = np.random.default_rng(0)
     >>> X = rng.standard_normal((50, 2))
     >>> y = 0.5 + X @ np.array([1.0, -2.0])
@@ -1686,7 +1686,7 @@ class FRegress(RegressorMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.regression import FRegress
+        >>> from fdatools.regression import FRegress
         >>> X = np.array([[0.0], [1.0], [2.0], [3.0]])
         >>> model = FRegress().fit(X, 1.0 + 2.0 * X[:, 0])
         >>> [round(float(b.coefs[0, 0]), 10) for b in model.coef_]

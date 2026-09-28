@@ -205,7 +205,7 @@ def test_validate_chapter_rejects_buried_figure_heading() -> None:
 
 @pytest.mark.parametrize(
     ("code", "problem"),
-    [("plt.show()", r"plt\.show"), ("from fabel._internal import x", "_internal")],
+    [("plt.show()", r"plt\.show"), ("from fdatools._internal import x", "_internal")],
 )
 def test_validate_chapter_rejects_forbidden_code(code: str, problem: str) -> None:
     text = _chapter(1, [1]).replace("fig, ax = plt.subplots()", code)
@@ -273,7 +273,7 @@ def test_build_notebook_structure(tmp_path: Path) -> None:
     assert notebook.metadata["kernelspec"]["name"] == "python3"
     kinds = [cell.cell_type for cell in notebook.cells]
     assert kinds == ["markdown", "markdown", "code", "markdown", "code", "markdown", "code"]
-    assert "FABEL_DATA_DIR" in notebook.cells[0].source
+    assert "FDATOOLS_DATA_DIR" in notebook.cells[0].source
     assert "data-v1" in notebook.cells[0].source
     code = [cell for cell in notebook.cells if cell.cell_type == "code"]
     assert all(cell.outputs == [] and cell.execution_count is None for cell in code)

@@ -1,4 +1,4 @@
-"""Benchmarks for generalized profiling (``fabel.profiling``).
+"""Benchmarks for generalized profiling (``fdatools.profiling``).
 
 The CSTR problem mirrors the golden case: 97 temperature and concentration
 observations on ``[0, 24]``, a 51-function cubic B-spline basis per state
@@ -15,8 +15,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline
-from fabel.profiling import CSTR_PARAMETERS, ProfiledODE, cstr_model, fitzhugh_nagumo_model
+from fdatools import BSpline
+from fdatools.profiling import CSTR_PARAMETERS, ProfiledODE, cstr_model, fitzhugh_nagumo_model
 
 
 @pytest.fixture(scope="module")

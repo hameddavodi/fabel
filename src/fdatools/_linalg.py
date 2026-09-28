@@ -1,6 +1,6 @@
 """Linear algebra helpers that have no array-API equivalent.
 
-Together with :mod:`fabel._backend` this is the only module allowed to import
+Together with :mod:`fdatools._backend` this is the only module allowed to import
 NumPy and SciPy directly.  Every routine dispatches on the concrete backend:
 NumPy inputs use LAPACK through SciPy (banded Cholesky where the matrix is
 banded), PyTorch inputs use :mod:`torch.linalg` so that gradients keep flowing.
@@ -8,7 +8,7 @@ banded), PyTorch inputs use :mod:`torch.linalg` so that gradients keep flowing.
 Examples
 --------
 >>> import numpy as np
->>> from fabel._linalg import solve_spd
+>>> from fdatools._linalg import solve_spd
 >>> a = np.array([[4.0, 1.0], [1.0, 3.0]])
 >>> solve_spd(a, np.array([1.0, 2.0])).round(6).tolist()
 [0.090909, 0.636364]
@@ -25,7 +25,7 @@ import scipy.linalg as sla
 import scipy.sparse as sp
 from numpy.polynomial.legendre import leggauss
 
-from fabel._backend import array_namespace, asarray, is_torch, to_numpy
+from fdatools._backend import array_namespace, asarray, is_torch, to_numpy
 
 __all__ = [
     "bandwidth_of",
@@ -71,7 +71,7 @@ def bandwidth_of(a: NDArray, tol: float = _BAND_TOL) -> int:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import bandwidth_of
+    >>> from fdatools._linalg import bandwidth_of
     >>> bandwidth_of(np.eye(4))
     0
     """
@@ -106,7 +106,7 @@ def to_banded(a: NDArray, bandwidth: int) -> NDArray:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import to_banded
+    >>> from fdatools._linalg import to_banded
     >>> to_banded(np.eye(3), 0).tolist()
     [[1.0, 1.0, 1.0]]
     """
@@ -153,7 +153,7 @@ def solve_spd(a: Any, b: Any, bandwidth: int | None = None) -> Any:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import solve_spd
+    >>> from fdatools._linalg import solve_spd
     >>> solve_spd(np.array([[2.0, 0.0], [0.0, 4.0]]), np.array([2.0, 4.0])).round(9).tolist()
     [1.0, 1.0]
     """
@@ -206,7 +206,7 @@ def lstsq(a: Any, b: Any, ridge: float = 0.0) -> Any:
     """Least-squares solution of ``a @ x ~= b`` via the normal equations.
 
     The normal equations are used rather than a QR/SVD driver because they are
-    differentiable on every backend and because the design matrices in Fabel are
+    differentiable on every backend and because the design matrices in fdatools are
     tall and very well conditioned (basis matrices on a fine grid).
 
     Parameters
@@ -227,7 +227,7 @@ def lstsq(a: Any, b: Any, ridge: float = 0.0) -> Any:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import lstsq
+    >>> from fdatools._linalg import lstsq
     >>> a = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
     >>> lstsq(a, np.array([1.0, 1.0, 2.0])).round(10).tolist()
     [1.0, 1.0]
@@ -276,7 +276,7 @@ def pencil_eigh(a: NDArray, b: NDArray) -> tuple[NDArray, NDArray]:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import pencil_eigh
+    >>> from fdatools._linalg import pencil_eigh
     >>> s = np.array([[2.0, 0.0], [0.0, 1.0]])
     >>> mu, v = pencil_eigh(s, s + np.eye(2))
     >>> np.round(mu, 6).tolist()
@@ -316,7 +316,7 @@ def sparse_penalty(a: NDArray, bandwidth: int | None = None) -> sp.dia_array:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import sparse_penalty
+    >>> from fdatools._linalg import sparse_penalty
     >>> sparse_penalty(np.eye(3)).toarray().tolist()
     [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     """
@@ -355,7 +355,7 @@ def gauss_legendre_reference(deg: int) -> tuple[NDArray, NDArray]:
 
     Examples
     --------
-    >>> from fabel._linalg import gauss_legendre_reference
+    >>> from fdatools._linalg import gauss_legendre_reference
     >>> nodes, weights = gauss_legendre_reference(2)
     >>> weights.tolist()
     [1.0, 1.0]
@@ -397,7 +397,7 @@ def gauss_legendre(deg: int, lower: float, upper: float) -> tuple[NDArray, NDArr
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import gauss_legendre
+    >>> from fdatools._linalg import gauss_legendre
     >>> nodes, weights = gauss_legendre(3, 0.0, 1.0)
     >>> float(np.sum(weights))
     1.0
@@ -428,7 +428,7 @@ def composite_gauss_legendre(breaks: NDArray, deg: int) -> tuple[NDArray, NDArra
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import composite_gauss_legendre
+    >>> from fdatools._linalg import composite_gauss_legendre
     >>> nodes, weights = composite_gauss_legendre(np.array([0.0, 1.0, 2.0]), 2)
     >>> float(np.sum(weights))
     2.0
@@ -477,7 +477,7 @@ def cached_gram(key: Hashable, deriv: int, compute: Callable[[], NDArray]) -> ND
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import cached_gram, clear_gram_cache
+    >>> from fdatools._linalg import cached_gram, clear_gram_cache
     >>> clear_gram_cache()
     >>> cached_gram(("demo",), 0, lambda: np.eye(2)).tolist()
     [[1.0, 0.0], [0.0, 1.0]]
@@ -499,7 +499,7 @@ def clear_gram_cache() -> None:
 
     Examples
     --------
-    >>> from fabel._linalg import clear_gram_cache
+    >>> from fdatools._linalg import clear_gram_cache
     >>> clear_gram_cache()
     """
     _GRAM_CACHE.clear()
@@ -523,7 +523,7 @@ def as_backend(values: NDArray, like: Any) -> Any:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._linalg import as_backend
+    >>> from fdatools._linalg import as_backend
     >>> as_backend(np.eye(2), np.zeros(1)).shape
     (2, 2)
     """

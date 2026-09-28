@@ -10,7 +10,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 
@@ -21,10 +21,10 @@ plt.rcParams["figure.max_open_warning"] = 0
 # illustration, as in the book, where the spline is built from its coefficients.
 
 # %%
-spline_basis = fb.BSpline(domain=(0.0, 10.0), n_basis=13, order=4)
+spline_basis = fdt.BSpline(domain=(0.0, 10.0), n_basis=13, order=4)
 knot_points = np.asarray(spline_basis.breaks)
 spline_coefs = np.array([0.0, 1.5, 2.8, 1.2, -1.0, -2.2, -0.5, 1.8, 2.6, 1.0, -0.8, -1.5, 0.2])
-spline_fd = fb.FData(spline_coefs, spline_basis)
+spline_fd = fdt.FData(spline_coefs, spline_basis)
 x_grid = np.linspace(0.0, 10.0, 501)
 
 fig, ax = plt.subplots(figsize=(8, 4.5))
@@ -54,7 +54,7 @@ fig
 # %% [markdown]
 # ### Figure 3.3
 # B-spline bases of orders 1 (step functions) to 4 (cubic) on the same breaks.
-# Each order adds one continuous derivative at the knots. Fabel requires distinct
+# Each order adds one continuous derivative at the knots. fdatools requires distinct
 # breaks, so the book's view of smoothness at a knot is shown through the order.
 
 # %%
@@ -63,7 +63,7 @@ unit_grid = np.linspace(0.0, 1.0, 401)
 
 fig, axes = plt.subplots(2, 2, figsize=(9, 6), sharex=True)
 for order, axis in zip(range(1, 5), axes.ravel(), strict=True):
-    basis = fb.BSpline(domain=(0.0, 1.0), breaks=breaks, order=order)
+    basis = fdt.BSpline(domain=(0.0, 1.0), breaks=breaks, order=order)
     axis.plot(unit_grid, basis(unit_grid), linewidth=1.0)
     for knot in breaks[1:-1]:
         axis.axvline(knot, color="0.5", linestyle=":", linewidth=0.8)
@@ -81,9 +81,9 @@ fig
 
 # %%
 circle = np.linspace(0.0, 2.0 * np.pi, 201)
-sine_basis = fb.BSpline(domain=(0.0, 2.0 * np.pi), n_basis=13, order=4)
+sine_basis = fdt.BSpline(domain=(0.0, 2.0 * np.pi), n_basis=13, order=4)
 sine_coefs, *_ = np.linalg.lstsq(sine_basis(circle), np.sin(circle), rcond=None)
-sine_fd = fb.FData(sine_coefs, sine_basis)
+sine_fd = fdt.FData(sine_coefs, sine_basis)
 exact = [np.sin(circle), np.cos(circle), -np.sin(circle)]
 titles = ["sin(t)", "D sin(t)", "D$^2$ sin(t)"]
 

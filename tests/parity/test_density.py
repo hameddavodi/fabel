@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.density` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.density` against golden output from R ``fda`` 6.3.0.
 
 Every golden case is an ``intensity.fd`` fit (fda 6.3.0 no longer ships
 ``density.fd``).  The density cases use the exact identity between the two
@@ -20,9 +20,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import Monomial
-from fabel.basis import Basis
-from fabel.density import _Problem, fit_density, fit_intensity
+from fdatools import Monomial
+from fdatools.basis import Basis
+from fdatools.density import _Problem, fit_density, fit_intensity
 
 from .conftest import build_basis, case_rtol, compare, golden_cases
 
@@ -36,9 +36,9 @@ _DENSITY_FIELDS = ("density", "log_density")
 _QUADRATURE = (
     "R's intensity.fd integrates exp(W) with a quadrature that is off by up to "
     "1.6e-4 in its reported criterion f; its coefficients are therefore not "
-    "stationary for the exact criterion, and Fabel's (exact Gauss-Legendre "
+    "stationary for the exact criterion, and fdatools' (exact Gauss-Legendre "
     "integral, gradient norm < 2e-13) give a lower exact criterion in every "
-    "case (test_fabel_improves_on_r_criterion). "
+    "case (test_fdatools_improves_on_r_criterion). "
 )
 
 #: ``(case, field)`` pairs where R is the less accurate side.  Measured with
@@ -48,19 +48,19 @@ _QUADRATURE = (
 R_FDA_DEFECTS: dict[tuple[str, str], str] = {
     ("intensity_sine_bspline11_order3_L1_lam0", "coefs"): _QUADRATURE
     + "Exact gradient norm at R's coefficients 4.07e-5.  Worst entry: "
-    "coefficient 7, R 0.11139673524, Fabel 0.11140196492 (abs 5.2e-6, rel 4.7e-5).",
+    "coefficient 7, R 0.11139673524, fdatools 0.11140196492 (abs 5.2e-6, rel 4.7e-5).",
     ("density_regina_bspline13_L2_lam0.1", "coefs"): _QUADRATURE
     + "Exact gradient norm at R's coefficients 4.18e-5.  Worst entry: "
-    "coefficient 6, R -0.037409071057, Fabel -0.037405675073 (abs 3.4e-6, rel 9.1e-5).",
+    "coefficient 6, R -0.037409071057, fdatools -0.037405675073 (abs 3.4e-6, rel 9.1e-5).",
     ("density_regina_bspline13_L2_lam0.1", "log_intensity"): _QUADRATURE
-    + "Worst entry: W(42.85), R 0.033795023457, Fabel 0.033793807749 "
+    + "Worst entry: W(42.85), R 0.033795023457, fdatools 0.033793807749 "
     "(abs 1.2e-6, rel 3.6e-5); the intensity itself agrees to 4.3e-6.",
     ("density_gamma_bspline9_L2_lam1", "log_intensity"): _QUADRATURE
     + "Exact gradient norm at R's coefficients 1.60e-5.  Worst entry: "
-    "W(8.7), R 0.010768158864, Fabel 0.010768044513 (abs 1.1e-7, rel 1.1e-5).",
+    "W(8.7), R 0.010768158864, fdatools 0.010768044513 (abs 1.1e-7, rel 1.1e-5).",
     ("density_truncnormal_monomial3_L1_lam0", "log_intensity"): _QUADRATURE
     + "Exact gradient norm at R's coefficients 5.16e-5.  Worst entry: "
-    "W(-2.1), R -0.033503115309, Fabel -0.033503752936 (abs 6.4e-7, rel 1.9e-5).",
+    "W(-2.1), R -0.033503115309, fdatools -0.033503752936 (abs 6.4e-7, rel 1.9e-5).",
 }
 
 
@@ -116,7 +116,7 @@ def test_density_parity(case: dict[str, Any], field: str) -> None:
 
 
 @pytest.mark.parametrize("case", golden_cases(MODULE), ids=lambda c: c["name"])
-def test_fabel_improves_on_r_criterion(case: dict[str, Any]) -> None:
+def test_fdatools_improves_on_r_criterion(case: dict[str, Any]) -> None:
     """R's coefficients are near-optimal, and never better, for the exact criterion."""
     x, kwargs = _fit_args(case)
     res = fit_intensity(x, **kwargs)
@@ -129,7 +129,7 @@ def test_fabel_improves_on_r_criterion(case: dict[str, Any]) -> None:
 
 def test_regina_sample_is_the_dataset() -> None:
     """The golden Regina sample is ReginaPrecip restricted to (2, 45] mm, sorted."""
-    datasets = pytest.importorskip("fabel.datasets")
+    datasets = pytest.importorskip("fdatools.datasets")
     try:
         value = np.asarray(datasets.load_regina_precip().value, dtype=float)
     except (OSError, ValueError) as exc:  # offline and not cached

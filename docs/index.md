@@ -1,11 +1,11 @@
-# Fabel
+# fdatools
 
-**Functional data analysis for Python.** Fabel is a clean-room Python rewrite of
+**Functional data analysis for Python.** fdatools is a clean-room Python rewrite of
 R's `fda` package (Ramsay, Hooker & Graves, version 6.3.0). It covers basis
 expansions, penalised smoothing, functional PCA and CCA, functional regression,
 curve registration and principal differential analysis.
 
-## Why Fabel
+## Why fdatools
 
 - **Same numbers as R.** Every public function is tested against golden output
   from R `fda` 6.3.0 at `rtol = 1e-8` (`1e-5` for iterative fits such as
@@ -21,35 +21,35 @@ curve registration and principal differential analysis.
 ## Install
 
 ```bash
-pip install fabel
+pip install fdatools
 ```
 
 | Extra | Adds |
 |---|---|
-| `fabel[plot]` | matplotlib, for `.plot()` |
-| `fabel[pandas]` | pandas and xarray, for `from_pandas` / `to_pandas` / `to_xarray` |
-| `fabel[io]` | `rdata`, for `read_rds` (load R `fd` objects) |
-| `fabel[torch]` | PyTorch backend and `fabel.nn` |
+| `fdatools[plot]` | matplotlib, for `.plot()` |
+| `fdatools[pandas]` | pandas and xarray, for `from_pandas` / `to_pandas` / `to_xarray` |
+| `fdatools[io]` | `rdata`, for `read_rds` (load R `fd` objects) |
+| `fdatools[torch]` | PyTorch backend and `fdatools.nn` |
 
-Fabel supports Python 3.10 to 3.13.
+fdatools supports Python 3.10 to 3.13.
 
 ## A first look
 
 ```python
 import numpy as np
-import fabel as fb
+import fdatools as fdt
 
-growth = fb.datasets.load_growth()
-basis = fb.BSpline(domain=(1.0, 18.0), n_basis=12)
+growth = fdt.datasets.load_growth()
+basis = fdt.BSpline(domain=(1.0, 18.0), n_basis=12)
 coefs, *_ = np.linalg.lstsq(basis(growth.age), growth.hgtf, rcond=None)
-girls = fb.FData(coefs, basis)
+girls = fdt.FData(coefs, basis)
 girls.derivative().mean()(np.array([5.0, 12.0]))   # mean growth speed at 5 and 12
 ```
 
 ## Where to go next
 
 - [Quickstart](quickstart.md): the core objects and a full smoothing + FPCA workflow.
-- [Migrating from R `fda`](r-migration.md): every R function and its Fabel equivalent.
+- [Migrating from R `fda`](r-migration.md): every R function and its fdatools equivalent.
 - [Tutorials](tutorials/index.md): six end-to-end analyses (smoothing, FPCA, registration,
   regression, dynamics, machine learning).
 - [API reference](api/index.md): every public class and function.

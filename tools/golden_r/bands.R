@@ -1,6 +1,6 @@
 # tools/golden_r/bands.R
 #
-# Golden cases for pointwise confidence bands (fabel.stats.confidence_band):
+# Golden cases for pointwise confidence bands (fdatools.stats.confidence_band):
 # the pointwise standard error of a smooth, phi(t)' S Sigma S' phi(t) with S
 # the smooth.basis y2cMap, and the pointwise standard error of fRegress
 # coefficient functions, theta(t)' Bvar_jj theta(t) with Bvar the coefficient

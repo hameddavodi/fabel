@@ -9,18 +9,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day5 = weather.t - 0.5  # the book's day.5: mid-day points 0.5, ..., 364.5
-harmonic = fb.LDO.harmonic(period=365.0)
-daybasis = fb.Fourier(domain=(0.0, 365.0), n_basis=365)
+harmonic = fdt.LDO.harmonic(period=365.0)
+daybasis = fdt.Fourier(domain=(0.0, 365.0), n_basis=365)
 logprec = weather.log10precip
-logprecfit = fb.smooth(logprec, day5, basis=daybasis, lam=1e6, penalty=harmonic)
+logprecfit = fdt.smooth(logprec, day5, basis=daybasis, lam=1e6, penalty=harmonic)
 logprecfd = logprecfit.fd
-tempfd = fb.smooth(weather.temp, day5, basis=daybasis, lam=1e4, penalty=harmonic).fd
+tempfd = fdt.smooth(weather.temp, day5, basis=daybasis, lam=1e4, penalty=harmonic).fd
 dayfine = np.linspace(0.0, 365.0, 121)
 
 # %% [markdown]
@@ -29,7 +29,7 @@ dayfine = np.linspace(0.0, 365.0, 121)
 # as a perspective plot (left) and a contour plot (right).
 
 # %%
-logprecvar = fb.stats.cov(logprecfd)
+logprecvar = fdt.stats.cov(logprecfd)
 surface = np.asarray(logprecvar(dayfine, dayfine))
 grid_s, grid_t = np.meshgrid(dayfine, dayfine, indexing="ij")
 
@@ -54,7 +54,7 @@ fig
 # stations, from smoothed temperature and log precipitation curves.
 
 # %%
-crosscor = np.asarray(fb.stats.cor(tempfd, logprecfd, s=dayfine, t=dayfine))
+crosscor = np.asarray(fdt.stats.cor(tempfd, logprecfd, s=dayfine, t=dayfine))
 
 fig, ax = plt.subplots(figsize=(5.5, 4.5))
 filled = ax.contourf(dayfine, dayfine, crosscor.T, levels=np.linspace(-1, 1, 21), cmap="RdBu_r")
@@ -73,10 +73,10 @@ fig
 # %%
 logprecres = logprec - np.asarray(logprecfd(day5))
 logprecvar1 = np.sum(logprecres**2, axis=1) / (logprec.shape[1] - 1)
-logvarfit = fb.smooth(
+logvarfit = fdt.smooth(
     np.log(logprecvar1),
     day5,
-    basis=fb.Fourier(domain=(0.0, 365.0), n_basis=365),
+    basis=fdt.Fourier(domain=(0.0, 365.0), n_basis=365),
     penalty=harmonic,
 )
 print(f"log variance smooth: GCV lambda = {logvarfit.lam:.3g}, df = {logvarfit.df:.2f}")
@@ -96,12 +96,12 @@ fig
 # potential energy on the vertical axis.
 
 # %%
-unitbasis = fb.Fourier(domain=(0.0, 1.0), n_basis=3)
+unitbasis = fdt.Fourier(domain=(0.0, 1.0), n_basis=3)
 sinscale = 1.0 / float(np.asarray(unitbasis(np.array([0.25])))[0, 1])
-sinefd = fb.FData(np.array([[0.0], [sinscale], [0.0]]), unitbasis)
+sinefd = fdt.FData(np.array([[0.0], [sinscale], [0.0]]), unitbasis)
 
 fig, ax = plt.subplots(figsize=(5, 5))
-fb.phase_plane(
+fdt.phase_plane(
     sinefd,
     np.linspace(0.0, 1.0, 201),
     labels={0.0: "t=0", 0.25: "t=1/4", 0.5: "t=1/2", 0.75: "t=3/4"},
@@ -121,13 +121,13 @@ fig
 # B-splines with a knot at every month and a D^4 penalty.
 
 # %%
-nondur = fb.datasets.load_nondurables()
+nondur = fdt.datasets.load_nondurables()
 years = 1919.0 + np.arange(nondur.value.size) / 12.0
 window = (years >= 1960.0) & (years < 1971.0)
 ndyears = years[window]
 lognondur = np.log10(nondur.value[window])
-ndbasis = fb.BSpline(domain=(ndyears[0], ndyears[-1]), order=6, breaks=ndyears)
-ndfit = fb.smooth(lognondur, ndyears, basis=ndbasis, lam=1e-7, penalty=4)
+ndbasis = fdt.BSpline(domain=(ndyears[0], ndyears[-1]), order=6, breaks=ndyears)
+ndfit = fdt.smooth(lognondur, ndyears, basis=ndbasis, lam=1e-7, penalty=4)
 ndfine = np.linspace(ndyears[0], ndyears[-1], 1201)
 
 fig, ax = plt.subplots(figsize=(7, 4))
@@ -147,7 +147,7 @@ months = "JFMAMJJASOND"
 year64 = np.linspace(1964.0, 1965.0, 241)
 
 fig, ax = plt.subplots(figsize=(5.5, 5))
-fb.phase_plane(
+fdt.phase_plane(
     ndfit.fd,
     year64,
     labels={1964.0 + (m + 0.5) / 12.0: months[m] for m in range(12)},
@@ -167,12 +167,12 @@ fig
 # pubertal spurt is the large loop, and age 11.5 is marked on each curve.
 
 # %%
-growth = fb.datasets.load_growth()
-growthbasis = fb.BSpline(domain=(1.0, 18.0), order=6, breaks=growth.age)
-girlsfd = fb.smooth(growth.hgtf, growth.age, basis=growthbasis, lam=1.0, penalty=4).fd[:10]
+growth = fdt.datasets.load_growth()
+growthbasis = fdt.BSpline(domain=(1.0, 18.0), order=6, breaks=growth.age)
+girlsfd = fdt.smooth(growth.hgtf, growth.age, basis=growthbasis, lam=1.0, penalty=4).fd[:10]
 
 fig, ax = plt.subplots(figsize=(6, 5))
-fb.phase_plane(girlsfd, np.linspace(3.0, 18.0, 301), labels={11.5: "o"}, ax=ax, linewidth=1)
+fdt.phase_plane(girlsfd, np.linspace(3.0, 18.0, 301), labels={11.5: "o"}, ax=ax, linewidth=1)
 ax.axhline(0.0, color="grey", linestyle=":")
 ax.set_xlabel("Velocity (cm/yr)")
 ax.set_ylabel(r"Acceleration (cm/yr$^2$)")

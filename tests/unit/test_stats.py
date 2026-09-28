@@ -1,4 +1,4 @@
-"""Unit and property tests for :mod:`fabel.stats`."""
+"""Unit and property tests for :mod:`fdatools.stats`."""
 
 from __future__ import annotations
 
@@ -10,10 +10,10 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from fabel import LDO, BSpline, FData, Fourier, inprod
-from fabel.regression import fregress
-from fabel.smoothing import SmoothResult, smooth
-from fabel.stats import (
+from fdatools import LDO, BSpline, FData, Fourier, inprod
+from fdatools.regression import fregress
+from fdatools.smoothing import SmoothResult, smooth
+from fdatools.stats import (
     BoxplotResult,
     DepthResult,
     PermutationTestResult,

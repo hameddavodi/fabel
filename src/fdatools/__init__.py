@@ -1,4 +1,4 @@
-"""Fabel: functional data analysis for Python.
+"""fdatools: functional data analysis for Python.
 
 A clean-room, production-grade Python implementation of the functional data
 analysis toolkit described in Ramsay & Silverman, *Functional Data Analysis*.
@@ -6,16 +6,16 @@ analysis toolkit described in Ramsay & Silverman, *Functional Data Analysis*.
 Examples
 --------
 >>> import numpy as np
->>> import fabel as fb
->>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
+>>> import fdatools as fdt
+>>> basis = fdt.BSpline(domain=(0.0, 1.0), n_basis=5)
 >>> basis(np.array([0.0, 0.5, 1.0])).shape
 (3, 5)
 """
 
 from typing import TYPE_CHECKING, Any
 
-from fabel import datasets, density, profiling, sparse, stats
-from fabel.basis import (
+from fdatools import datasets, density, profiling, sparse, stats
+from fdatools.basis import (
     Basis,
     BSpline,
     Constant,
@@ -25,19 +25,19 @@ from fabel.basis import (
     Polygonal,
     Power,
 )
-from fabel.core import LDO, BiFData, FData, inprod
-from fabel.decomposition import FCCA, FPCA
-from fabel.density import DensityResult, IntensityResult, fit_density, fit_intensity
-from fabel.dynamics import PDA, PDAStability, phase_plane
-from fabel.io import from_pandas, read_rds, to_pandas, to_xarray
-from fabel.profiling import ODEModel, ProfiledODE, profile_ode
-from fabel.registration import Registrator, landmark_register, register
-from fabel.regression import FRegress, LinmodResult, fregress, linmod
-from fabel.smoothing import Smoother, SmoothResult, smooth
-from fabel.sparse import PACE, SparseCov, sparse_cov, sparse_mean
+from fdatools.core import LDO, BiFData, FData, inprod
+from fdatools.decomposition import FCCA, FPCA
+from fdatools.density import DensityResult, IntensityResult, fit_density, fit_intensity
+from fdatools.dynamics import PDA, PDAStability, phase_plane
+from fdatools.io import from_pandas, read_rds, to_pandas, to_xarray
+from fdatools.profiling import ODEModel, ProfiledODE, profile_ode
+from fdatools.registration import Registrator, landmark_register, register
+from fdatools.regression import FRegress, LinmodResult, fregress, linmod
+from fdatools.smoothing import Smoother, SmoothResult, smooth
+from fdatools.sparse import PACE, SparseCov, sparse_cov, sparse_mean
 
 if TYPE_CHECKING:
-    from fabel import nn as nn
+    from fdatools import nn as nn
 
 __all__ = [
     "FCCA",
@@ -94,14 +94,14 @@ __version__ = "1.0.0"
 
 
 def __getattr__(name: str) -> Any:
-    """Import the optional :mod:`fabel.nn` module on first access.
+    """Import the optional :mod:`fdatools.nn` module on first access.
 
-    ``import fabel`` never imports PyTorch; ``fabel.nn`` loads it lazily.
+    ``import fdatools`` never imports PyTorch; ``fdatools.nn`` loads it lazily.
     """
     if name == "nn":
         import importlib
 
-        module = importlib.import_module("fabel.nn")
+        module = importlib.import_module("fdatools.nn")
         globals()["nn"] = module
         return module
-    raise AttributeError(f"module 'fabel' has no attribute {name!r}")
+    raise AttributeError(f"module 'fdatools' has no attribute {name!r}")

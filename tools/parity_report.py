@@ -1,4 +1,4 @@
-"""Generate ``PARITY_REPORT.md``: Fabel's numeric agreement with R ``fda`` 6.3.0.
+"""Generate ``PARITY_REPORT.md``: fdatools' numeric agreement with R ``fda`` 6.3.0.
 
 Usage::
 
@@ -21,7 +21,7 @@ parity tests themselves absorb those entries with an ``atol`` scaled by
 ``max |expected|``.  It also records the tolerance the test asked for and the
 test outcome (pass, strict xfail with its written reason, fail, skip).
 
-Each test is then attributed to one public Fabel symbol: parametrised parity
+Each test is then attributed to one public fdatools symbol: parametrised parity
 tests carry their golden case (``callspec.params["case"]``), whose ``r_call``
 names the R function under test; unparametrised tests are attributed by their
 test module.  Golden files with no parity test yet on the current branch are
@@ -62,7 +62,7 @@ GOLDEN_DIR = REPO_ROOT / "tests" / "golden"
 
 @dataclass(frozen=True)
 class Symbol:
-    """One public Fabel symbol and the R ``fda`` functions it replaces."""
+    """One public fdatools symbol and the R ``fda`` functions it replaces."""
 
     name: str
     module: str
@@ -73,80 +73,80 @@ class Symbol:
 #: Every public symbol of SPEC.md, in the order the report lists them.
 SYMBOLS: tuple[Symbol, ...] = (
     Symbol(
-        "FData", "fabel.core", "FData", "fd, eval.fd, mean.fd, sd.fd, center.fd, deriv.fd, +.fd"
+        "FData", "fdatools.core", "FData", "fd, eval.fd, mean.fd, sd.fd, center.fd, deriv.fd, +.fd"
     ),
-    Symbol("BiFData", "fabel.core", "BiFData", "bifd, eval.bifd"),
-    Symbol("LDO", "fabel.core", "LDO", "Lfd, int2Lfd, vec2Lfd"),
-    Symbol("inprod", "fabel.core", "inprod", "inprod, inprod.bspline"),
-    Symbol("Basis", "fabel.basis", "Basis", "basisfd"),
-    Symbol("BSpline", "fabel.basis", "BSpline", "create.bspline.basis, bsplineS, bsplinepen"),
-    Symbol("Fourier", "fabel.basis", "Fourier", "create.fourier.basis, fourier, fourierpen"),
-    Symbol("Monomial", "fabel.basis", "Monomial", "create.monomial.basis, monomial"),
-    Symbol("Exponential", "fabel.basis", "Exponential", "create.exponential.basis, expon"),
-    Symbol("Power", "fabel.basis", "Power", "create.power.basis, powerbasis, powerpen"),
-    Symbol("Constant", "fabel.basis", "Constant", "create.constant.basis"),
-    Symbol("Polygonal", "fabel.basis", "Polygonal", "create.polygonal.basis, polyg, polygpen"),
+    Symbol("BiFData", "fdatools.core", "BiFData", "bifd, eval.bifd"),
+    Symbol("LDO", "fdatools.core", "LDO", "Lfd, int2Lfd, vec2Lfd"),
+    Symbol("inprod", "fdatools.core", "inprod", "inprod, inprod.bspline"),
+    Symbol("Basis", "fdatools.basis", "Basis", "basisfd"),
+    Symbol("BSpline", "fdatools.basis", "BSpline", "create.bspline.basis, bsplineS, bsplinepen"),
+    Symbol("Fourier", "fdatools.basis", "Fourier", "create.fourier.basis, fourier, fourierpen"),
+    Symbol("Monomial", "fdatools.basis", "Monomial", "create.monomial.basis, monomial"),
+    Symbol("Exponential", "fdatools.basis", "Exponential", "create.exponential.basis, expon"),
+    Symbol("Power", "fdatools.basis", "Power", "create.power.basis, powerbasis, powerpen"),
+    Symbol("Constant", "fdatools.basis", "Constant", "create.constant.basis"),
+    Symbol("Polygonal", "fdatools.basis", "Polygonal", "create.polygonal.basis, polyg, polygpen"),
     Symbol(
         "smooth",
-        "fabel.smoothing",
+        "fdatools.smoothing",
         "smooth",
         "smooth.basis, smooth.basisPar, Data2fd, smooth.monotone, smooth.pos",
     ),
-    Symbol("SmoothResult", "fabel.smoothing", "SmoothResult", "smooth.basis return list"),
-    Symbol("Smoother", "fabel.smoothing", "Smoother", "(new: sklearn estimator)"),
-    Symbol("gcv_curve", "fabel.smoothing", "gcv_curve", "lambda2gcv"),
-    Symbol("lambda_to_df", "fabel.smoothing", "lambda_to_df", "lambda2df"),
-    Symbol("df_to_lambda", "fabel.smoothing", "df_to_lambda", "df2lambda"),
-    Symbol("FPCA", "fabel.decomposition", "FPCA", "pca.fd, varmx.pca.fd"),
-    Symbol("FCCA", "fabel.decomposition", "FCCA", "cca.fd"),
+    Symbol("SmoothResult", "fdatools.smoothing", "SmoothResult", "smooth.basis return list"),
+    Symbol("Smoother", "fdatools.smoothing", "Smoother", "(new: sklearn estimator)"),
+    Symbol("gcv_curve", "fdatools.smoothing", "gcv_curve", "lambda2gcv"),
+    Symbol("lambda_to_df", "fdatools.smoothing", "lambda_to_df", "lambda2df"),
+    Symbol("df_to_lambda", "fdatools.smoothing", "df_to_lambda", "df2lambda"),
+    Symbol("FPCA", "fdatools.decomposition", "FPCA", "pca.fd, varmx.pca.fd"),
+    Symbol("FCCA", "fdatools.decomposition", "FCCA", "cca.fd"),
     Symbol(
         "fregress",
-        "fabel.regression",
+        "fdatools.regression",
         "fregress",
         "fRegress, predict.fRegress, fRegress.stderr, fRegress.CV",
     ),
-    Symbol("FRegress", "fabel.regression", "FRegress", "fRegress (estimator form)"),
-    Symbol("linmod", "fabel.regression", "linmod", "linmod"),
-    Symbol("register", "fabel.registration", "register", "register.fd, AmpPhaseDecomp"),
-    Symbol("landmark_register", "fabel.registration", "landmark_register", "landmarkreg"),
-    Symbol("Registrator", "fabel.registration", "Registrator", "register.fd (estimator form)"),
-    Symbol("PDA", "fabel.dynamics", "PDA", "pda.fd, pda.overlay"),
-    Symbol("PDAStability", "fabel.dynamics", "PDAStability", "eigen.pda"),
-    Symbol("phase_plane", "fabel.dynamics", "phase_plane", "phaseplanePlot"),
-    Symbol("sparse_mean", "fabel.sparse", "sparse_mean", "smooth.sparse.mean"),
-    Symbol("PACE", "fabel.sparse", "PACE", "pcaPACE, covPACE, scoresPACE"),
+    Symbol("FRegress", "fdatools.regression", "FRegress", "fRegress (estimator form)"),
+    Symbol("linmod", "fdatools.regression", "linmod", "linmod"),
+    Symbol("register", "fdatools.registration", "register", "register.fd, AmpPhaseDecomp"),
+    Symbol("landmark_register", "fdatools.registration", "landmark_register", "landmarkreg"),
+    Symbol("Registrator", "fdatools.registration", "Registrator", "register.fd (estimator form)"),
+    Symbol("PDA", "fdatools.dynamics", "PDA", "pda.fd, pda.overlay"),
+    Symbol("PDAStability", "fdatools.dynamics", "PDAStability", "eigen.pda"),
+    Symbol("phase_plane", "fdatools.dynamics", "phase_plane", "phaseplanePlot"),
+    Symbol("sparse_mean", "fdatools.sparse", "sparse_mean", "smooth.sparse.mean"),
+    Symbol("PACE", "fdatools.sparse", "PACE", "pcaPACE, covPACE, scoresPACE"),
     Symbol(
         "fit_density",
-        "fabel.density",
+        "fdatools.density",
         "fit_density",
         "density.fd (dropped in fda 6.3.0; checked via intensity.fd / n)",
     ),
-    Symbol("fit_intensity", "fabel.density", "fit_intensity", "intensity.fd"),
+    Symbol("fit_intensity", "fdatools.density", "fit_intensity", "intensity.fd"),
     Symbol(
         "profile_ode",
-        "fabel.profiling",
+        "fdatools.profiling",
         "profile_ode",
         "CSTR2in, CSTR2, CSTRfitLS, CSTRfn, CSTRres, CSTRsse, quadset",
     ),
-    Symbol("stats.cov", "fabel.stats", "cov", "var.fd"),
-    Symbol("stats.cor", "fabel.stats", "cor", "cor.fd"),
-    Symbol("stats.depth", "fabel.stats", "depth", "fdepth"),
-    Symbol("stats.boxplot", "fabel.stats", "boxplot", "fbplot, boxplot.fd"),
-    Symbol("stats.f_test", "fabel.stats", "f_test", "Fperm.fd"),
-    Symbol("stats.t_test", "fabel.stats", "t_test", "tperm.fd"),
+    Symbol("stats.cov", "fdatools.stats", "cov", "var.fd"),
+    Symbol("stats.cor", "fdatools.stats", "cor", "cor.fd"),
+    Symbol("stats.depth", "fdatools.stats", "depth", "fdepth"),
+    Symbol("stats.boxplot", "fdatools.stats", "boxplot", "fbplot, boxplot.fd"),
+    Symbol("stats.f_test", "fdatools.stats", "f_test", "Fperm.fd"),
+    Symbol("stats.t_test", "fdatools.stats", "t_test", "tperm.fd"),
     Symbol(
         "stats.confidence_band",
-        "fabel.stats",
+        "fdatools.stats",
         "confidence_band",
         "smooth.basis y2cMap variance, fRegress.stderr",
     ),
-    Symbol("datasets.load_*", "fabel.datasets", "load_growth", "data(package='fda')"),
-    Symbol("nn.BasisLayer", "fabel.nn", "BasisLayer", "(new: PyTorch layer)"),
-    Symbol("nn.FDataDataset", "fabel.nn", "FDataDataset", "(new: PyTorch dataset)"),
-    Symbol("from_pandas", "fabel.io", "from_pandas", "(new)"),
-    Symbol("to_pandas", "fabel.io", "to_pandas", "(new)"),
-    Symbol("to_xarray", "fabel.io", "to_xarray", "(new)"),
-    Symbol("read_rds", "fabel.io", "read_rds", "readRDS on fd / bifd / basisfd objects"),
+    Symbol("datasets.load_*", "fdatools.datasets", "load_growth", "data(package='fda')"),
+    Symbol("nn.BasisLayer", "fdatools.nn", "BasisLayer", "(new: PyTorch layer)"),
+    Symbol("nn.FDataDataset", "fdatools.nn", "FDataDataset", "(new: PyTorch dataset)"),
+    Symbol("from_pandas", "fdatools.io", "from_pandas", "(new)"),
+    Symbol("to_pandas", "fdatools.io", "to_pandas", "(new)"),
+    Symbol("to_xarray", "fdatools.io", "to_xarray", "(new)"),
+    Symbol("read_rds", "fdatools.io", "read_rds", "readRDS on fd / bifd / basisfd objects"),
 )
 
 #: ``(golden module, regex searched in the case's r_call or name, symbol name)``.
@@ -400,7 +400,7 @@ def symbol_status(symbol: Symbol, nodes: Sequence[NodeResult], golden_cases: int
 
     Examples
     --------
-    >>> s = Symbol("X", "fabel.core", "FData", "x")
+    >>> s = Symbol("X", "fdatools.core", "FData", "x")
     >>> symbol_status(s, [], 0)
     'no golden cases'
     """
@@ -433,7 +433,7 @@ def render(results: Sequence[NodeResult], test_paths: Sequence[str]) -> str:
     for node in results:
         by_symbol.setdefault(node.symbol or "(unattributed)", []).append(node)
 
-    fabel = importlib.import_module("fabel")
+    fdatools = importlib.import_module("fdatools")
     metas = [entry["meta"] for entry in inventory.values()]
     r_version = metas[0]["r_version"] if metas else "unknown"
     fda_version = metas[0]["fda_version"] if metas else "unknown"
@@ -442,13 +442,13 @@ def render(results: Sequence[NodeResult], test_paths: Sequence[str]) -> str:
     lines = [
         "# Parity report",
         "",
-        f"Fabel {fabel.__version__} against R `fda` {fda_version} ({r_version}).",
+        f"fdatools {fdatools.__version__} against R `fda` {fda_version} ({r_version}).",
         f"Generated {date.today().isoformat()} by `tools/parity_report.py` "
         f"from a live run of `{' '.join(test_paths)}`.",
         "",
         "Errors are measured on every `assert_allclose` a parity test makes:",
-        "absolute error is `max |fabel - R|`, relative error is the normwise",
-        "`max |fabel - R| / max |R|` (entrywise ratios are meaningless on matrix entries",
+        "absolute error is `max |fdatools - R|`, relative error is the normwise",
+        "`max |fdatools - R| / max |R|` (entrywise ratios are meaningless on matrix entries",
         "that are zero up to rounding). The summary columns show",
         "the worst value over **passing** cases only; strict xfails (cases where R is",
         "demonstrably the less accurate side) are listed with their measured reason below.",

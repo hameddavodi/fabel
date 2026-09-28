@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.sparse` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.sparse` against golden output from R ``fda`` 6.3.0.
 
 The golden file ``tests/golden/pace.json`` holds seeded sparse subsamples of
 two real datasets (6 random ages for each of the 54 girls of ``growth$hgtf``;
@@ -14,7 +14,7 @@ R's ``pcaPACE`` signs each harmonic so that its coefficients in orthonormal
 coordinates, ``U b`` with ``W + λR = UᵀU`` (upper Cholesky factor), sum to a
 positive number.  Measured on 90 harmonics of random sparse weather subsamples
 this held every time, while a positive plain coefficient sum held for only
-76-79 %; the weather case of the golden file is one of the exceptions.  Fabel
+76-79 %; the weather case of the golden file is one of the exceptions.  fdatools
 uses the same rule, so harmonics are compared as they are.
 """
 
@@ -27,9 +27,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import LDO
-from fabel.basis import Basis
-from fabel.sparse import PACE, _harmonics, sparse_mean
+from fdatools import LDO
+from fdatools.basis import Basis
+from fdatools.sparse import PACE, _harmonics, sparse_mean
 
 from .conftest import build_basis as _build_basis
 from .conftest import case_rtol, compare, golden_cases
@@ -49,18 +49,18 @@ _INPROD_HARMONICS_REASON = (
     "max|inprod(b, b) - eval.penalty(b, 0)|: 4.0e-5 for the order-4 spline "
     "with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on "
     "[1, 365]; it is exactly 0 for monomial bases.  With R's own inprod() J "
-    "(recorded in the golden file) Fabel's eigenproblem reproduces R's values "
+    "(recorded in the golden file) fdatools' eigenproblem reproduces R's values "
     "to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram).  "
     "With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 "
     "(values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 "
-    "/ growth cov-lambda 10 / weather.  Fabel uses the exact J."
+    "/ growth cov-lambda 10 / weather.  fdatools uses the exact J."
 )
 
 _INPROD_COV_PENALTY_REASON = (
     "R's covPACE penalty is lambda (W (x) P + P (x) W) with W = inprod(basis, "
     "basis) (Romberg, 4.0e-5 off the exact Gram for this order-4 spline on "
     "[1, 18]) and the exact P = eval.penalty(basis, 2).  With R's inprod() W "
-    "(recorded in the golden file) Fabel reproduces R's surface to 1.9e-14 "
+    "(recorded in the golden file) fdatools reproduces R's surface to 1.9e-14 "
     "(test_same_math_with_r_inprod_gram); with the exact W the relative gap is "
     "1.2e-5.  Unpenalised surfaces (cov lambda 0) match to 6e-14."
 )
@@ -76,7 +76,7 @@ _SCORES_REASON = (
     "moved the scores about 365 times more than the same change of the fifth; "
     "changing another curve's data moved them too.  The same function errors "
     "('evalarg contains 1 NA') for non-integer times such as growth ages.  "
-    "Fabel implements the published PACE estimator (Yao, Mueller & Wang 2005)."
+    "fdatools implements the published PACE estimator (Yao, Mueller & Wang 2005)."
 )
 
 R_FDA_DEFECTS: dict[tuple[str, str], str] = {
@@ -200,7 +200,7 @@ def test_same_math_with_r_inprod_gram(case: dict[str, Any]) -> None:
     This isolates the only difference behind the strict xfails above: the
     quadrature of R's ``inprod()``, not the estimator.
     """
-    from fabel.sparse import _fit_cov, _residuals
+    from fdatools.sparse import _fit_cov, _residuals
 
     inp, out = case["input"], case["output"]
     rtol = case_rtol(MODULE, case)

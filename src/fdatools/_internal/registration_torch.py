@@ -1,12 +1,12 @@
-r"""PyTorch path of :func:`fabel.registration.register`: autodiff Newton steps.
+r"""PyTorch path of :func:`fdatools.registration.register`: autodiff Newton steps.
 
-:func:`~fabel.registration.register` comes here when it receives curves (or a
+:func:`~fdatools.registration.register` comes here when it receives curves (or a
 continuous-registration target) with :class:`torch.Tensor` coefficients.  Two
 pieces are provided:
 
 - :class:`AutogradObjective` computes one curve's registration criterion in
   PyTorch (float64, CPU) and returns its gradient and Hessian by automatic
-  differentiation.  :func:`fabel.registration._minimise` runs the same
+  differentiation.  :func:`fdatools.registration._minimise` runs the same
   safeguarded Newton iteration with an Armijo line search on it as on the
   analytic NumPy derivatives, so both paths stop at the same optimum.
 - :func:`to_torch_result` turns the finished registration into tensors in the
@@ -14,9 +14,9 @@ pieces are provided:
   respect to the input coefficients.
 - :func:`warp_curves_torch` warps tensor curves with fixed warps; it builds
   the registered curves of :func:`to_torch_result` and serves
-  :meth:`fabel.registration.RegistrationResult.apply`.
+  :meth:`fdatools.registration.RegistrationResult.apply`.
 
-The criterion is the one of :mod:`fabel.registration`: for the warp
+The criterion is the one of :mod:`fdatools.registration`: for the warp
 parameters ``p`` (the free latent coefficients, plus the shift of a periodic
 registration) it is the grid mean of ``(x_0 - x∘h)^2`` (least squares) or
 twice the smaller eigenvalue of the grid-mean cross-product matrix of
@@ -35,16 +35,16 @@ registration grid, linear in the coefficients of ``x_i``, and that linear map
 is what autograd sees.  The implicit dependence of the optimal ``h_i`` on
 ``x_i`` is not propagated.
 
-This module imports PyTorch at the top; :mod:`fabel.registration` imports it
-only when a tensor reaches :func:`~fabel.registration.register`, so
-``import fabel`` never imports torch.
+This module imports PyTorch at the top; :mod:`fdatools.registration` imports it
+only when a tensor reaches :func:`~fdatools.registration.register`, so
+``import fdatools`` never imports torch.
 
 Examples
 --------
 >>> import numpy as np
 >>> import torch
->>> from fabel import BSpline, FData
->>> from fabel.registration import register
+>>> from fdatools import BSpline, FData
+>>> from fdatools.registration import register
 >>> basis = BSpline(domain=(0.0, 1.0), n_basis=15)
 >>> t = np.linspace(0.0, 1.0, 400)
 >>> bumps = np.stack([np.exp(-(((t - s) / 0.1) ** 2)) for s in (0.45, 0.55)], axis=1)
@@ -62,12 +62,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import torch
-from fabel import _linalg
-from fabel._backend import default_namespace, is_torch, to_numpy
-from fabel.core import FData
+from fdatools import _linalg
+from fdatools._backend import default_namespace, is_torch, to_numpy
+from fdatools.core import FData
 
 if TYPE_CHECKING:
-    from fabel.registration import RegistrationResult, _CurveProblem
+    from fdatools.registration import RegistrationResult, _CurveProblem
 
 __all__ = ["AutogradObjective", "as_tensor_like", "to_torch_result", "warp_curves_torch"]
 
@@ -104,7 +104,7 @@ def as_tensor_like(values: Any, like: Any) -> torch.Tensor:
     --------
     >>> import numpy as np
     >>> import torch
-    >>> from fabel._internal.registration_torch import as_tensor_like
+    >>> from fdatools._internal.registration_torch import as_tensor_like
     >>> as_tensor_like(np.arange(3.0), torch.zeros(1, dtype=torch.float64))
     tensor([0., 1., 2.], dtype=torch.float64)
     """
@@ -114,7 +114,7 @@ def as_tensor_like(values: Any, like: Any) -> torch.Tensor:
 class AutogradObjective:
     """One curve's registration criterion with autograd derivatives.
 
-    A drop-in replacement for :meth:`fabel.registration._CurveProblem.evaluate`:
+    A drop-in replacement for :meth:`fdatools.registration._CurveProblem.evaluate`:
     calling it with NumPy parameters returns the criterion as a float and its
     gradient and Hessian as NumPy arrays.  The criterion is evaluated in
     PyTorch; the gradient comes from one backward pass with
@@ -125,15 +125,15 @@ class AutogradObjective:
     ----------
     problem : _CurveProblem
         The curve, target values, warp quadrature, penalty and options of one
-        curve, as built by :func:`fabel.registration.register`.
+        curve, as built by :func:`fdatools.registration.register`.
 
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.registration import _CurveProblem, _WarpQuadrature, _fine_grid
-    >>> from fabel.registration import _penalty_matrix
-    >>> from fabel._internal.registration_torch import AutogradObjective
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.registration import _CurveProblem, _WarpQuadrature, _fine_grid
+    >>> from fdatools.registration import _penalty_matrix
+    >>> from fdatools._internal.registration_torch import AutogradObjective
     >>> curve = FData(np.linspace(0.0, 1.0, 6)[:, None] ** 2, BSpline(n_basis=6))
     >>> grid = _fine_grid((0.0, 1.0), 6)
     >>> wbasis = BSpline(n_basis=4)
@@ -289,7 +289,7 @@ def to_torch_result(
     """Convert a finished registration into tensors, differentiable in ``fd``.
 
     ``registered`` is rebuilt as the least-squares projection (on the
-    registration grid, as in :func:`fabel.registration.register`) of
+    registration grid, as in :func:`fdatools.registration.register`) of
     ``x_i(h_i(t))``, with the basis matrices at the warped times held
     constant and the coefficients of ``x_i`` taken from ``fd`` itself, so a
     loss on the registered curves back-propagates to ``fd.coefs``.  Every
@@ -300,9 +300,9 @@ def to_torch_result(
     result : RegistrationResult
         The registration computed on the NumPy copy of ``fd``.
     fd : FData
-        The curves as passed to :func:`~fabel.registration.register`.
+        The curves as passed to :func:`~fdatools.registration.register`.
     target : FData or None
-        The target as passed to :func:`~fabel.registration.register`.
+        The target as passed to :func:`~fdatools.registration.register`.
     like : torch.Tensor
         Tensor whose dtype and device the outputs take.
     periodic : bool
@@ -317,9 +317,9 @@ def to_torch_result(
     --------
     >>> import numpy as np
     >>> import torch
-    >>> from fabel import BSpline, FData
-    >>> from fabel.registration import register
-    >>> from fabel._internal.registration_torch import to_torch_result
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.registration import register
+    >>> from fdatools._internal.registration_torch import to_torch_result
     >>> fd = FData(np.random.default_rng(0).standard_normal((8, 2)), BSpline(n_basis=8))
     >>> res = register(fd, landmarks=[0.45, 0.55])
     >>> out = to_torch_result(res, fd, None, torch.zeros(1, dtype=torch.float64), periodic=False)
@@ -328,7 +328,7 @@ def to_torch_result(
     >>> bool(torch.allclose(out.registered.coefs, torch.tensor(res.registered.coefs)))
     True
     """
-    from fabel.registration import RegistrationResult, _fine_grid
+    from fdatools.registration import RegistrationResult, _fine_grid
 
     xp = default_namespace()
     dtype, device = like.dtype, like.device
@@ -377,7 +377,7 @@ def warp_curves_torch(fd: FData, grid: Any, where: Any, like: Any) -> FData:
 
     Curve ``i`` is evaluated at ``where[:, i]`` and the values are fitted by
     least squares on ``grid`` in ``fd``'s basis -- the projection
-    :func:`fabel.registration.register` uses.  The basis matrices are
+    :func:`fdatools.registration.register` uses.  The basis matrices are
     constants, so the result is linear in the coefficients of ``fd`` and a
     loss on it back-propagates to ``fd.coefs`` when they are a tensor.
 
@@ -402,8 +402,8 @@ def warp_curves_torch(fd: FData, grid: Any, where: Any, like: Any) -> FData:
     --------
     >>> import numpy as np
     >>> import torch
-    >>> from fabel import BSpline, FData
-    >>> from fabel._internal.registration_torch import warp_curves_torch
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools._internal.registration_torch import warp_curves_torch
     >>> coefs = torch.ones((6, 2, 2), dtype=torch.float64, requires_grad=True)
     >>> grid = np.linspace(0.0, 1.0, 11)
     >>> where = np.stack([grid, grid**2], axis=1)

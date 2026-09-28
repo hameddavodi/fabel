@@ -7,8 +7,8 @@ as ``test_docs_examples.py``).  The first lines of a block may carry markers:
 ``# requires: <module>``
     Skip the block when the optional module (``torch``, say) is not installed.
 ``# requires-data: <name>[, <name>...]``
-    Skip the block when the dataset (the suffix of ``fabel.datasets.load_<name>``)
-    cannot be loaded offline -- ``FABEL_DATA_DIR`` unset or the files missing.
+    Skip the block when the dataset (the suffix of ``fdatools.datasets.load_<name>``)
+    cannot be loaded offline -- ``FDATOOLS_DATA_DIR`` unset or the files missing.
     Tests never touch the network: the download hook is replaced by one that
     raises.
 
@@ -25,7 +25,7 @@ from pathlib import Path
 
 import pytest
 
-import fabel.datasets
+import fdatools.datasets
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TUTORIAL_DIR = REPO_ROOT / "docs" / "tutorials"
@@ -69,7 +69,7 @@ def offline(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     """Forbid dataset downloads and force the Agg matplotlib backend."""
     import matplotlib
 
-    monkeypatch.setattr(fabel.datasets, "_download_file", _refuse_download)
+    monkeypatch.setattr(fdatools.datasets, "_download_file", _refuse_download)
     monkeypatch.setenv("MPLBACKEND", "Agg")
     matplotlib.use("Agg")
     yield
@@ -80,7 +80,7 @@ def offline(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
 
 def dataset_available(name: str) -> bool:
     """Whether ``load_<name>()`` succeeds without the network (needs ``offline``)."""
-    loader = getattr(fabel.datasets, f"load_{name}")
+    loader = getattr(fdatools.datasets, f"load_{name}")
     try:
         loader()
     except (OSError, ValueError):
@@ -107,7 +107,7 @@ def test_marker_parsing() -> None:
 def test_offline_guard_refuses_downloads(
     offline: None, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("FABEL_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("FDATOOLS_DATA_DIR", str(tmp_path))
     assert not dataset_available("lip")
     assert dataset_available("growth")  # ships inside the package
     assert not list(tmp_path.iterdir())
@@ -128,7 +128,7 @@ def test_tutorial_structure(page: str) -> None:
     text = (TUTORIAL_DIR / page).read_text(encoding="utf-8")
     assert text.startswith("# "), f"{page} must start with a title"
     assert "## R equivalent" in text, f"{page} needs an 'R equivalent' section"
-    assert "import fabel as fb" in text
+    assert "import fdatools as fdt" in text
     assert len(python_blocks(page)) >= 4
 
 
@@ -137,7 +137,7 @@ def test_tutorial_markers_are_valid(page: str) -> None:
     for block in python_blocks(page):
         modules, datasets = markers(block)
         for name in datasets:
-            assert hasattr(fabel.datasets, f"load_{name}"), f"{page}: unknown dataset {name!r}"
+            assert hasattr(fdatools.datasets, f"load_{name}"), f"{page}: unknown dataset {name!r}"
         for module in modules:
             assert module.isidentifier()
 
@@ -172,15 +172,15 @@ def test_tutorial_runs(page: str, offline: None) -> None:
 
 
 def test_tutorial_data_available_when_configured(offline: None) -> None:
-    """With ``FABEL_DATA_DIR`` set, every dataset a tutorial needs must load offline.
+    """With ``FDATOOLS_DATA_DIR`` set, every dataset a tutorial needs must load offline.
 
     This keeps the data-marked blocks from being skipped silently on a machine
     that is meant to run them all.
     """
-    if not os.environ.get("FABEL_DATA_DIR"):
-        pytest.skip("FABEL_DATA_DIR is not set")
+    if not os.environ.get("FDATOOLS_DATA_DIR"):
+        pytest.skip("FDATOOLS_DATA_DIR is not set")
     needed = {
         name for page in TUTORIALS for block in python_blocks(page) for name in markers(block)[1]
     }
     missing = sorted(name for name in needed if not dataset_available(name))
-    assert not missing, f"datasets missing from FABEL_DATA_DIR: {missing}"
+    assert not missing, f"datasets missing from FDATOOLS_DATA_DIR: {missing}"

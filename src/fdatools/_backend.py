@@ -1,6 +1,6 @@
-"""Array-API dispatch for Fabel.
+"""Array-API dispatch for fdatools.
 
-This is the *only* module (together with :mod:`fabel._linalg`) that is allowed to
+This is the *only* module (together with :mod:`fdatools._linalg`) that is allowed to
 import NumPy directly.  Every other module obtains its array namespace through
 :func:`array_namespace` and calls ``xp.*`` functions, so that a NumPy input
 produces a NumPy output and a PyTorch input produces a PyTorch output with
@@ -9,7 +9,7 @@ gradients flowing through.
 Examples
 --------
 >>> import numpy as np
->>> from fabel import _backend as be
+>>> from fdatools import _backend as be
 >>> xp = be.array_namespace(np.zeros(3))
 >>> be.asarray([1, 2, 3]).dtype
 dtype('float64')
@@ -45,7 +45,7 @@ def default_namespace() -> ModuleType:
 
     Examples
     --------
-    >>> from fabel._backend import default_namespace
+    >>> from fdatools._backend import default_namespace
     >>> default_namespace().__name__.endswith("numpy")
     True
     """
@@ -78,7 +78,7 @@ def array_namespace(*xs: Any) -> ModuleType:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._backend import array_namespace
+    >>> from fdatools._backend import array_namespace
     >>> array_namespace(np.zeros(2), 1.0).__name__.endswith("numpy")
     True
     """
@@ -115,7 +115,7 @@ def result_namespace(*xs: Any) -> ModuleType:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._backend import result_namespace
+    >>> from fdatools._backend import result_namespace
     >>> result_namespace(np.zeros(2), None).__name__.endswith("numpy")
     True
     """
@@ -151,7 +151,7 @@ def asarray(x: Any, xp: ModuleType | None = None, dtype: Any = float) -> Any:
 
     Examples
     --------
-    >>> from fabel._backend import asarray
+    >>> from fdatools._backend import asarray
     >>> asarray([1, 2, 3]).dtype
     dtype('float64')
     """
@@ -185,7 +185,7 @@ def to_numpy(x: Any) -> np.ndarray[Any, np.dtype[Any]]:
 
     Examples
     --------
-    >>> from fabel._backend import to_numpy
+    >>> from fdatools._backend import to_numpy
     >>> to_numpy([1.0, 2.0]).tolist()
     [1.0, 2.0]
     """
@@ -212,7 +212,7 @@ def is_torch(x: Any) -> bool:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel._backend import is_torch
+    >>> from fdatools._backend import is_torch
     >>> is_torch(np.zeros(2))
     False
     """

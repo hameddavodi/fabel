@@ -10,16 +10,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day5 = weather.t - 0.5  # the book's day.5: mid-day points 0.5, ..., 364.5
-harmonic = fb.LDO.harmonic(period=365.0)
-daybasis = fb.Fourier(domain=(0.0, 365.0), n_basis=365)
-logprecfd = fb.smooth(weather.log10precip, day5, basis=daybasis, lam=1e6, penalty=harmonic).fd
-tempfd = fb.smooth(weather.temp, day5, basis=daybasis, lam=1e4, penalty=harmonic).fd
+harmonic = fdt.LDO.harmonic(period=365.0)
+daybasis = fdt.Fourier(domain=(0.0, 365.0), n_basis=365)
+logprecfd = fdt.smooth(weather.log10precip, day5, basis=daybasis, lam=1e6, penalty=harmonic).fd
+tempfd = fdt.smooth(weather.temp, day5, basis=daybasis, lam=1e4, penalty=harmonic).fd
 stations = weather.stations
 
 # %% [markdown]
@@ -28,7 +28,7 @@ stations = weather.stations
 # the mean curve (solid) plus (dashed) and minus (dotted) a multiple of the harmonic.
 
 # %%
-logprecpca = fb.FPCA(n=4).fit(logprecfd)
+logprecpca = fdt.FPCA(n=4).fit(logprecfd)
 print("proportion of variance:", np.round(np.asarray(logprecpca.varprop), 4))
 
 fig, axes = plt.subplots(2, 2, figsize=(10, 7), sharex=True)
@@ -84,11 +84,11 @@ fig
 # showing how each component distorts the whole script.
 
 # %%
-handwrit = fb.datasets.load_handwriting()
-hwbasis = fb.BSpline(domain=(0.0, 2300.0), n_basis=105, order=6)
-hwfit = fb.smooth(handwrit.value, handwrit.t, basis=hwbasis, penalty=4)
+handwrit = fdt.datasets.load_handwriting()
+hwbasis = fdt.BSpline(domain=(0.0, 2300.0), n_basis=105, order=6)
+hwfit = fdt.smooth(handwrit.value, handwrit.t, basis=hwbasis, penalty=4)
 print(f"handwriting: GCV lambda = {hwfit.lam:.3g}, df = {hwfit.df:.1f}")
-hwpca = fb.FPCA(n=3).fit(hwfit.fd)
+hwpca = fdt.FPCA(n=3).fit(hwfit.fd)
 hwvarprop = np.asarray(hwpca.varprop)
 hwtime = np.linspace(0.0, 2300.0, 401)
 hwmean = np.asarray(hwpca.mean_fd(hwtime))[:, 0, :]
@@ -126,7 +126,7 @@ fig
 # (smaller values give rough weights and canonical correlations near one).
 
 # %%
-weathercca = fb.FCCA(n=3, lam1=1e10, lam2=1e10, penalty=harmonic).fit(tempfd, logprecfd)
+weathercca = fdt.FCCA(n=3, lam1=1e10, lam2=1e10, penalty=harmonic).fit(tempfd, logprecfd)
 canocor = np.asarray(weathercca.correlations)[:3]
 print("canonical correlations:", np.round(canocor, 4))
 dayfine = np.linspace(0.0, 365.0, 366)

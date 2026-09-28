@@ -9,7 +9,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 
@@ -19,11 +19,11 @@ plt.rcParams["figure.max_open_warning"] = 0
 # (circles), with the monotone smooth of each record (lines).
 
 # %%
-growth = fb.datasets.load_growth()
+growth = fdt.datasets.load_growth()
 age = growth.age
 heights = growth.hgtf[:, :10]
-growth_basis = fb.BSpline(domain=(1.0, 18.0), breaks=age, order=6)
-girls = fb.smooth(heights, age, basis=growth_basis, lam=0.01, penalty=3, constraint="monotone")
+growth_basis = fdt.BSpline(domain=(1.0, 18.0), breaks=age, order=6)
+girls = fdt.smooth(heights, age, basis=growth_basis, lam=0.01, penalty=3, constraint="monotone")
 fine_age = np.linspace(1.0, 18.0, 401)
 
 fig, ax = plt.subplots(figsize=(7, 5))
@@ -58,7 +58,7 @@ fig
 # Dates follow the dataset metadata: monthly values starting January 1919.
 
 # %%
-nondurables = fb.datasets.load_nondurables()
+nondurables = fdt.datasets.load_nondurables()
 index = np.asarray(nondurables.value, dtype=float)
 year = 1919.0 + np.arange(index.size) / 12.0
 
@@ -74,7 +74,7 @@ fig
 # and the reflux flow into that tray (bottom) during an experiment.
 
 # %%
-refinery = fb.datasets.load_refinery()
+refinery = fdt.datasets.load_refinery()
 
 fig, (top, bottom) = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
 top.plot(refinery.time, refinery.tray47, "o", color="k", markersize=2.5)
@@ -91,10 +91,10 @@ fig
 # (time is the proportion of the cycle). Curves are Fourier smooths of the data.
 
 # %%
-gait = fb.datasets.load_gait()
-gait_basis = fb.Fourier(domain=(0.0, 1.0), n_basis=21)
-gait_fd = fb.smooth(
-    np.asarray(gait.value), gait.t, basis=gait_basis, lam=1e-11, penalty=fb.LDO.harmonic(1.0)
+gait = fdt.datasets.load_gait()
+gait_basis = fdt.Fourier(domain=(0.0, 1.0), n_basis=21)
+gait_fd = fdt.smooth(
+    np.asarray(gait.value), gait.t, basis=gait_basis, lam=1e-11, penalty=fdt.LDO.harmonic(1.0)
 ).fd
 cycle = np.linspace(0.0, 1.0, 201)
 gait_values = gait_fd(cycle)
@@ -139,7 +139,7 @@ fig
 # coordinates of the pen tip (meters), each record centered.
 
 # %%
-handwriting = fb.datasets.load_handwriting()
+handwriting = fdt.datasets.load_handwriting()
 pen = np.asarray(handwriting.value)
 
 fig, ax = plt.subplots(figsize=(7, 5))
@@ -155,16 +155,16 @@ fig
 # Prince Rupert and Resolute, smoothed with a 65-term Fourier basis.
 
 # %%
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 chosen = ["Montreal", "Edmonton", "Pr. Rupert", "Resolute"]
 columns = [weather.stations.index(name) for name in chosen]
 day = np.asarray(weather.t, dtype=float) - 0.5
-temp_fd = fb.smooth(
+temp_fd = fdt.smooth(
     weather.temp[:, columns],
     day,
-    basis=fb.Fourier(domain=(0.0, 365.0), n_basis=65),
+    basis=fdt.Fourier(domain=(0.0, 365.0), n_basis=65),
     lam=1e4,
-    penalty=fb.LDO.harmonic(365.0),
+    penalty=fdt.LDO.harmonic(365.0),
 ).fd
 year_grid = np.linspace(0.0, 365.0, 366)
 
@@ -187,10 +187,10 @@ window = (year >= 1962.0) & (year < 1970.0)
 window_year = year[window]
 window_log = log_index[window]
 monthly_breaks = np.linspace(1962.0, 1970.0, 97)
-index_fd = fb.smooth(
+index_fd = fdt.smooth(
     window_log,
     window_year,
-    basis=fb.BSpline(domain=(1962.0, 1970.0), breaks=monthly_breaks, order=6),
+    basis=fdt.BSpline(domain=(1962.0, 1970.0), breaks=monthly_breaks, order=6),
     lam=1e-6,
     penalty=4,
 ).fd
@@ -217,7 +217,7 @@ month_labels = {1964.0 + (m + 0.5) / 12.0: months[m] for m in range(12)}
 year_1964 = np.linspace(1964.0, 1965.0, 201)
 
 fig, ax = plt.subplots(figsize=(6, 6))
-fb.phase_plane(index_fd, year_1964, labels=month_labels, ax=ax, color="k")
+fdt.phase_plane(index_fd, year_1964, labels=month_labels, ax=ax, color="k")
 ax.axhline(0.0, color="k", linestyle=":", linewidth=0.8)
 ax.axvline(0.0, color="k", linestyle=":", linewidth=0.8)
 ax.set_xlabel("Velocity")

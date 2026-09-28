@@ -2,7 +2,7 @@
 
 ``pandas``, ``xarray`` and ``rdata`` are optional dependencies (extras
 ``pandas``/``io``): every function here imports them lazily and raises a clear
-:class:`ImportError` if the extra is missing, so importing :mod:`fabel` itself
+:class:`ImportError` if the extra is missing, so importing :mod:`fdatools` itself
 never requires them.
 """
 
@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import NDArray
 
-from fabel._backend import to_numpy
-from fabel.basis import (
+from fdatools._backend import to_numpy
+from fdatools.basis import (
     Basis,
     BSpline,
     Constant,
@@ -26,7 +26,7 @@ from fabel.basis import (
     Polygonal,
     Power,
 )
-from fabel.core import BiFData, FData
+from fdatools.core import BiFData, FData
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import pandas as pd
@@ -89,11 +89,11 @@ def from_pandas(df: pd.DataFrame, id_col: str, t_col: str, y_col: str) -> LongDa
     Examples
     --------
     >>> import pandas as pd
-    >>> import fabel as fb
+    >>> import fdatools as fdt
     >>> df = pd.DataFrame(
     ...     {"id": ["a", "a", "b", "b"], "t": [0.0, 1.0, 0.0, 1.0], "y": [1.0, 2.0, 3.0, 4.0]}
     ... )
-    >>> long = fb.from_pandas(df, "id", "t", "y")
+    >>> long = fdt.from_pandas(df, "id", "t", "y")
     >>> long.ids
     ['a', 'b']
     >>> long.t.shape
@@ -147,9 +147,9 @@ def to_pandas(fd: FData, t: Any) -> pd.DataFrame:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> fd = fb.FData(np.eye(4), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
-    >>> df = fb.to_pandas(fd, np.array([0.0, 1.0]))
+    >>> import fdatools as fdt
+    >>> fd = fdt.FData(np.eye(4), fdt.BSpline(domain=(0.0, 1.0), n_basis=4))
+    >>> df = fdt.to_pandas(fd, np.array([0.0, 1.0]))
     >>> list(df.columns)
     ['t', 'curve', 'value']
     """
@@ -199,9 +199,9 @@ def to_xarray(fd: FData, t: Any) -> xr.DataArray:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> fd = fb.FData(np.eye(4), fb.BSpline(domain=(0.0, 1.0), n_basis=4))
-    >>> da = fb.to_xarray(fd, np.array([0.0, 1.0]))
+    >>> import fdatools as fdt
+    >>> fd = fdt.FData(np.eye(4), fdt.BSpline(domain=(0.0, 1.0), n_basis=4))
+    >>> da = fdt.to_xarray(fd, np.array([0.0, 1.0]))
     >>> da.dims
     ('t', 'curve')
     """
@@ -215,7 +215,7 @@ def to_xarray(fd: FData, t: Any) -> xr.DataArray:
 
 
 def _rds_basis(obj: dict[str, Any]) -> Basis:
-    """Build a :class:`~fabel.basis.Basis` from a converted R ``basisfd`` object."""
+    """Build a :class:`~fdatools.basis.Basis` from a converted R ``basisfd`` object."""
     dropind = obj.get("dropind")
     if dropind is not None and np.asarray(dropind).size:
         raise ValueError("a basis with dropind (dropped basis functions) is not supported")
@@ -293,19 +293,21 @@ def read_rds(path: Any) -> Basis | FData | BiFData:
     ------
     ValueError
         If the stored R object's class is not one of ``basisfd``, ``fd`` or
-        ``bifd``, or it uses a basis feature Fabel does not support
+        ``bifd``, or it uses a basis feature fdatools does not support
         (``dropind``, or a basis type outside
         bspline/fourier/monomial/power/expon/const/polygonal).
 
     Examples
     --------
-    >>> import fabel as fb
-    >>> basis = fb.read_rds("tests/fixtures/bspline_basis.rds")  # doctest: +SKIP
+    >>> import fdatools as fdt
+    >>> basis = fdt.read_rds("tests/fixtures/bspline_basis.rds")  # doctest: +SKIP
     """
     try:
         import rdata
     except ImportError as exc:  # pragma: no cover - exercised only without the extra
-        raise ImportError("read_rds requires the 'rdata' package: pip install fabel[io]") from exc
+        raise ImportError(
+            "read_rds requires the 'rdata' package: pip install fdatools[io]"
+        ) from exc
 
     from rdata.conversion import DEFAULT_CLASS_MAP
 

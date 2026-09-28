@@ -1,4 +1,4 @@
-"""PyTorch path of :func:`fabel.registration.register` (SPEC 1.5 and 5.2).
+"""PyTorch path of :func:`fdatools.registration.register` (SPEC 1.5 and 5.2).
 
 With tensor coefficients the continuous criterion is differentiated by
 autograd instead of the analytic formulas; the Newton iteration is shared, so
@@ -18,8 +18,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline, FData, Fourier
-from fabel.registration import (
+from fdatools import BSpline, FData, Fourier
+from fdatools.registration import (
     RegistrationResult,
     Registrator,
     _CurveProblem,
@@ -31,7 +31,7 @@ from fabel.registration import (
 
 torch = pytest.importorskip("torch", reason="torch extra not installed")
 
-from fabel._internal.registration_torch import AutogradObjective  # noqa: E402
+from fdatools._internal.registration_torch import AutogradObjective  # noqa: E402
 
 GOLDEN = Path(__file__).resolve().parents[1] / "golden" / "registration.json"
 GROWTH = "register_fd_growth_hgtf_to_mean"
@@ -187,8 +187,8 @@ def test_zero_iterations_and_zero_curves() -> None:
 def test_unpenalised_eigen_torch_does_not_crash() -> None:
     # Growth accelerations with lam=0: girl 4 has no finite optimum (see the
     # NumPy regression test); the torch path must end with the warning too.
-    from fabel.datasets import load_growth
-    from fabel.smoothing import smooth
+    from fdatools.datasets import load_growth
+    from fdatools.smoothing import smooth
 
     growth = load_growth()
     age = np.asarray(growth.age, dtype=float)
@@ -357,12 +357,12 @@ def test_autograd_objective_degenerate_graphs(monkeypatch: pytest.MonkeyPatch) -
 
 def test_registration_does_not_import_torch() -> None:
     code = (
-        "import sys, fabel, fabel.registration\n"
+        "import sys, fdatools, fdatools.registration\n"
         "import numpy as np\n"
-        "from fabel import BSpline, FData\n"
+        "from fdatools import BSpline, FData\n"
         "fd = FData(np.random.default_rng(0).normal(size=(6, 2)), BSpline(n_basis=6))\n"
-        "fabel.registration.register(fd, criterion='least_squares')\n"
-        "fabel.registration.register(fd, landmarks=[0.4, 0.6])\n"
+        "fdatools.registration.register(fd, criterion='least_squares')\n"
+        "fdatools.registration.register(fd, landmarks=[0.4, 0.6])\n"
         "print('torch' in sys.modules)"
     )
     out = subprocess.run(

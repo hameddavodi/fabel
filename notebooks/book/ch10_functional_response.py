@@ -9,17 +9,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 plt.rcParams["figure.autolayout"] = True
 
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day = weather.t - 0.5
 n_stations = len(weather.stations)
-harmonic = fb.LDO.harmonic(365.0)
-day_basis = fb.Fourier(domain=(0.0, 365.0), n_basis=65)
-temp = fb.smooth(weather.temp, day, basis=day_basis, lam=1e-2, penalty=harmonic).fd
+harmonic = fdt.LDO.harmonic(365.0)
+day_basis = fdt.Fourier(domain=(0.0, 365.0), n_basis=65)
+temp = fdt.smooth(weather.temp, day, basis=day_basis, lam=1e-2, penalty=harmonic).fd
 regions = sorted(set(weather.region))
 region_dummy = {
     name: np.array([1.0 if r == name else 0.0 for r in weather.region]) for name in regions
@@ -36,10 +36,12 @@ region_colors = dict(zip(regions, ["C0", "C1", "C2", "C3"], strict=True))
 # pseudo-observation (a zero curve with every region indicator on), as in the book.
 
 # %%
-anova_y = fb.FData(np.hstack([np.asarray(temp.coefs), np.zeros((day_basis.n_basis, 1))]), day_basis)
+anova_y = fdt.FData(
+    np.hstack([np.asarray(temp.coefs), np.zeros((day_basis.n_basis, 1))]), day_basis
+)
 anova_x = {"const": np.r_[np.ones(n_stations), 0.0]}
 anova_x |= {name: np.r_[region_dummy[name], 1.0] for name in regions}
-anova = fb.fregress(anova_y, anova_x, beta=fb.Fourier((0.0, 365.0), 11))
+anova = fdt.fregress(anova_y, anova_x, beta=fdt.Fourier((0.0, 365.0), 11))
 fig, axes = plt.subplots(2, 3, figsize=(11, 6), sharex=True)
 for ax, name, beta in zip(axes.ravel(), anova.names, anova.beta, strict=False):
     ax.plot(t_grid, beta(t_grid)[:, 0], linewidth=2, color=region_colors.get(name, "k"))
@@ -76,10 +78,10 @@ fig
 # of F (dashed), from 200 permutations (treatment coding, Arctic as baseline).
 
 # %%
-region_test = fb.stats.f_test(
+region_test = fdt.stats.f_test(
     temp,
     [np.ones(n_stations)] + [region_dummy[name] for name in regions[1:]],
-    basis=fb.Fourier((0.0, 365.0), 11),
+    basis=fdt.Fourier((0.0, 365.0), 11),
     n_perm=200,
     random_state=2009,
 )
@@ -101,9 +103,9 @@ fig
 # standard errors, from the residual covariance over days and the smoothing map.
 
 # %%
-log_precip = fb.smooth(weather.log10precip, day, basis=day_basis, lam=1e5, penalty=harmonic)
-concurrent = fb.fregress(
-    log_precip, {"const": 1.0, "temp": temp}, beta=fb.Fourier((0.0, 365.0), 11)
+log_precip = fdt.smooth(weather.log10precip, day, basis=day_basis, lam=1e5, penalty=harmonic)
+concurrent = fdt.fregress(
+    log_precip, {"const": 1.0, "temp": temp}, beta=fdt.Fourier((0.0, 365.0), 11)
 )
 residuals = weather.log10precip - np.asarray(concurrent.fitted(day))
 concurrent_se = concurrent.stderr(sigma_e=np.cov(residuals))
@@ -130,10 +132,10 @@ fig
 # %%
 log_lambdas = np.arange(4.0, 14.01, 1.0)
 cv_errors = [
-    fb.fregress(
+    fdt.fregress(
         log_precip,
         {"const": 1.0, "temp": temp},
-        beta=fb.Fourier((0.0, 365.0), 11),
+        beta=fdt.Fourier((0.0, 365.0), 11),
         lam=10.0**value,
         penalty=harmonic,
     )
@@ -156,11 +158,11 @@ fig
 # cycle, smoothed with a 21-function Fourier basis (time rescaled to [0, 1]).
 
 # %%
-gait = fb.datasets.load_gait()
-gait_basis = fb.Fourier(domain=(0.0, 1.0), n_basis=21)
-gait_penalty = fb.LDO.harmonic(1.0)
-hip = fb.smooth(gait.hip_angle, gait.t, basis=gait_basis, lam=1e-11, penalty=gait_penalty).fd
-knee_fit = fb.smooth(gait.knee_angle, gait.t, basis=gait_basis, lam=1e-11, penalty=gait_penalty)
+gait = fdt.datasets.load_gait()
+gait_basis = fdt.Fourier(domain=(0.0, 1.0), n_basis=21)
+gait_penalty = fdt.LDO.harmonic(1.0)
+hip = fdt.smooth(gait.hip_angle, gait.t, basis=gait_basis, lam=1e-11, penalty=gait_penalty).fd
+knee_fit = fdt.smooth(gait.knee_angle, gait.t, basis=gait_basis, lam=1e-11, penalty=gait_penalty)
 knee = knee_fit.fd
 cycle = np.linspace(0.0, 1.0, 201)
 fig, axes = plt.subplots(1, 2, figsize=(11, 4))
@@ -180,10 +182,10 @@ fig
 # correlation R^2(t) along the cycle.
 
 # %%
-gait_model = fb.fregress(
+gait_model = fdt.fregress(
     knee_fit,
     {"const": 1.0, "hip": hip},
-    beta=fb.Fourier((0.0, 1.0), 21),
+    beta=fdt.Fourier((0.0, 1.0), 21),
     lam=1e-8,
     penalty=gait_penalty,
 )

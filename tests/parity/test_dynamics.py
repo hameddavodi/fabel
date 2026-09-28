@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.dynamics` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.dynamics` against golden output from R ``fda`` 6.3.0.
 
 ``tests/golden/dynamics.json`` records ``pda.fd``'s weight functions and
 residual functions for three single-equation problems.  The curves ``pda.fd``
@@ -8,7 +8,7 @@ ill-conditioned (normal matrix condition number ~3.7e9) that two correct
 double-precision solvers disagree in its 7th significant digit, which would
 test the smoother, not the principal differential analysis.
 
-Every case runs with :class:`~fabel.dynamics.PDA`'s default ``n_grid=501``,
+Every case runs with :class:`~fdatools.dynamics.PDA`'s default ``n_grid=501``,
 the trapezoidal discretisation ``pda.fd`` uses.
 """
 
@@ -22,9 +22,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import FData
-from fabel.dynamics import PDA
-from fabel.smoothing import smooth
+from fdatools import FData
+from fdatools.dynamics import PDA
+from fdatools.smoothing import smooth
 
 from .conftest import build_basis, case_rtol, compare, golden_cases
 
@@ -75,10 +75,10 @@ def test_every_golden_case_is_covered() -> None:
 def test_input_curves_reproduce_the_golden_design() -> None:
     """The fixture curves are the golden raw data smoothed on the golden basis.
 
-    This guards the fixture, not a parity claim: Fabel's own ``smooth`` agrees
+    This guards the fixture, not a parity claim: fdatools' own ``smooth`` agrees
     with R's ``smooth.basis`` to 7e-15 on the well-conditioned exponential fit
     and to 5.9e-7 on the lip fit, whose normal matrix has condition number
-    3.7e9 (a 40-digit solve of Fabel's system lands 7e-8 from Fabel's result).
+    3.7e9 (a 40-digit solve of fdatools' system lands 7e-8 from fdatools' result).
     """
     case = CASES["pda_fd_order1_analytic_exp_decay"]
     inp = case["input"]
@@ -164,7 +164,7 @@ def test_solution_tracks_the_analytic_ground_truth() -> None:
     """The solution differs from ``exp(-4t)`` only by the estimation error of ``β``.
 
     ``|exp(-β̂ t) - exp(-β t)| / exp(-β t) = |expm1((β - β̂) t)|``, which is the
-    whole of the admissible gap: the estimate itself (R's and Fabel's agree to
+    whole of the admissible gap: the estimate itself (R's and fdatools' agree to
     7e-16) is 7.8e-8 above ``β = 4`` because the curve is an order-5 spline fit
     of ``exp(-4t)``, not ``exp(-4t)`` itself.
     """

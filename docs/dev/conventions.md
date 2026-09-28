@@ -1,15 +1,15 @@
-# Fabel engineering conventions (binding for every contributor and agent)
+# fdatools engineering conventions (binding for every contributor and agent)
 
 Read `CLAUDE.md`, `SPEC.md`, `WORKFLOW.md` first. This file adds the concrete mechanics.
 
 ## Environment
 - `uv` only. Venv at `.venv` (Python 3.12). Run tools as `.venv/bin/pytest`, `.venv/bin/ruff`, `.venv/bin/mypy`.
 - Local R 4.6.1 with `fda` 6.3.0 + `jsonlite` at `Rscript` (Homebrew). `rpy2` works in the venv. Docker image also exists.
-- Lint gate: `.venv/bin/ruff check . && .venv/bin/ruff format --check . && .venv/bin/mypy --strict src/fabel`
+- Lint gate: `.venv/bin/ruff check . && .venv/bin/ruff format --check . && .venv/bin/mypy --strict src/fdatools`
 
 ## Layout
-- `src/fabel/<module>.py` public modules per SPEC §2. Private helpers → `src/fabel/_internal/`.
-- `fabel/_backend.py` exposes `xp = array_namespace(*arrays)` (array-api-compat) and `asarray`, `to_numpy`. Core math uses `xp.*` only; never `import numpy` in core modules except inside `_backend.py`, `_linalg.py` and typing blocks (`if TYPE_CHECKING:`).
+- `src/fdatools/<module>.py` public modules per SPEC §2. Private helpers → `src/fdatools/_internal/`.
+- `fdatools/_backend.py` exposes `xp = array_namespace(*arrays)` (array-api-compat) and `asarray`, `to_numpy`. Core math uses `xp.*` only; never `import numpy` in core modules except inside `_backend.py`, `_linalg.py` and typing blocks (`if TYPE_CHECKING:`).
 - Public objects: `@dataclass(frozen=True)`. Methods return new objects.
 
 ## Golden files (`tests/golden/<module>.json`) — schema

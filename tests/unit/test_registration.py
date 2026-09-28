@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.registration`."""
+"""Unit tests for :mod:`fdatools.registration`."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from sklearn.exceptions import NotFittedError
 
-from fabel import Basis, BSpline, FData, Fourier, Monomial
-from fabel.registration import (
+from fdatools import Basis, BSpline, FData, Fourier, Monomial
+from fdatools.registration import (
     AmpPhaseDecomposition,
     RegistrationResult,
     Registrator,
@@ -189,7 +189,7 @@ def test_newton_step_non_finite_hessian_is_steepest_descent() -> None:
 
 
 def test_newton_step_falls_back_when_eigh_fails(monkeypatch: pytest.MonkeyPatch) -> None:
-    from fabel._backend import default_namespace
+    from fdatools._backend import default_namespace
 
     def broken(_: Any) -> Any:
         raise np.linalg.LinAlgError("Eigenvalues did not converge")
@@ -471,8 +471,8 @@ def test_decompose_sub_interval_and_errors() -> None:
 
 
 def _growth_accelerations() -> FData:
-    from fabel.datasets import load_growth
-    from fabel.smoothing import smooth
+    from fdatools.datasets import load_growth
+    from fdatools.smoothing import smooth
 
     growth = load_growth()
     age = np.asarray(growth.age, dtype=float)
@@ -927,7 +927,7 @@ def test_multivariate_torch_matches_numpy() -> None:
 
 def test_multivariate_autograd_objective_matches_analytic() -> None:
     pytest.importorskip("torch")
-    from fabel._internal.registration_torch import AutogradObjective
+    from fdatools._internal.registration_torch import AutogradObjective
 
     for criterion in ("eigen", "least_squares"):
         problem, params = _multi_problem(criterion, True, (0.6, 1.3))

@@ -27,16 +27,16 @@ and the harmonic accelerator penalty, as in the
 # requires-data: canadian_weather
 import matplotlib.pyplot as plt
 import numpy as np
-import fabel as fb
-from fabel.decomposition import FCCA, FPCA
+import fdatools as fdt
+from fdatools.decomposition import FCCA, FPCA
 
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day = weather.t
-fourier = fb.Fourier(domain=(0.0, 365.0), n_basis=65)
-harmonic = fb.LDO.harmonic(period=365.0)
+fourier = fdt.Fourier(domain=(0.0, 365.0), n_basis=65)
+harmonic = fdt.LDO.harmonic(period=365.0)
 
-temp = fb.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam=1e2).fd
-precip = fb.smooth(weather.log10precip, day, basis=fourier, penalty=harmonic, lam=1e4).fd
+temp = fdt.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam=1e2).fd
+precip = fdt.smooth(weather.log10precip, day, basis=fourier, penalty=harmonic, lam=1e4).fd
 temp.n_curves, precip.n_curves          # 35 stations each
 ```
 
@@ -200,13 +200,13 @@ ccafd$ccacorr
 
 Differences to know:
 
-- Fabel computes the scores and the Gram matrix with exact integrals. R uses
+- fdatools computes the scores and the Gram matrix with exact integrals. R uses
   numerical integration that is good to about 4 or 5 digits, so R's scores can
-  differ from Fabel's in the third or fourth digit.
-- R's `varmx` stops a little before the varimax optimum. Fabel iterates to the
+  differ from fdatools' in the third or fourth digit.
+- R's `varmx` stops a little before the varimax optimum. fdatools iterates to the
   optimum, so rotated harmonics can differ slightly.
 - Signs: every harmonic has a positive coefficient sum, the rule R follows.
   For FCCA the two members of a pair share one sign so their scores stay
   positively correlated (R has no rule).
-- `FPCA(lam="gcv")` is a Fabel addition; R's `pca.fd` has no automatic
+- `FPCA(lam="gcv")` is a fdatools addition; R's `pca.fd` has no automatic
   choice.

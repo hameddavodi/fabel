@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.io.read_rds` against values recorded straight from R.
+"""Parity of :mod:`fdatools.io.read_rds` against values recorded straight from R.
 
 Fixtures live at ``tests/fixtures/*.rds`` (written by R's ``saveRDS()``) with a
 companion ``*_expected.json`` recording R's own ``eval.fd``/``eval.bifd``
@@ -16,7 +16,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-import fabel as fb
+import fdatools as fdt
 
 pytest.importorskip("rdata", reason="io extra (rdata) not installed")
 
@@ -33,8 +33,8 @@ def _expected(name: str) -> dict[str, Any]:
 
 
 def test_fd_coefs_and_eval_match_r() -> None:
-    fdobj = fb.read_rds(FIXTURES / "bspline_fd.rds")
-    assert isinstance(fdobj, fb.FData)
+    fdobj = fdt.read_rds(FIXTURES / "bspline_fd.rds")
+    assert isinstance(fdobj, fdt.FData)
     expected = _expected("bspline_fd_expected.json")
 
     np.testing.assert_allclose(fdobj.coefs, expected["coefs"], rtol=RTOL, atol=1e-12)
@@ -45,8 +45,8 @@ def test_fd_coefs_and_eval_match_r() -> None:
 
 
 def test_bifd_coefs_and_eval_match_r() -> None:
-    bifdobj = fb.read_rds(FIXTURES / "bspline_bifd.rds")
-    assert isinstance(bifdobj, fb.BiFData)
+    bifdobj = fdt.read_rds(FIXTURES / "bspline_bifd.rds")
+    assert isinstance(bifdobj, fdt.BiFData)
     expected = _expected("bspline_bifd_expected.json")
 
     np.testing.assert_allclose(bifdobj.coefs, expected["coef"], rtol=RTOL, atol=1e-12)

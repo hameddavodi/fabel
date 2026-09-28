@@ -62,8 +62,8 @@ obtains every derivative by automatic differentiation.
 Examples
 --------
 >>> import numpy as np
->>> import fabel as fb
->>> from fabel.profiling import ODEModel, profile_ode
+>>> import fdatools as fdt
+>>> from fdatools.profiling import ODEModel, profile_ode
 >>> decay = ODEModel(
 ...     rhs=lambda x, t, theta: -theta[0] * x,
 ...     n_states=1,
@@ -73,7 +73,7 @@ Examples
 ... )
 >>> t = np.linspace(0.0, 2.0, 41)
 >>> y = 3.0 * np.exp(-1.5 * t)
->>> basis = fb.BSpline(domain=(0.0, 2.0), breaks=np.linspace(0.0, 2.0, 21))
+>>> basis = fdt.BSpline(domain=(0.0, 2.0), breaks=np.linspace(0.0, 2.0, 21))
 >>> fit = profile_ode(decay, t, y[:, None], basis, lam=1e4, theta0=[1.0])
 >>> round(float(fit.theta[0]), 4)
 1.5
@@ -90,10 +90,10 @@ from typing import Any, Literal, NamedTuple
 
 from scipy.integrate import solve_ivp
 
-from fabel import _linalg
-from fabel._backend import asarray, default_namespace, to_numpy
-from fabel.basis import Basis, BSpline
-from fabel.core import FData
+from fdatools import _linalg
+from fdatools._backend import asarray, default_namespace, to_numpy
+from fdatools.basis import Basis, BSpline
+from fdatools.core import FData
 
 __all__ = [
     "InnerFit",
@@ -149,7 +149,7 @@ _PANELS_PER_BASIS = 4
 #: The input variables of the CSTR, in column order.
 CSTR_INPUTS = ("F", "CA0", "T0", "Tcin", "Fc")
 
-#: R's CSTR input scenarios that Fabel reproduces (see :func:`cstr_inputs`).
+#: R's CSTR input scenarios that fdatools reproduces (see :func:`cstr_inputs`).
 CSTR_CONDITIONS = ("all.cool.step", "all.hot.step", "Tc.hot.step", "Tc.cool.step")
 
 #: The CSTR constants and their defaults, as in the example of R's ``CSTR`` help
@@ -234,7 +234,7 @@ class ODEModel:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.profiling import ODEModel
+    >>> from fdatools.profiling import ODEModel
     >>> growth = ODEModel(lambda x, t, th: th[0] * x, n_states=1, n_params=1)
     >>> growth(np.array([[2.0]]), np.array([0.0]), np.array([0.5])).tolist()
     [[1.0]]
@@ -308,7 +308,7 @@ class ODEModel:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.profiling import fitzhugh_nagumo_model
+        >>> from fdatools.profiling import fitzhugh_nagumo_model
         >>> fhn = fitzhugh_nagumo_model()
         >>> fhn(np.array([[0.0, 0.0]]), np.array([0.0]), np.array([0.2, 0.2, 3.0])).round(
         ...     4
@@ -401,7 +401,7 @@ class ODEModel:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.profiling import fitzhugh_nagumo_model
+        >>> from fdatools.profiling import fitzhugh_nagumo_model
         >>> fx, ft = fitzhugh_nagumo_model().jacobians(
         ...     np.array([[1.0, 0.5]]), np.array([0.0]), np.array([0.2, 0.2, 3.0])
         ... )
@@ -432,7 +432,7 @@ class ODEModel:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.profiling import fitzhugh_nagumo_model
+        >>> from fdatools.profiling import fitzhugh_nagumo_model
         >>> fxx, fxt = fitzhugh_nagumo_model().hessians(
         ...     np.array([[1.0, 0.5]]), np.array([0.0]), np.array([0.2, 0.2, 3.0])
         ... )
@@ -486,7 +486,7 @@ class ODEModel:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.profiling import ODEModel
+        >>> from fdatools.profiling import ODEModel
         >>> decay = ODEModel(lambda x, t, th: -th[0] * x, n_states=1, n_params=1)
         >>> x = decay.simulate([0.0, 1.0], [1.0], [2.0])
         >>> round(float(x[1, 0]), 8) == round(float(np.exp(-2.0)), 8)
@@ -553,7 +553,7 @@ class ODEModel:
         ``rhs(x, t, theta)`` must use PyTorch operations only and treat the
         ``n`` points independently (it is differentiated one point at a time
         with :func:`torch.func.vmap`).  Every Jacobian and second derivative is
-        then exact.  Requires the ``fabel[torch]`` extra; PyTorch is imported
+        then exact.  Requires the ``fdatools[torch]`` extra; PyTorch is imported
         only when this method is called.
 
         Parameters
@@ -574,7 +574,7 @@ class ODEModel:
         --------
         >>> import numpy as np
         >>> import torch
-        >>> from fabel.profiling import ODEModel
+        >>> from fdatools.profiling import ODEModel
         >>> model = ODEModel.from_torch(lambda x, t, th: -th[0] * x**2, 1, 1)
         >>> float(
         ...     model.hessians(np.array([[3.0]]), np.array([0.0]), np.array([2.0]))[0][0, 0, 0, 0]
@@ -638,7 +638,7 @@ def fitzhugh_nagumo_model() -> ODEModel:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.profiling import fitzhugh_nagumo_model
+    >>> from fdatools.profiling import fitzhugh_nagumo_model
     >>> fhn = fitzhugh_nagumo_model()
     >>> x = fhn.simulate(np.linspace(0.0, 20.0, 5), [-1.0, 1.0], [0.2, 0.2, 3.0])
     >>> x.shape
@@ -733,7 +733,7 @@ def cstr_inputs(t: Any, condition: str = "all.cool.step") -> Array:
 
     Examples
     --------
-    >>> from fabel.profiling import cstr_inputs
+    >>> from fdatools.profiling import cstr_inputs
     >>> cstr_inputs([0.0, 4.0, 8.0], "all.cool.step")[:, 0].tolist()
     [1.0, 1.5, 0.5]
     """
@@ -821,7 +821,7 @@ def cstr_model(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel.profiling import cstr_model
+    >>> from fdatools.profiling import cstr_model
     >>> model = cstr_model("all.cool.step", estimate=("kref", "EoverR"))
     >>> dx = model(np.array([[1.5965, 341.3754]]), np.array([1.0]), np.array([0.461, 0.83301]))
     >>> dx.round(6).tolist()
@@ -1012,7 +1012,7 @@ def simpson_rule(breaks: Sequence[float], n_quad: int = 5) -> tuple[Array, Array
 
     Examples
     --------
-    >>> from fabel.profiling import simpson_rule
+    >>> from fdatools.profiling import simpson_rule
     >>> nodes, weights = simpson_rule([0.0, 1.0], 5)
     >>> nodes.tolist()
     [0.0, 0.25, 0.5, 0.75, 1.0]
@@ -1113,7 +1113,7 @@ class ProfileResult:
     sigma2 : float
         Residual variance ``sse / (N - p)``.
     states : tuple of FData
-        The fitted state functions, one single-curve :class:`~fabel.FData` per
+        The fitted state functions, one single-curve :class:`~fdatools.FData` per
         state.
     inner : InnerFit
         The inner fit at ``theta``.
@@ -1153,12 +1153,12 @@ class ProfileResult:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.profiling import ODEModel, profile_ode
+        >>> import fdatools as fdt
+        >>> from fdatools.profiling import ODEModel, profile_ode
         >>> m = ODEModel(lambda x, t, th: -th[0] * x, 1, 1)
         >>> t = np.linspace(0.0, 1.0, 21)
         >>> y = np.exp(-t) + 0.01 * np.cos(40 * t)
-        >>> fit = profile_ode(m, t, y[:, None], fb.BSpline((0.0, 1.0), 12), 1e3, [0.5])
+        >>> fit = profile_ode(m, t, y[:, None], fdt.BSpline((0.0, 1.0), 12), 1e3, [0.5])
         >>> fit.stderr.shape
         (1,)
         """
@@ -1183,11 +1183,11 @@ class ProfileResult:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.profiling import ODEModel, profile_ode
+        >>> import fdatools as fdt
+        >>> from fdatools.profiling import ODEModel, profile_ode
         >>> m = ODEModel(lambda x, t, th: -th[0] * x, 1, 1)
         >>> t = np.linspace(0.0, 1.0, 21)
-        >>> fit = profile_ode(m, t, np.exp(-t)[:, None], fb.BSpline((0.0, 1.0), 12), 1e3, [0.5])
+        >>> fit = profile_ode(m, t, np.exp(-t)[:, None], fdt.BSpline((0.0, 1.0), 12), 1e3, [0.5])
         >>> fit(np.array([0.0, 1.0])).shape
         (2, 1)
         """
@@ -1312,12 +1312,12 @@ class ProfiledODE:
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.profiling import ProfiledODE, fitzhugh_nagumo_model
+    >>> import fdatools as fdt
+    >>> from fdatools.profiling import ProfiledODE, fitzhugh_nagumo_model
     >>> fhn = fitzhugh_nagumo_model()
     >>> t = np.linspace(0.0, 20.0, 201)
     >>> x = fhn.simulate(t, [-1.0, 1.0], [0.2, 0.2, 3.0])
-    >>> basis = fb.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201))
+    >>> basis = fdt.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201))
     >>> problem = ProfiledODE(fhn, t, x, basis, lam=1e3)
     >>> fit = problem.fit([0.3, 0.3, 2.5])
     >>> np.round(fit.theta, 3).tolist()
@@ -1410,10 +1410,10 @@ class ProfiledODE:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.profiling import ProfiledODE, fitzhugh_nagumo_model
+        >>> import fdatools as fdt
+        >>> from fdatools.profiling import ProfiledODE, fitzhugh_nagumo_model
         >>> t = np.linspace(0.0, 1.0, 5)
-        >>> p = ProfiledODE(fitzhugh_nagumo_model(), t, np.ones((5, 2)), fb.BSpline(n_basis=6))
+        >>> p = ProfiledODE(fitzhugh_nagumo_model(), t, np.ones((5, 2)), fdt.BSpline(n_basis=6))
         >>> p.n_coefs
         12
         """
@@ -1512,11 +1512,11 @@ class ProfiledODE:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.profiling import ProfiledODE, ODEModel
+        >>> import fdatools as fdt
+        >>> from fdatools.profiling import ProfiledODE, ODEModel
         >>> m = ODEModel(lambda x, t, th: -th[0] * x, 1, 1)
         >>> t = np.linspace(0.0, 1.0, 5)
-        >>> p = ProfiledODE(m, t, np.ones((5, 1)), fb.BSpline(n_basis=4))
+        >>> p = ProfiledODE(m, t, np.ones((5, 1)), fdt.BSpline(n_basis=4))
         >>> r = p.residuals(np.ones(4), [0.0])
         >>> float(abs(r.data).max()), float(abs(r.equation).max())
         (0.0, 0.0)
@@ -1541,11 +1541,11 @@ class ProfiledODE:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.profiling import ProfiledODE, ODEModel
+        >>> import fdatools as fdt
+        >>> from fdatools.profiling import ProfiledODE, ODEModel
         >>> m = ODEModel(lambda x, t, th: -th[0] * x, 1, 1)
         >>> t = np.linspace(0.0, 1.0, 5)
-        >>> p = ProfiledODE(m, t, np.zeros((5, 1)), fb.BSpline(n_basis=4))
+        >>> p = ProfiledODE(m, t, np.zeros((5, 1)), fdt.BSpline(n_basis=4))
         >>> p.criterion(np.ones(4), [0.0])
         5.0
         """
@@ -1706,11 +1706,11 @@ class ProfiledODE:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.profiling import ProfiledODE, ODEModel
+        >>> import fdatools as fdt
+        >>> from fdatools.profiling import ProfiledODE, ODEModel
         >>> m = ODEModel(lambda x, t, th: -th[0] * x, 1, 1)
         >>> t = np.linspace(0.0, 1.0, 11)
-        >>> p = ProfiledODE(m, t, np.exp(-t)[:, None], fb.BSpline(n_basis=8), lam=1e2)
+        >>> p = ProfiledODE(m, t, np.exp(-t)[:, None], fdt.BSpline(n_basis=8), lam=1e2)
         >>> inner = p.fit_states([1.0])
         >>> inner.converged, inner.sse < 1e-8
         (True, True)
@@ -1768,11 +1768,11 @@ class ProfiledODE:
         Examples
         --------
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> from fabel.profiling import ProfiledODE, ODEModel
+        >>> import fdatools as fdt
+        >>> from fdatools.profiling import ProfiledODE, ODEModel
         >>> m = ODEModel(lambda x, t, th: -th[0] * x, 1, 1)
         >>> t = np.linspace(0.0, 1.0, 21)
-        >>> basis = fb.BSpline(domain=(0.0, 1.0), breaks=np.linspace(0.0, 1.0, 11))
+        >>> basis = fdt.BSpline(domain=(0.0, 1.0), breaks=np.linspace(0.0, 1.0, 11))
         >>> fit = ProfiledODE(m, t, 2 * np.exp(-0.7 * t)[:, None], basis, lam=1e4).fit([0.2])
         >>> round(float(fit.theta[0]), 5)
         0.7
@@ -1914,13 +1914,13 @@ def profile_ode(
     Examples
     --------
     >>> import numpy as np
-    >>> import fabel as fb
-    >>> from fabel.profiling import fitzhugh_nagumo_model, profile_ode
+    >>> import fdatools as fdt
+    >>> from fdatools.profiling import fitzhugh_nagumo_model, profile_ode
     >>> fhn = fitzhugh_nagumo_model()
     >>> t = np.linspace(0.0, 20.0, 201)
     >>> x = fhn.simulate(t, [-1.0, 1.0], [0.2, 0.2, 3.0])
     >>> y = np.column_stack([x[:, 0], np.full(201, np.nan)])  # R is never observed
-    >>> basis = fb.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201))
+    >>> basis = fdt.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201))
     >>> fit = profile_ode(fhn, t, y, basis, lam=1e3, theta0=[0.25, 0.25, 2.8])
     >>> np.round(fit.theta, 2).tolist()
     [0.2, 0.2, 3.0]

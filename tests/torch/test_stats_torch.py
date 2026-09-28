@@ -1,6 +1,6 @@
-"""Torch backend behaviour of :mod:`fabel.stats`.
+"""Torch backend behaviour of :mod:`fdatools.stats`.
 
-:func:`~fabel.stats.cov` and :func:`~fabel.stats.cor` act on coefficients and
+:func:`~fdatools.stats.cov` and :func:`~fdatools.stats.cor` act on coefficients and
 stay in the input namespace, so gradients flow through them; the depth and
 permutation machinery samples curves and returns NumPy arrays.
 """
@@ -10,8 +10,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from fabel import BSpline, FData
-from fabel.stats import cor, cov, depth, t_test
+from fdatools import BSpline, FData
+from fdatools.stats import cor, cov, depth, t_test
 
 torch = pytest.importorskip("torch", reason="torch extra not installed")
 

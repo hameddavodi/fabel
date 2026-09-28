@@ -7,11 +7,11 @@ them, and that you can evaluate and differentiate anywhere.
 This tutorial uses two datasets:
 
 - the **Berkeley growth study**: the height of 54 girls, measured 31 times
-  between age 1 and 18 (ships inside Fabel);
+  between age 1 and 18 (ships inside fdatools);
 - the **Canadian weather** data: the average temperature of every day of the
   year at 35 weather stations (downloaded once, then cached).
 
-You will learn how `fb.smooth()` picks a basis and a smoothing level for you,
+You will learn how `fdt.smooth()` picks a basis and a smoothing level for you,
 how to control both, and how to force a curve to only go up.
 
 ## 1. The growth data
@@ -19,21 +19,21 @@ how to control both, and how to force a curve to only go up.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import fabel as fb
+import fdatools as fdt
 
-growth = fb.datasets.load_growth()
+growth = fdt.datasets.load_growth()
 age = growth.age            # 31 ages, not equally spaced
 heights = growth.hgtf       # shape (31, 54): one column per girl
 age.shape, heights.shape
 ```
 
-Each column of `heights` is one girl. In Fabel, observations always have the
+Each column of `heights` is one girl. In fdatools, observations always have the
 time axis first: `y` has shape `(n_points, n_curves)`.
 
 ## 2. One call, everything automatic
 
 ```python
-fit = fb.smooth(heights, age)
+fit = fdt.smooth(heights, age)
 
 fit.fd.basis                # the basis chosen for you
 fit.lam                     # the smoothing parameter chosen by GCV
@@ -98,11 +98,11 @@ fig.tight_layout()
 Three ways to set the smoothing level:
 
 ```python
-basis = fb.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
+basis = fdt.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
 
-by_value = fb.smooth(heights, age, basis=basis, lam=1e-1, penalty=3)
-by_df = fb.smooth(heights, age, basis=basis, df=8.0, penalty=3)
-by_gcv = fb.smooth(heights, age, basis=basis, lam="gcv", penalty=3)
+by_value = fdt.smooth(heights, age, basis=basis, lam=1e-1, penalty=3)
+by_df = fdt.smooth(heights, age, basis=basis, df=8.0, penalty=3)
+by_gcv = fdt.smooth(heights, age, basis=basis, lam="gcv", penalty=3)
 
 round(by_df.df, 6), by_df.lam, by_gcv.lam
 ```
@@ -119,7 +119,7 @@ derivative smooth, which matters when you study acceleration.
 convert between the two scales:
 
 ```python
-from fabel.smoothing import df_to_lambda, gcv_curve, lambda_to_df
+from fdatools.smoothing import df_to_lambda, gcv_curve, lambda_to_df
 
 lambdas = 10.0 ** np.arange(-6.0, 3.0, 0.5)
 scores = gcv_curve(heights, age, basis, lambdas, penalty=3)   # (n_lambda, 54)
@@ -144,8 +144,8 @@ can only increase.
 
 ```python
 girls = heights[:, :4]
-monotone = fb.smooth(
-    girls, age, basis=fb.BSpline(domain=(1.0, 18.0), n_basis=15), lam=1e-1,
+monotone = fdt.smooth(
+    girls, age, basis=fdt.BSpline(domain=(1.0, 18.0), n_basis=15), lam=1e-1,
     constraint="monotone",
 )
 monotone.constraint, monotone.beta.shape      # "monotone", (2, 4)
@@ -165,9 +165,9 @@ natural choice. We use 65 functions over the 365 days.
 
 ```python
 # requires-data: canadian_weather
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day = weather.t                               # 1, 2, ..., 365
-fourier = fb.Fourier(domain=(0.0, 365.0), n_basis=65)
+fourier = fdt.Fourier(domain=(0.0, 365.0), n_basis=65)
 weather.temp.shape                            # (365, 35)
 ```
 
@@ -178,12 +178,12 @@ expect, and we do not want to punish it. The *harmonic accelerator*
 L = ω² D + D³, with ω = 2π / 365,
 
 gives exactly zero on those curves. A *linear differential operator* (LDO) is
-a weighted sum of derivatives like this one; `fb.LDO.harmonic` builds it.
+a weighted sum of derivatives like this one; `fdt.LDO.harmonic` builds it.
 
 ```python
 # requires-data: canadian_weather
-harmonic = fb.LDO.harmonic(period=365.0)
-temp = fb.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam="gcv")
+harmonic = fdt.LDO.harmonic(period=365.0)
+temp = fdt.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam="gcv")
 temp.lam, round(temp.df, 2)
 
 stations = ["Montreal", "Edmonton", "Pr. Rupert", "Resolute"]
@@ -201,7 +201,7 @@ Check the claim: the harmonic accelerator kills a pure yearly cycle.
 ```python
 # requires-data: canadian_weather
 omega = 2 * np.pi / 365.0
-cycle = fb.FData(np.linalg.lstsq(fourier(day), 3 + 5 * np.sin(omega * day), rcond=None)[0], fourier)
+cycle = fdt.FData(np.linalg.lstsq(fourier(day), 3 + 5 * np.sin(omega * day), rcond=None)[0], fourier)
 float(np.max(np.abs(cycle(day, harmonic))))   # about 0
 ```
 
@@ -229,9 +229,9 @@ tempfit  <- smooth.basis(day.5, CanadianWeather$dailyAv[, , "Temperature.C"],
 
 Differences to know:
 
-- `fb.smooth()` picks the basis and λ for you; R needs both.
+- `fdt.smooth()` picks the basis and λ for you; R needs both.
 - `fit.gcv` is a score per curve, like R. When the fit interpolates the data
-  (df equal to the number of points), GCV is 0/0: Fabel returns `inf`, R
+  (df equal to the number of points), GCV is 0/0: fdatools returns `inf`, R
   returns `NULL`.
 - One `smooth()` call with `constraint=` replaces `smooth.monotone`,
   `smooth.pos` and `smooth.morph`, and it smooths all curves at once.

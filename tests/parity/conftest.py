@@ -3,7 +3,7 @@
 Golden files live at ``tests/golden/<module>.json`` and are generated only
 by ``tools/make_golden.py`` (see ``docs/dev/conventions.md`` for the schema).
 Parity tests (``tests/parity/test_<module>.py``) load expected R output via
-``golden`` / ``golden_cases`` and compare against ``fabel`` with
+``golden`` / ``golden_cases`` and compare against ``fdatools`` with
 ``numpy.testing.assert_allclose(actual, expected, rtol=case_rtol, atol=1e-12)``.
 """
 
@@ -15,8 +15,8 @@ from typing import Any
 
 import numpy as np
 
-from fabel import BSpline, Constant, Exponential, Fourier, Monomial
-from fabel.basis import Basis
+from fdatools import BSpline, Constant, Exponential, Fourier, Monomial
+from fdatools.basis import Basis
 
 GOLDEN_DIR = Path(__file__).resolve().parent.parent / "golden"
 
@@ -50,7 +50,7 @@ def case_rtol(module: str, case: dict[str, Any]) -> float:
 
 
 def build_basis(spec: dict[str, Any]) -> Basis:
-    """Construct the Fabel basis described by a golden basis specification.
+    """Construct the fdatools basis described by a golden basis specification.
 
     Golden files record a basis as R's ``basisfd`` summary: ``type``,
     ``rangeval``, ``nbasis`` and the type-specific ``params`` (interior knots

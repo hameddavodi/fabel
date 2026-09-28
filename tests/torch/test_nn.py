@@ -1,4 +1,4 @@
-"""Tests for :mod:`fabel.nn`: PyTorch layers and a dataset for functional data.
+"""Tests for :mod:`fdatools.nn`: PyTorch layers and a dataset for functional data.
 
 Every layer is checked with :func:`torch.autograd.gradcheck` in float64, which
 compares the analytic Jacobian against central finite differences.  The device
@@ -15,13 +15,13 @@ from typing import Any, cast
 import numpy as np
 import pytest
 
-from fabel import LDO, BSpline, FData, Fourier
-from fabel.smoothing import smooth
+from fdatools import LDO, BSpline, FData, Fourier
+from fdatools.smoothing import smooth
 
 pytest.importorskip("torch", reason="torch extra not installed")
 
 import torch
-from fabel import nn as fnn
+from fdatools import nn as fnn
 
 DOMAIN = (0.0, 1.0)
 GRID = np.linspace(0.0, 1.0, 21)
@@ -50,8 +50,10 @@ def _gpu_device() -> str | None:
 # --------------------------------------------------------------------------- #
 
 
-def test_importing_fabel_does_not_import_torch() -> None:
-    code = "import sys, fabel, fabel.dynamics, fabel.smoothing; print('torch' in sys.modules)"
+def test_importing_fdatools_does_not_import_torch() -> None:
+    code = (
+        "import sys, fdatools, fdatools.dynamics, fdatools.smoothing; print('torch' in sys.modules)"
+    )
     out = subprocess.run(
         [sys.executable, "-c", code], capture_output=True, text=True, check=True
     ).stdout
@@ -60,11 +62,11 @@ def test_importing_fabel_does_not_import_torch() -> None:
 
 def test_missing_torch_gives_a_helpful_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(sys.modules, "torch", None)
-    monkeypatch.delitem(sys.modules, "fabel.nn")
-    with pytest.raises(ImportError, match=r"fabel\[torch\]"):
-        importlib.import_module("fabel.nn")
+    monkeypatch.delitem(sys.modules, "fdatools.nn")
+    with pytest.raises(ImportError, match=r"fdatools\[torch\]"):
+        importlib.import_module("fdatools.nn")
     monkeypatch.undo()
-    importlib.import_module("fabel.nn")
+    importlib.import_module("fdatools.nn")
 
 
 # --------------------------------------------------------------------------- #

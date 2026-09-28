@@ -1,10 +1,10 @@
 """A stand-in for R's default random number generator, for seeded parity cases.
 
 R's permutation tests (``tperm.fd``, ``Fperm.fd``) draw their permutations with
-``sample(n)`` after ``set.seed(seed)``.  Fabel draws them from a NumPy
+``sample(n)`` after ``set.seed(seed)``.  fdatools draws them from a NumPy
 ``Generator``, so the two null distributions are different samples from the
 same law.  To compare the *seeded* golden outputs value for value, the parity
-tests hand Fabel an object that exposes the one method Fabel calls,
+tests hand fdatools an object that exposes the one method fdatools calls,
 ``permutation(n)``, and answers with exactly the permutation R would draw.
 
 R's default generator is the standard Mersenne Twister (MT19937, Matsumoto and

@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.registration` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.registration` against golden output from R ``fda`` 6.3.0.
 
 Cases are parametrised by ``(case, field)`` so that a defect in one R output
 (the inverse warp of ``landmarkreg``, say) does not hide agreement in the others.
@@ -20,8 +20,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel.core import FData
-from fabel.registration import RegistrationResult, register
+from fdatools.core import FData
+from fdatools.registration import RegistrationResult, register
 
 from .conftest import build_basis, case_rtol, compare, golden_cases
 
@@ -50,7 +50,7 @@ _REGISTER_STOPS_SHORT = (
     "crit=2, lambda=1), R's Wfd scores 0.621731 / 0.304731 / 0.912346 / "
     "0.114607 / 0.310316 / 0.070639 / 0.815999 / 0.194697 / 0.282611 / "
     "0.646418 for the ten girls, with gradients of max-norm 0.021 to 0.371 "
-    "there; Fabel's Newton iterate is stationary (gradient < 1e-10) at "
+    "there; fdatools' Newton iterate is stationary (gradient < 1e-10) at "
     "0.619192 / 0.304554 / 0.911651 / 0.114439 / 0.310197 / 0.070245 / "
     "0.808155 / 0.194462 / 0.282337 / 0.639359 -- lower on every curve.  R's "
     "own dbglev=2 trace agrees: it stops girls 1-4 with gradient lengths "
@@ -67,7 +67,7 @@ _PERIODIC_STOPS_SHORT = (
     "Evaluated with R's discretisation (grid mean over 651 points, crit=1, "
     "lambda=1, periodic shift), R's (Wfd, shift) scores 0.634340 / 0.286287 / "
     "0.101681 / 1.122814 / 0.806865 for the five stations, with gradients of "
-    "max-norm 0.0088 to 0.205 there; Fabel's Newton iterate is stationary "
+    "max-norm 0.0088 to 0.205 there; fdatools' Newton iterate is stationary "
     "(gradient < 1e-10) at 0.631612 / 0.285765 / 0.101659 / 1.120003 / "
     "0.798741 -- lower on every curve.  Shifts and warps trade off along a "
     "shallow valley, so the stationary point is far from R's: shifts 6.269 / "
@@ -91,7 +91,7 @@ _TRAPEZOID_WARP = (
     "(monfn) -- reproduced to 2e-12.  For the weather warps that rule is off "
     "the exact integral by up to 4.7e-4 days, which moves the least-squares "
     "warp coefficients by up to 8.1e-4; the smallest coefficient (-0.1143) is "
-    "then 2.5e-3 out relative.  Fabel integrates exp(W) by Gauss-Legendre to "
+    "then 2.5e-3 out relative.  fdatools integrates exp(W) by Gauss-Legendre to "
     "rounding error."
 )
 
@@ -101,7 +101,7 @@ _LANDMARK_WARP_QUADRATURE = (
     "from R's warpfd by up to 3.5e-5 years; the order-6 spline coefficients "
     "amplify that to 7.6e-5, so 6 of 350 coefficients miss 1e-5 relative "
     "(worst 6.9e-5).  No 1025-point trapezoid or grid choice reproduces R's "
-    "values, so the gap is R's quadrature, not a different warp: Fabel's own "
+    "values, so the gap is R's quadrature, not a different warp: fdatools' own "
     "Wfd agrees with R's to 5.9e-7."
 )
 
@@ -109,7 +109,7 @@ _LANDMARK_INVERSE = (
     "landmarkreg's warpinvfd is not the inverse of its warpfd: "
     "warpinvfd(warpfd(t)) - t reaches 1.73 years (girl 3, t = 2.48), and "
     "warpinvfd rises from 1 to 3.53 over the first year for girl 1, where the "
-    "true inverse reaches 2.17.  Fabel inverts its warps by Newton's method; "
+    "true inverse reaches 2.17.  fdatools inverts its warps by Newton's method; "
     "its inverse composes with the warp to the identity within 2e-8."
 )
 
@@ -118,7 +118,7 @@ _LANDMARK_REGISTERED = (
     "3360.37 and a value of 421.27 cm at age 1.2 (the curve spans 67.6-183.2 "
     "cm), where x(h(1.2)) = 80.25 cm.  It is sampled through R's faulty inverse "
     "warp (above), whose steep start leaves the first years almost unsampled. "
-    "Fabel projects x(h(t)) on the registration grid."
+    "fdatools projects x(h(t)) on the registration grid."
 )
 
 R_FDA_DEFECTS: dict[tuple[str, str], str] = {
@@ -171,8 +171,8 @@ def _continuous_options(case: dict[str, Any]) -> dict[str, Any]:
 
 
 @cache
-def _fabel_result(name: str) -> RegistrationResult:
-    """Run Fabel on the golden inputs of case ``name`` once per session."""
+def _fdatools_result(name: str) -> RegistrationResult:
+    """Run fdatools on the golden inputs of case ``name`` once per session."""
     case = CASES[name]
     if name == LANDMARK:
         inputs = case["input"]
@@ -202,7 +202,7 @@ def _from_r_latent(name: str) -> RegistrationResult:
 
 
 def _field(result: RegistrationResult, field: str) -> Any:
-    """Return the Fabel counterpart of an R output field."""
+    """Return the fdatools counterpart of an R output field."""
     if field == "regfd_coefs":
         return result.registered.coefs
     if field == "warpfd_coefs":
@@ -237,7 +237,7 @@ def test_registration_matches_r(name: str, field: str, request: pytest.FixtureRe
     """``register`` reproduces ``landmarkreg`` / ``register.fd`` output fields."""
     _mark(request, R_FDA_DEFECTS.get((name, field)))
     case = CASES[name]
-    compare(_field(_fabel_result(name), field), case["output"][field], case_rtol(MODULE, case))
+    compare(_field(_fdatools_result(name), field), case["output"][field], case_rtol(MODULE, case))
 
 
 @pytest.mark.parametrize(
@@ -245,7 +245,7 @@ def test_registration_matches_r(name: str, field: str, request: pytest.FixtureRe
     [(name, field) for name in (GROWTH, WEATHER) for field in ("warpfd_coefs", "regfd_coefs")],
 )
 def test_warps_from_r_latent_match_r(name: str, field: str, request: pytest.FixtureRequest) -> None:
-    """R's own ``Wfd`` maps to R's ``warpfd`` / ``regfd`` through Fabel's warps."""
+    """R's own ``Wfd`` maps to R's ``warpfd`` / ``regfd`` through fdatools' warps."""
     _mark(request, R_POSTPROCESS_DEFECTS.get((name, field)))
     case = CASES[name]
     result = _from_r_latent(name)

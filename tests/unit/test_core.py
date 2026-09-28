@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.core` (FData, BiFData, inner products)."""
+"""Unit tests for :mod:`fdatools.core` (FData, BiFData, inner products)."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from fabel import LDO, BiFData, BSpline, Constant, Exponential, FData, Fourier, Monomial, inprod
-from fabel import _linalg as la
-from fabel._backend import to_numpy
+from fdatools import LDO, BiFData, BSpline, Constant, Exponential, FData, Fourier, Monomial, inprod
+from fdatools import _linalg as la
+from fdatools._backend import to_numpy
 
 torch = pytest.importorskip("torch", reason="torch extra not installed")
 

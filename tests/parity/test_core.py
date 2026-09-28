@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.core` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.core` against golden output from R ``fda`` 6.3.0.
 
 Cases whose output is a function (a basis plus coefficients) are compared by
 evaluating both representations on a dense grid: the two sides may legitimately
@@ -12,8 +12,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import LDO, BiFData, BSpline, Constant, Exponential, FData, Fourier, Monomial, inprod
-from fabel.basis import Basis
+from fdatools import LDO, BiFData, BSpline, Constant, Exponential, FData, Fourier, Monomial, inprod
+from fdatools.basis import Basis
 
 from .conftest import case_rtol, golden_cases
 
@@ -31,13 +31,13 @@ _INPROD_REASON = (
     "R's inprod integrates by Romberg iteration with a convergence tolerance of "
     "1e-4 and returns values ~1.3e-4 away from the exact integral.  Its public "
     "API exposes no tolerance argument and no exact alternative outside "
-    "inprod.bspline, which does not accept a Fourier basis.  Fabel uses "
+    "inprod.bspline, which does not accept a Fourier basis.  fdatools uses "
     "Gauss-Legendre panels that are exact for these integrands -- its Gram "
     "matrices match R's own eval.penalty to 1e-8."
 )
 
 #: Golden cases where R ``fda`` 6.3.0 returns a coarse approximation of a
-#: function Fabel represents exactly.  The relative errors are measured against
+#: function fdatools represents exactly.  The relative errors are measured against
 #: the exact function reconstructed from the same golden inputs.
 R_FDA_DEFECTS: dict[str, str] = {
     "fd_mul_bspline": (
@@ -45,12 +45,12 @@ R_FDA_DEFECTS: dict[str, str] = {
         "is C^5 where the true product is only C^2 and cannot be represented.  "
         "R's answer is 12.8% away from the exact product (max 0.254 on a curve "
         "of size 1.99), and is not even the L2 projection onto its own basis.  "
-        "Fabel raises the interior knot multiplicities and is exact."
+        "fdatools raises the interior knot multiplicities and is exact."
     ),
     "fd_power2": (
         "^.fd projects onto an arbitrary uniform refinement (80 intervals, "
         "order 7) whose knots miss the curve's own breaks at k/7, leaving a "
-        "5.7e-5 relative error.  Fabel squares the curve exactly."
+        "5.7e-5 relative error.  fdatools squares the curve exactly."
     ),
     "inprod_fourier_L0_0": _INPROD_REASON,
     "inprod_fourier_L1_1": _INPROD_REASON,
@@ -59,13 +59,13 @@ R_FDA_DEFECTS: dict[str, str] = {
     "deriv_fd_bspline_order6_L2": (
         "deriv.fd re-expands D^2 x in the *original* order-6 basis, which holds "
         "only C^4 functions while D^2 x is C^2; the result is 1.3% off (max "
-        "59.9 on a curve of size 4655).  Fabel returns the exact order-4 spline."
+        "59.9 on a curve of size 4655).  fdatools returns the exact order-4 spline."
     ),
 }
 
 
 def build_basis(spec: dict[str, Any]) -> Basis:
-    """Construct the Fabel basis described by a golden basis specification."""
+    """Construct the fdatools basis described by a golden basis specification."""
     kind = spec["type"]
     domain = (float(spec["rangeval"][0]), float(spec["rangeval"][1]))
     params: Any = spec.get("params")

@@ -14,8 +14,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline, Fourier
-from fabel._linalg import clear_gram_cache
+from fdatools import BSpline, Fourier
+from fdatools._linalg import clear_gram_cache
 
 N_POINTS = 365
 N_BASIS = 65

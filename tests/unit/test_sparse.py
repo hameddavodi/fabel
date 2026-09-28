@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.sparse` (PACE for sparse longitudinal data)."""
+"""Unit tests for :mod:`fdatools.sparse` (PACE for sparse longitudinal data)."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ from hypothesis import strategies as st
 from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 
-from fabel import LDO, BSpline, FData, Monomial
-from fabel.sparse import (
+from fdatools import LDO, BSpline, FData, Monomial
+from fdatools.sparse import (
     PACE,
     SparseCov,
     _curves,

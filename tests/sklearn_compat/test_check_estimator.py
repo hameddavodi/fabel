@@ -1,4 +1,4 @@
-"""scikit-learn's own estimator checks on every Fabel estimator that takes ``X``.
+"""scikit-learn's own estimator checks on every fdatools estimator that takes ``X``.
 
 SPEC 5.1: ``Smoother``, ``FPCA``, ``FCCA``, ``Registrator`` and ``FRegress``
 implement the estimator API natively.  The four single-view estimators run the
@@ -16,10 +16,10 @@ from typing import Any
 import pytest
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
-from fabel.decomposition import FPCA
-from fabel.registration import Registrator
-from fabel.regression import FRegress
-from fabel.smoothing import Smoother
+from fdatools.decomposition import FPCA
+from fdatools.registration import Registrator
+from fdatools.regression import FRegress
+from fdatools.smoothing import Smoother
 
 # sklearn's checks feed random blobs as coefficient rows; registering such
 # curves to their mean often stops at ``max_iter`` and says so.  The checks

@@ -1,4 +1,4 @@
-"""Parity of ``fabel.profiling`` against R fda 6.3.0's CSTR functions.
+"""Parity of ``fdatools.profiling`` against R fda 6.3.0's CSTR functions.
 
 Golden file ``tests/golden/profiling.json`` (``tools/golden_r/profiling.R``):
 
@@ -22,8 +22,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline
-from fabel.profiling import (
+from fdatools import BSpline
+from fdatools.profiling import (
     CSTR_PARAMETERS,
     ProfiledODE,
     cstr_inputs,

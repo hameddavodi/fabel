@@ -7,7 +7,7 @@ A single entry point, :func:`register`, replaces R ``fda``'s ``register.fd``
 
 Every warping function is strictly increasing by construction.  It is built
 from an unconstrained latent function ``W`` exactly as a monotone smooth is
-(see :func:`fabel.smoothing.smooth` with ``constraint="morph"``):
+(see :func:`fdatools.smoothing.smooth` with ``constraint="morph"``):
 
 .. math::
 
@@ -52,8 +52,8 @@ derivatives of ``h`` with respect to ``c`` are cumulative integrals of
 Examples
 --------
 >>> import numpy as np
->>> from fabel import BSpline, FData
->>> from fabel.registration import register
+>>> from fdatools import BSpline, FData
+>>> from fdatools.registration import register
 >>> basis = BSpline(domain=(0.0, 1.0), n_basis=15)
 >>> t = np.linspace(0.0, 1.0, 400)
 >>> shifts = [0.42, 0.5, 0.58]
@@ -77,12 +77,12 @@ from typing import Any, NamedTuple
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, validate_data
 
-from fabel import _linalg
-from fabel._backend import asarray, default_namespace, is_torch, to_numpy
-from fabel._operator import LDO
-from fabel.basis import Basis, BSpline
-from fabel.core import FData
-from fabel.smoothing import smooth
+from fdatools import _linalg
+from fdatools._backend import asarray, default_namespace, is_torch, to_numpy
+from fdatools._operator import LDO
+from fdatools.basis import Basis, BSpline
+from fdatools.core import FData
+from fdatools.smoothing import smooth
 
 __all__ = [
     "AmpPhaseDecomposition",
@@ -110,7 +110,7 @@ _POINTS_PER_BASIS = 10
 _QUAD_DEGREE = 8
 
 #: Gauss-Legendre nodes per panel for the warps returned to the user (the same
-#: rule :func:`fabel.smoothing.smooth` uses for monotone fits).
+#: rule :func:`fdatools.smoothing.smooth` uses for monotone fits).
 _WARP_QUAD_DEGREE = 12
 
 _ARMIJO = 1e-4
@@ -158,7 +158,7 @@ class AmpPhaseDecomposition(NamedTuple):
 
     Examples
     --------
-    >>> from fabel.registration import AmpPhaseDecomposition
+    >>> from fdatools.registration import AmpPhaseDecomposition
     >>> AmpPhaseDecomposition(1.0, 3.0, 0.75, 1.0).rsq
     0.75
     """
@@ -212,8 +212,8 @@ class RegistrationResult:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.registration import register
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.registration import register
     >>> basis = BSpline(domain=(0.0, 1.0), n_basis=8)
     >>> fd = FData(np.random.default_rng(0).standard_normal((8, 3)), basis)
     >>> res = register(fd, landmarks=[[0.4], [0.5], [0.6]])
@@ -249,8 +249,8 @@ class RegistrationResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import BSpline, FData
-        >>> from fabel.registration import register
+        >>> from fdatools import BSpline, FData
+        >>> from fdatools.registration import register
         >>> basis = BSpline(domain=(0.0, 1.0), n_basis=8)
         >>> fd = FData(np.random.default_rng(1).standard_normal((8, 2)), basis)
         >>> res = register(fd, landmarks=[[0.45], [0.55]])
@@ -266,7 +266,7 @@ class RegistrationResult:
         like = self.latent.coefs if is_torch(self.latent.coefs) else t
         if not is_torch(like):
             return values
-        from fabel._internal.registration_torch import as_tensor_like
+        from fdatools._internal.registration_torch import as_tensor_like
 
         return as_tensor_like(values, like)
 
@@ -306,8 +306,8 @@ class RegistrationResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import BSpline, FData
-        >>> from fabel.registration import register
+        >>> from fdatools import BSpline, FData
+        >>> from fdatools.registration import register
         >>> basis = BSpline(domain=(0.0, 1.0), n_basis=8)
         >>> fd = FData(np.random.default_rng(5).standard_normal((8, 3)), basis)
         >>> res = register(fd, landmarks=[[0.4], [0.5], [0.6]])
@@ -335,7 +335,7 @@ class RegistrationResult:
             warps = lower + xp.remainder(warps - lower, upper - lower)
         if not is_torch(fd.coefs):
             return _warp_curves(data, grid, warps)
-        from fabel._internal.registration_torch import warp_curves_torch
+        from fdatools._internal.registration_torch import warp_curves_torch
 
         return warp_curves_torch(fd, grid, warps, fd.coefs)
 
@@ -380,8 +380,8 @@ class RegistrationResult:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import BSpline, FData
-        >>> from fabel.registration import register
+        >>> from fdatools import BSpline, FData
+        >>> from fdatools.registration import register
         >>> basis = BSpline(domain=(0.0, 1.0), n_basis=10)
         >>> fd = FData(np.random.default_rng(2).standard_normal((10, 4)), basis)
         >>> amp, phase, rsq, c = register(fd, landmarks=[[0.4], [0.45], [0.55], [0.6]]).decompose()
@@ -1251,13 +1251,13 @@ def register(
     with respect to the coefficients is exact.  ``warp``, ``latent``,
     ``warp_inverse``, ``shift``, ``criterion`` and ``n_iter`` are constant
     tensors.  Multivariate tensor curves work the same way.  ``import
-    fabel`` never imports torch; this path imports it on first use.
+    fdatools`` never imports torch; this path imports it on first use.
 
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.registration import register
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.registration import register
     >>> basis = BSpline(domain=(0.0, 1.0), n_basis=12)
     >>> t = np.linspace(0.0, 1.0, 300)
     >>> curves = np.stack([np.sin(np.pi * t**p) for p in (0.8, 1.0, 1.25)], axis=1)
@@ -1287,7 +1287,7 @@ def register(
         weights = _variable_weights(var_weights, data.n_vars)
         objective: ObjectiveFactory | None = None
         if like is not None:
-            from fabel._internal.registration_torch import AutogradObjective
+            from fdatools._internal.registration_torch import AutogradObjective
 
             objective = AutogradObjective
         result = _continuous(
@@ -1307,7 +1307,7 @@ def register(
         )
     if like is None:
         return result
-    from fabel._internal.registration_torch import to_torch_result
+    from fdatools._internal.registration_torch import to_torch_result
 
     return to_torch_result(result, fd, target, like, periodic=landmarks is None and periodic)
 
@@ -1354,8 +1354,8 @@ def landmark_register(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.registration import landmark_register
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.registration import landmark_register
     >>> fd = FData(np.random.default_rng(3).standard_normal((6, 2)), BSpline(n_basis=6))
     >>> landmark_register(fd, [0.3, 0.5]).latent.n_curves
     2
@@ -1415,8 +1415,8 @@ class Registrator(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline, FData
-    >>> from fabel.registration import Registrator
+    >>> from fdatools import BSpline, FData
+    >>> from fdatools.registration import Registrator
     >>> basis = BSpline(domain=(0.0, 1.0), n_basis=9)
     >>> fd = FData(np.random.default_rng(4).standard_normal((9, 5)), basis)
     >>> Registrator(criterion="least_squares").fit_transform(fd).shape
@@ -1457,7 +1457,7 @@ class Registrator(TransformerMixin, BaseEstimator):  # type: ignore[misc]
             if X.n_vars != 1:
                 raise ValueError(
                     "Registrator handles univariate curves; register multivariate "
-                    "curves with fabel.registration.register"
+                    "curves with fdatools.registration.register"
                 )
             if reset:
                 self.n_features_in_ = X.basis.n_basis

@@ -18,8 +18,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import Constant, FData
-from fabel.dynamics import PDA
+from fdatools import Constant, FData
+from fdatools.dynamics import PDA
 
 from .conftest import build_basis, case_rtol, compare, golden_cases
 
@@ -196,7 +196,7 @@ def _stability(name: str) -> Any:
     """Run ``PDA.stability`` on R's ``argvals``, with the forcing R was given.
 
     The second-order case was fitted with three copies of ``u = 1`` (one per
-    curve); ``eigen.pda`` got a single ``u = 1``, and so does Fabel.
+    curve); ``eigen.pda`` got a single ``u = 1``, and so does fdatools.
     """
     grid = np.asarray(CASES[name]["output"]["argvals"])
     pda = _fit(name)
@@ -257,7 +257,7 @@ def test_first_order_limits_are_r_limvals_with_the_sign_flipped(name: str) -> No
     """For one first-order equation R's ``limvals`` is ``-z*``.
 
     ``Dx = -β x + a u`` has the equilibrium ``z* = a u / β`` (the solution is
-    drawn to it when ``β > 0``); R reports ``-a u / β``.  Measured: Fabel's
+    drawn to it when ``β > 0``); R reports ``-a u / β``.  Measured: fdatools'
     limits equal minus R's to 4e-16 (constant weights) and 1.5e-11 relative
     (B-spline weights, R's eval.fd rounding).
     """
@@ -273,7 +273,7 @@ def test_first_order_limits_are_r_limvals_with_the_sign_flipped(name: str) -> No
         "refinery (one first-order equation) it is exactly -z* (sign flipped); for the "
         "second-order equation it is (0, -a/b0) where z* = (a/b0, 0); for the forced "
         "two-equation system it is (-0.5000000338, -1.9e-8) where z* = (0.4999999929, "
-        "-0.3861262521) -- the second equation's forcing is lost. Fabel returns z*, "
+        "-0.3861262521) -- the second equation's forcing is lost. fdatools returns z*, "
         "checked against the ODE solution in tests/unit/test_dynamics.py."
     ),
 )

@@ -1,6 +1,6 @@
-# CLAUDE.md — Fabel Project Contract
+# CLAUDE.md — fdatools Project Contract
 
-You are building **Fabel**: a production-grade Python rewrite of R's `fda` package (Ramsay, v6.3.0).
+You are building **fdatools**: a production-grade Python rewrite of R's `fda` package (Ramsay, v6.3.0).
 Authoritative docs: `SPEC.md` (API surface) and `WORKFLOW.md` (execution order). Read both before any work.
 
 ## Non-negotiables
@@ -9,13 +9,13 @@ Authoritative docs: `SPEC.md` (API surface) and `WORKFLOW.md` (execution order).
 2. **Production quality only.** No TODOs, no stubs, no `NotImplementedError` in shipped modules, no "beta" markers. Every merged module is final-quality.
 3. **Parity is law.** Public API output must match R golden files (`rtol=1e-8`; `1e-5` for iterative solvers). Never weaken a tolerance to make a test pass — fix the math.
 4. **Clean room.** Never translate R source code line-by-line. Implement from the math in SPEC.md and published references. License: BSD-3.
-5. **API freeze.** Public surface = exactly the ~40 symbols in SPEC.md. New helpers go under `fabel._internal`.
+5. **API freeze.** Public surface = exactly the ~40 symbols in SPEC.md. New helpers go under `fdatools._internal`.
 
 ## Commands
 
 - Env: `docker compose run dev` (Python 3.11 + R 4.x + rpy2)
 - Test: `pytest -x -q` | Parity only: `pytest tests/parity -x`
-- Lint/type: `ruff check . && ruff format --check . && mypy --strict src/fabel`
+- Lint/type: `ruff check . && ruff format --check . && mypy --strict src/fdatools`
 - Golden files: `python tools/make_golden.py <module>`
 - Bench: `pytest benchmarks --benchmark-only`
 - Docs: `mkdocs build --strict`
@@ -41,6 +41,6 @@ Authoritative docs: `SPEC.md` (API surface) and `WORKFLOW.md` (execution order).
 ## Style
 
 - `src/` layout, `pyproject.toml` (hatchling), Python ≥ 3.10
-- Array API dispatch in `fabel/_backend.py` — core math must not import numpy directly
+- Array API dispatch in `fdatools/_backend.py` — core math must not import numpy directly
 - Immutable dataclasses (`frozen=True`) for FData/Basis
-- No pandas/torch imports in core modules — optional extras only (`fabel[torch]`, `fabel[pandas]`)
+- No pandas/torch imports in core modules — optional extras only (`fdatools[torch]`, `fdatools[pandas]`)

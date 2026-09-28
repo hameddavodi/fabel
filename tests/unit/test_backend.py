@@ -1,4 +1,4 @@
-"""Unit tests for fabel._backend (array-API dispatch)."""
+"""Unit tests for fdatools._backend (array-API dispatch)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from fabel import _backend as be
+from fdatools import _backend as be
 
 torch = pytest.importorskip("torch", reason="torch extra not installed")
 

@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.decomposition` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.decomposition` against golden output from R ``fda`` 6.3.0.
 
 Cases are parametrised by ``(case, field)``, as in ``test_smoothing.py``: a
 defect in R's scores must not hide agreement in its eigenvalues.
@@ -8,15 +8,15 @@ Inputs
 The golden file records only the outputs of ``pca.fd``/``varmx.pca.fd``/
 ``cca.fd``.  The smoothed curves they were computed from are read from
 ``tests/parity/data/fd_inputs.json`` (R's own ``smooth.basis`` coefficients),
-so Fabel decomposes bit-for-bit the same data as R did.
+so fdatools decomposes bit-for-bit the same data as R did.
 
 Signs
 -----
 An eigenvector is only defined up to sign.  Measured on all seven ``pca.fd``
 cases (18 harmonics), R returns every harmonic with a positive coefficient sum;
-Fabel adopts that rule, so unrotated harmonics and scores are compared as they
+fdatools adopts that rule, so unrotated harmonics and scores are compared as they
 are.  ``varmx.pca.fd`` does not re-sign or re-order its rotated harmonics, and
-``cca.fd`` follows no sign rule at all, so for those the Fabel columns are first
+``cca.fd`` follows no sign rule at all, so for those the fdatools columns are first
 matched to R's by a signed permutation (varimax) or by one sign per canonical
 pair (CCA, the same sign on both weight functions so the pair stays positively
 correlated).  Only the arbitrary part is aligned; magnitudes are compared at
@@ -34,8 +34,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import LDO, FData
-from fabel.decomposition import FCCA, FPCA
+from fdatools import LDO, FData
+from fdatools.decomposition import FCCA, FPCA
 
 from .conftest import build_basis, case_rtol, golden_cases
 
@@ -56,14 +56,14 @@ _INPROD_GRAM_REASON = (
     "from R's own exact eval.penalty(basis, 0) by 9.1e-5 (absolute) on the "
     "synthetic order-4 spline, 2.6e-4 (relative) on the growth order-6 spline "
     "and 1.38e-6 on both Fourier bases (weather, gait), where the error sits on "
-    "the highest-frequency pair.  Substituting R's inprod() Gram into Fabel's "
+    "the highest-frequency pair.  Substituting R's inprod() Gram into fdatools' "
     "eigenproblem reproduces R's values and harmonics to 1e-15 (lambda = 0) "
     "and 1.9e-11 (weather lambda = 1e4, which also carries R's harmonic "
     "accelerator penalty error, see test_smoothing.py).  With the exact Gram "
     "the gaps are 5.3e-5 (synthetic values), 1.3e-6 (the small gait "
     "eigenvalues), 4.9e-4 / 4.6e-5 (synthetic / growth harmonics), 1.38e-6 "
     "(weather harmonics, rows 63-64) and 6.9e-8 of the largest coefficient "
-    "(gait harmonics, spread over the coupled hip/knee blocks).  Fabel uses "
+    "(gait harmonics, spread over the coupled hip/knee blocks).  fdatools uses "
     "the exact Gram matrix."
 )
 
@@ -72,7 +72,7 @@ _INPROD_SCORES_REASON = (
     "quadrature good to 4-5 digits, not the exact C' W h.  Measured inside R: "
     "inprod() differs from t(C) %*% eval.penalty(basis, 0) %*% h by 0.660 on "
     "weather scores of size ~150 and by 2.2e-3 on growth scores of size 48.7.  "
-    "Fabel's scores are the exact inner products; the relative gaps asserted "
+    "fdatools' scores are the exact inner products; the relative gaps asserted "
     "here are 1.7e-3 to 7.7e-3 (weather), 4.5e-5 (growth), 1.9e-4 "
     "(synthetic) and 6.5e-4 (gait)."
 )
@@ -83,7 +83,7 @@ _VARIMAX_REASON = (
     "the gradient of the criterion on the rotation group (the skew part of "
     "L' dV/dL) is 4.0e-5 / 2.2e-4 / 6.7e-3 at R's rotation (weather lambda 0 "
     "/ weather lambda 1e4 / growth) against 8.2e-14 / 7.7e-14 / 3.0e-11 at "
-    "Fabel's, and max|T'T - I| is 1.8e-7 / 1.3e-7 / 9.6e-8 for R's T.  On the "
+    "fdatools', and max|T'T - I| is 1.8e-7 / 1.3e-7 / 9.6e-8 for R's T.  On the "
     "weather cases R's criterion is also lower (0.04072609184 against "
     "0.04072610195; 0.04092609258 against 0.04092669536).  Growth inherits the "
     "inprod() Gram error of its source pca.fd case as well."
@@ -155,7 +155,7 @@ _FITS: dict[str, Any] = {}
 
 
 def fit_for(name: str, case: dict[str, Any]) -> Any:
-    """Run (and memoise) the Fabel fit that replays one golden case."""
+    """Run (and memoise) the fdatools fit that replays one golden case."""
     if name in _FITS:
         return _FITS[name]
     if name.startswith("pca"):
@@ -187,16 +187,16 @@ def compare(actual: Any, expected: Any, rtol: float) -> None:
     np.testing.assert_allclose(got, want, rtol=rtol, atol=1e-12 * max(1.0, scale))
 
 
-def signed_permutation(fabel: np.ndarray, r: np.ndarray) -> tuple[list[int], np.ndarray]:
-    """Return the column order and signs that best map ``fabel``'s columns onto ``r``'s."""
-    n = fabel.shape[1]
+def signed_permutation(fdatools: np.ndarray, r: np.ndarray) -> tuple[list[int], np.ndarray]:
+    """Return the column order and signs that best map ``fdatools``'s columns onto ``r``'s."""
+    n = fdatools.shape[1]
     best: tuple[float, list[int]] = (-1.0, list(range(n)))
     for candidate in permutations(range(n)):
-        score = sum(abs(float(np.dot(fabel[:, j], r[:, i]))) for i, j in enumerate(candidate))
+        score = sum(abs(float(np.dot(fdatools[:, j], r[:, i]))) for i, j in enumerate(candidate))
         if score > best[0]:
             best = (score, list(candidate))
     order = best[1]
-    signs = np.array([np.sign(np.dot(fabel[:, j], r[:, i])) or 1.0 for i, j in enumerate(order)])
+    signs = np.array([np.sign(np.dot(fdatools[:, j], r[:, i])) or 1.0 for i, j in enumerate(order)])
     return order, signs
 
 

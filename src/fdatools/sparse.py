@@ -7,7 +7,7 @@ expectation* (Yao, Müller & Wang, 2005) -- pools the data of all curves
 instead.  It replaces R ``fda``'s ``smooth.sparse.mean``, ``covPACE``,
 ``pcaPACE`` and ``scoresPACE``.
 
-The input is the irregular per-curve form :func:`fabel.smoothing.smooth`
+The input is the irregular per-curve form :func:`fdatools.smoothing.smooth`
 accepts: a sequence ``t`` of observation times, one array per curve, and a
 matching sequence ``y`` of observed values.
 
@@ -34,7 +34,7 @@ matching sequence ``y`` of observed values.
              \qquad T_1 = [a + |T|/4,\; b - |T|/4] .
 
 4. **Eigenfunctions.**  The harmonics ``ξ = θ(t)ᵀ b`` in a basis ``θ`` solve
-   the penalised eigenproblem of :class:`~fabel.decomposition.FPCA` with the
+   the penalised eigenproblem of :class:`~fdatools.decomposition.FPCA` with the
    covariance operator of ``G``:
 
    .. math:: J C J^{T} b = \mu\,(W_\theta + \lambda R_\theta)\,b ,
@@ -53,7 +53,7 @@ Every integral is exact (Gauss-Legendre on the basis break points), where R
 uses the Romberg approximation of ``inprod()``; see
 ``tests/parity/test_pace.py`` for the measured consequences.  R's
 ``scoresPACE`` does not compute the conditional expectation above (it
-evaluates the harmonics at a single, wrongly indexed point per curve); Fabel
+evaluates the harmonics at a single, wrongly indexed point per curve); fdatools
 implements the published estimator.
 
 References
@@ -65,8 +65,8 @@ sparse longitudinal data.  *Journal of the American Statistical Association*,
 Examples
 --------
 >>> import numpy as np
->>> from fabel import BSpline
->>> from fabel.sparse import PACE
+>>> from fdatools import BSpline
+>>> from fdatools.sparse import PACE
 >>> rng = np.random.default_rng(0)
 >>> t = [np.sort(rng.uniform(0.0, 1.0, 5)) for _ in range(200)]
 >>> a = rng.normal(0.0, 1.0, 200)
@@ -89,12 +89,12 @@ from typing import Any, SupportsIndex
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from fabel import _linalg
-from fabel._backend import asarray, default_namespace, to_numpy
-from fabel._operator import LDO
-from fabel.basis import Basis, BSpline
-from fabel.core import BiFData, FData, inprod
-from fabel.decomposition import _positive_int, _positive_sum_signs
+from fdatools import _linalg
+from fdatools._backend import asarray, default_namespace, to_numpy
+from fdatools._operator import LDO
+from fdatools.basis import Basis, BSpline
+from fdatools.core import BiFData, FData, inprod
+from fdatools.decomposition import _positive_int, _positive_sum_signs
 
 __all__ = ["PACE", "SparseCov", "sparse_cov", "sparse_mean"]
 
@@ -262,8 +262,8 @@ def sparse_mean(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.sparse import sparse_mean
+    >>> from fdatools import BSpline
+    >>> from fdatools.sparse import sparse_mean
     >>> t = [np.array([0.0, 0.4, 0.9]), np.array([0.1, 0.5, 1.0]), np.array([0.2, 0.7])]
     >>> y = [2.0 * ti + 1.0 for ti in t]
     >>> mean = sparse_mean(y, t, BSpline(domain=(0.0, 1.0), n_basis=4))
@@ -316,8 +316,8 @@ class SparseCov:
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.sparse import sparse_cov
+    >>> from fdatools import BSpline
+    >>> from fdatools.sparse import sparse_cov
     >>> rng = np.random.default_rng(2)
     >>> t = [np.sort(rng.uniform(0.0, 1.0, 6)) for _ in range(40)]
     >>> y = [rng.normal() + 0.2 * rng.normal(size=6) for _ in t]
@@ -503,7 +503,7 @@ def sparse_cov(
 
     The diagonal ``j = k`` is excluded because ``E r_ij² = G(t, t) + σ²``;
     it is smoothed separately and gives the measurement-error variance
-    ``σ²`` (see :mod:`fabel.sparse`).
+    ``σ²`` (see :mod:`fdatools.sparse`).
 
     Parameters
     ----------
@@ -544,8 +544,8 @@ def sparse_cov(
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.sparse import sparse_cov
+    >>> from fdatools import BSpline
+    >>> from fdatools.sparse import sparse_cov
     >>> rng = np.random.default_rng(3)
     >>> t = [np.sort(rng.uniform(0.0, 1.0, 5)) for _ in range(200)]
     >>> y = [rng.normal(0.0, 2.0) + rng.normal(0.0, 0.5, 5) for _ in t]
@@ -642,7 +642,7 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     r"""Functional PCA for sparse longitudinal data by conditional expectation.
 
     Replaces R's ``pcaPACE`` and ``scoresPACE`` (and runs ``smooth.sparse.mean``
-    and ``covPACE`` on the way); see :mod:`fabel.sparse` for the five steps.
+    and ``covPACE`` on the way); see :mod:`fdatools.sparse` for the five steps.
 
     Parameters
     ----------
@@ -703,8 +703,8 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     Examples
     --------
     >>> import numpy as np
-    >>> from fabel import BSpline
-    >>> from fabel.sparse import PACE
+    >>> from fdatools import BSpline
+    >>> from fdatools.sparse import PACE
     >>> rng = np.random.default_rng(1)
     >>> t = [np.sort(rng.uniform(0.0, 1.0, 4)) for _ in range(150)]
     >>> y = [1.0 + rng.normal() * np.cos(np.pi * ti) + 0.05 * rng.normal(size=4) for ti in t]
@@ -765,7 +765,7 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.sparse import PACE
+        >>> from fdatools.sparse import PACE
         >>> rng = np.random.default_rng(5)
         >>> t = [np.sort(rng.uniform(0.0, 10.0, 5)) for _ in range(30)]
         >>> y = [rng.normal() * ti / 10.0 + 0.1 * rng.normal(size=5) for ti in t]
@@ -868,7 +868,7 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.sparse import PACE
+        >>> from fdatools.sparse import PACE
         >>> rng = np.random.default_rng(6)
         >>> t = [np.sort(rng.uniform(0.0, 1.0, 5)) for _ in range(40)]
         >>> y = [rng.normal() * np.sin(np.pi * ti) + 0.1 * rng.normal(size=5) for ti in t]
@@ -902,7 +902,7 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.sparse import PACE
+        >>> from fdatools.sparse import PACE
         >>> rng = np.random.default_rng(7)
         >>> t = [np.sort(rng.uniform(0.0, 1.0, 5)) for _ in range(40)]
         >>> y = [rng.normal() + 0.1 * rng.normal(size=5) for ti in t]
@@ -934,7 +934,7 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel.sparse import PACE
+        >>> from fdatools.sparse import PACE
         >>> rng = np.random.default_rng(8)
         >>> t = [np.sort(rng.uniform(0.0, 1.0, 6)) for _ in range(50)]
         >>> y = [rng.normal() * ti + 0.05 * rng.normal(size=6) for ti in t]

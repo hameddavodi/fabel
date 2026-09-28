@@ -1,4 +1,4 @@
-"""Unit tests for :func:`fabel.regression.linmod`, the bivariate-coefficient model."""
+"""Unit tests for :func:`fdatools.regression.linmod`, the bivariate-coefficient model."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from fabel import LDO, BiFData, BSpline, FData, Fourier, Monomial, inprod
-from fabel.regression import LinmodResult, linmod
-from fabel.smoothing import smooth
+from fdatools import LDO, BiFData, BSpline, FData, Fourier, Monomial, inprod
+from fdatools.regression import LinmodResult, linmod
+from fdatools.smoothing import smooth
 
 SBASIS = BSpline(domain=(0.0, 1.0), n_basis=6)
 TBASIS = BSpline(domain=(-1.0, 2.0), n_basis=5)

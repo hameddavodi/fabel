@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.smoothing` (smooth, SmoothResult, Smoother, lambda helpers)."""
+"""Unit tests for :mod:`fdatools.smoothing` (smooth, SmoothResult, Smoother, lambda helpers)."""
 
 from __future__ import annotations
 
@@ -12,9 +12,9 @@ from hypothesis import strategies as st
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 
-from fabel import LDO, BSpline, FData, Fourier, Monomial
-from fabel import smoothing as sm
-from fabel.smoothing import (
+from fdatools import LDO, BSpline, FData, Fourier, Monomial
+from fdatools import smoothing as sm
+from fdatools.smoothing import (
     Smoother,
     SmoothResult,
     df_to_lambda,

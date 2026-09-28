@@ -1,7 +1,7 @@
 # %% [markdown]
-# # A full tour of `fabel`
+# # A full tour of `fdatools`
 #
-# `fabel` is a Python rewrite of R's `fda` package (Ramsay, Hooker & Graves) for
+# `fdatools` is a Python rewrite of R's `fda` package (Ramsay, Hooker & Graves) for
 # *functional data analysis* (FDA). In FDA every observation is a whole **curve**
 # (a height curve, a temperature year, a lip movement), not a single number.
 #
@@ -35,7 +35,7 @@ from pathlib import Path
 here = Path.cwd()
 for folder in (here, *here.parents):
     if (folder / "data_release").is_dir():
-        os.environ.setdefault("FABEL_DATA_DIR", str(folder / "data_release"))
+        os.environ.setdefault("FDATOOLS_DATA_DIR", str(folder / "data_release"))
         break
 
 import matplotlib.pyplot as plt
@@ -43,7 +43,7 @@ import numpy as np
 import pandas as pd
 from IPython.display import display as show
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams.update({"figure.figsize": (10, 4), "axes.grid": True, "grid.alpha": 0.3})
 np.set_printoptions(precision=4, suppress=True)
@@ -61,7 +61,7 @@ def check(name, ok, detail=""):
 
 PART = "0 setup"
 T0 = time.time()
-print("fabel", fb.__version__)
+print("fdatools", fdt.__version__)
 
 # %% [markdown]
 # ## Part 0. The data sets
@@ -71,10 +71,10 @@ print("fabel", fb.__version__)
 # downloaded once and then cached. Each loader returns a small, typed object.
 
 # %%
-loaders = [name for name in fb.datasets.__all__ if name.startswith("load_")]
+loaders = [name for name in fdt.datasets.__all__ if name.startswith("load_")]
 rows = []
 for name in loaders:
-    data = getattr(fb.datasets, name)()
+    data = getattr(fdt.datasets, name)()
     fields = {
         key: getattr(value, "shape", len(value) if hasattr(value, "__len__") else value)
         for key, value in vars(data).items()
@@ -85,12 +85,12 @@ show(pd.DataFrame(rows))
 check("all 14 data sets load", len(rows) == 14, len(rows))
 
 # %%
-growth = fb.datasets.load_growth()
-weather = fb.datasets.load_canadian_weather()
-gait = fb.datasets.load_gait()
-pinch = fb.datasets.load_pinch()
-lip = fb.datasets.load_lip()
-hw = fb.datasets.load_handwriting()
+growth = fdt.datasets.load_growth()
+weather = fdt.datasets.load_canadian_weather()
+gait = fdt.datasets.load_gait()
+pinch = fdt.datasets.load_pinch()
+lip = fdt.datasets.load_lip()
+hw = fdt.datasets.load_handwriting()
 
 fig, axes = plt.subplots(2, 3, figsize=(15, 7))
 axes[0, 0].plot(growth.age, growth.hgtf, lw=0.6)
@@ -120,13 +120,13 @@ fig.tight_layout()
 # %%
 PART = "1 bases"
 bases = {
-    "BSpline (cubic, 8)": fb.BSpline(domain=(0.0, 1.0), n_basis=8),
-    "Fourier (7)": fb.Fourier(domain=(0.0, 1.0), n_basis=7),
-    "Monomial (1, t, t², t³)": fb.Monomial(domain=(0.0, 1.0), n_basis=4),
-    "Exponential (rates 0, ±2)": fb.Exponential(domain=(0.0, 1.0), rates=[0.0, 2.0, -2.0]),
-    "Power (t^0.5, t, t^1.5)": fb.Power(domain=(0.1, 1.0), exponents=[0.5, 1.0, 1.5]),
-    "Constant": fb.Constant(domain=(0.0, 1.0)),
-    "Polygonal (5 nodes)": fb.Polygonal(np.linspace(0.0, 1.0, 5)),
+    "BSpline (cubic, 8)": fdt.BSpline(domain=(0.0, 1.0), n_basis=8),
+    "Fourier (7)": fdt.Fourier(domain=(0.0, 1.0), n_basis=7),
+    "Monomial (1, t, t², t³)": fdt.Monomial(domain=(0.0, 1.0), n_basis=4),
+    "Exponential (rates 0, ±2)": fdt.Exponential(domain=(0.0, 1.0), rates=[0.0, 2.0, -2.0]),
+    "Power (t^0.5, t, t^1.5)": fdt.Power(domain=(0.1, 1.0), exponents=[0.5, 1.0, 1.5]),
+    "Constant": fdt.Constant(domain=(0.0, 1.0)),
+    "Polygonal (5 nodes)": fdt.Polygonal(np.linspace(0.0, 1.0, 5)),
 }
 fig, axes = plt.subplots(2, 4, figsize=(16, 6))
 for ax, (title, basis) in zip(axes.flat, bases.items(), strict=False):
@@ -209,9 +209,9 @@ check(
 # polynomial pieces join).
 
 # %%
-irregular = fb.BSpline(breaks=[0.0, 0.1, 0.2, 0.5, 1.0], order=3)
+irregular = fdt.BSpline(breaks=[0.0, 0.1, 0.2, 0.5, 1.0], order=3)
 print("irregular breaks -> n_basis =", irregular.n_basis)
-cross = fb.inprod(b, f)  # ∫ φ_bspline(t) φ_fourier(t)ᵀ dt
+cross = fdt.inprod(b, f)  # ∫ φ_bspline(t) φ_fourier(t)ᵀ dt
 check("inprod between two different bases has shape (8, 7)", cross.shape == (8, 7), cross.shape)
 num = np.trapezoid(b(sf)[:, :, None] * f(sf)[:, None, :], sf, axis=0)
 check(
@@ -230,9 +230,9 @@ check(
 
 # %%
 PART = "2 FData"
-basis = fb.BSpline(domain=(1.0, 18.0), n_basis=15)
+basis = fdt.BSpline(domain=(1.0, 18.0), n_basis=15)
 coefs, *_ = np.linalg.lstsq(basis(growth.age), growth.hgtf, rcond=None)
-girls = fb.FData(coefs, basis)
+girls = fdt.FData(coefs, basis)
 print(girls)
 print("n_curves:", girls.n_curves, " n_vars:", girls.n_vars, " domain:", girls.domain)
 
@@ -288,7 +288,7 @@ grid = np.linspace(1.0, 18.0, 20001)
 G = girls[:3] @ girls[:3]
 num = np.trapezoid(girls[:3](grid)[:, :, None] * girls[:3](grid)[:, None, :], grid, axis=0)
 check("fd @ fd is the matrix of L2 inner products", np.allclose(G, num, rtol=1e-6))
-check("inprod(fd, fd) == fd @ fd", np.allclose(fb.inprod(girls[:3], girls[:3]), G))
+check("inprod(fd, fd) == fd @ fd", np.allclose(fdt.inprod(girls[:3], girls[:3]), G))
 
 # slicing
 check("slicing keeps the basis", girls[5:9].n_curves == 4 and girls[5:9].basis == basis)
@@ -300,10 +300,10 @@ check("to_numpy(t) == fd(t)", np.allclose(girls.to_numpy(t), girls(t)))
 # `(n_basis, n_curves, n_vars)`.
 
 # %%
-gait_basis = fb.Fourier(domain=(0.0, 1.0), n_basis=21)
-gait_fd = fb.smooth(gait.value.reshape(20, -1), gait.t, basis=gait_basis, lam=1e-6).fd
+gait_basis = fdt.Fourier(domain=(0.0, 1.0), n_basis=21)
+gait_fd = fdt.smooth(gait.value.reshape(20, -1), gait.t, basis=gait_basis, lam=1e-6).fd
 gait_coefs = np.asarray(gait_fd.coefs).reshape(21, 39, 2)
-gait_mv = fb.FData(gait_coefs, gait_basis)
+gait_mv = fdt.FData(gait_coefs, gait_basis)
 print("coefs:", gait_mv.coefs.shape, " n_vars:", gait_mv.n_vars)
 check("multivariate FData has 2 variables", gait_mv.n_vars == 2)
 check(
@@ -350,12 +350,12 @@ fig.tight_layout()
 
 # %%
 PART = "3 LDO"
-fourier = fb.Fourier(domain=(0.0, 365.0), n_basis=65)
-harmonic = fb.LDO.harmonic(period=365.0)
+fourier = fdt.Fourier(domain=(0.0, 365.0), n_basis=65)
+harmonic = fdt.LDO.harmonic(period=365.0)
 print(harmonic)
 day = weather.t
 w = 2 * np.pi / 365
-cycle = fb.FData(
+cycle = fdt.FData(
     np.linalg.lstsq(fourier(day), 3 + 5 * np.sin(w * day) - 2 * np.cos(w * day), rcond=None)[0],
     fourier,
 )
@@ -364,12 +364,12 @@ check(
     np.max(np.abs(cycle(day, harmonic))) < 1e-8,
 )
 
-D2 = fb.LDO(2)
+D2 = fdt.LDO(2)
 check("LDO(2) applied == second derivative", np.allclose(girls(t, D2), girls(t, deriv=2)))
-spring = fb.LDO(weights=[4.0, 0.0])  # L = 4 + 0·D + D²
+spring = fdt.LDO(weights=[4.0, 0.0])  # L = 4 + 0·D + D²
 tt = np.linspace(0.0, 1.0, 101)
-sb = fb.Fourier(domain=(0.0, np.pi), n_basis=3)  # period π: sin 2t, cos 2t
-wave = fb.FData(np.array([0.0, 1.0, 0.5]), sb)
+sb = fdt.Fourier(domain=(0.0, np.pi), n_basis=3)  # period π: sin 2t, cos 2t
+wave = fdt.FData(np.array([0.0, 1.0, 0.5]), sb)
 check(
     "custom LDO: (D² + 4) sin 2t = 0",
     np.max(np.abs(wave(np.linspace(0, np.pi, 50), spring))) < 1e-8,
@@ -379,7 +379,7 @@ check("penalty(LDO) has the right shape", fourier.penalty(harmonic).shape == (65
 # %% [markdown]
 # ## Part 4. Smoothing: from noisy numbers to curves
 #
-# `fb.smooth(y, t)` fits curves by *penalised least squares*: it balances the
+# `fdt.smooth(y, t)` fits curves by *penalised least squares*: it balances the
 # fit to the data against a roughness penalty λ ∫ (Lx)². λ can be a number, a
 # target number of **degrees of freedom** (df, how flexible the fit is), or
 # chosen by **GCV** (generalised cross-validation, an estimate of prediction
@@ -387,7 +387,7 @@ check("penalty(LDO) has the right shape", fourier.penalty(harmonic).shape == (65
 
 # %%
 PART = "4 smoothing"
-fit = fb.smooth(growth.hgtf, growth.age)  # everything automatic
+fit = fdt.smooth(growth.hgtf, growth.age)  # everything automatic
 print("auto basis:", fit.fd.basis, "| lambda:", f"{fit.lam:.3g}", "| df:", round(fit.df, 2))
 print(
     "SmoothResult fields: gcv",
@@ -400,11 +400,11 @@ print(
     fit.y2c_map.shape,
 )
 
-fine = fb.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
-by_value = fb.smooth(growth.hgtf, growth.age, basis=fine, lam=1e-1, penalty=3)
-by_df = fb.smooth(growth.hgtf, growth.age, basis=fine, df=8.0, penalty=3)
-by_df_str = fb.smooth(growth.hgtf, growth.age, basis=fine, lam="df=8", penalty=3)
-by_gcv = fb.smooth(growth.hgtf, growth.age, basis=fine, lam="gcv", penalty=3)
+fine = fdt.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
+by_value = fdt.smooth(growth.hgtf, growth.age, basis=fine, lam=1e-1, penalty=3)
+by_df = fdt.smooth(growth.hgtf, growth.age, basis=fine, df=8.0, penalty=3)
+by_df_str = fdt.smooth(growth.hgtf, growth.age, basis=fine, lam="df=8", penalty=3)
+by_gcv = fdt.smooth(growth.hgtf, growth.age, basis=fine, lam="gcv", penalty=3)
 check("df=8 gives exactly 8 degrees of freedom", np.isclose(by_df.df, 8.0), round(by_df.df, 10))
 check('lam="df=8" is the same as df=8', np.isclose(by_df.lam, by_df_str.lam))
 check(
@@ -413,11 +413,11 @@ check(
 )
 check(
     "zero penalty = ordinary least squares",
-    np.allclose(fb.smooth(growth.hgtf, growth.age, basis=basis, lam=0.0).fd.coefs, coefs),
+    np.allclose(fdt.smooth(growth.hgtf, growth.age, basis=basis, lam=0.0).fd.coefs, coefs),
 )
 
 # %%
-from fabel.smoothing import df_to_lambda, gcv_curve, lambda_to_df
+from fdatools.smoothing import df_to_lambda, gcv_curve, lambda_to_df
 
 lambdas = 10.0 ** np.arange(-6.0, 3.0, 0.25)
 scores = gcv_curve(growth.hgtf, growth.age, fine, lambdas, penalty=3)
@@ -436,7 +436,7 @@ axes[0].set(xlabel="lambda", ylabel="mean GCV", title="GCV curve (dotted: chosen
 axes[1].semilogx(lambdas, dfs)
 axes[1].set(xlabel="lambda", ylabel="df", title="lambda vs degrees of freedom")
 for lam, style in [(1e-4, "-"), (1e0, "--"), (1e3, ":")]:
-    r = fb.smooth(growth.hgtf[:, :1], growth.age, basis=fine, lam=lam, penalty=3)
+    r = fdt.smooth(growth.hgtf[:, :1], growth.age, basis=fine, lam=lam, penalty=3)
     axes[2].plot(t, r.fd(t, deriv=2), style, label=f"lambda={lam:g}")
 axes[2].set(title="Acceleration of girl 1 at 3 lambdas", xlabel="age", ylim=(-8, 6))
 axes[2].legend()
@@ -447,13 +447,13 @@ fig.tight_layout()
 # draw a 95% pointwise **confidence band** with `stats.confidence_band`.
 
 # %%
-from fabel.stats import confidence_band
+from fdatools.stats import confidence_band
 
 rng = np.random.default_rng(0)
 tn = np.linspace(0.0, 1.0, 80)
 truth = np.sin(2 * np.pi * tn) + 0.5 * tn
 noisy = truth + 0.15 * rng.standard_normal(tn.size)
-nfit = fb.smooth(noisy, tn, basis=fb.BSpline(n_basis=20), lam="gcv")
+nfit = fdt.smooth(noisy, tn, basis=fdt.BSpline(n_basis=20), lam="gcv")
 tg = np.linspace(0.0, 1.0, 300)
 band = confidence_band(nfit, tg, sigma_e=0.15**2)
 truth_g = np.sin(2 * np.pi * tg) + 0.5 * tg
@@ -472,10 +472,10 @@ ax.set_title(f"GCV smooth (df = {nfit.df:.1f}) with 95% band")
 # Call the result itself (`fit(t)`) to evaluate the constrained curve.
 
 # %%
-mono = fb.smooth(
+mono = fdt.smooth(
     growth.hgtf[:, :6],
     growth.age,
-    basis=fb.BSpline(domain=(1.0, 18.0), n_basis=15),
+    basis=fdt.BSpline(domain=(1.0, 18.0), n_basis=15),
     lam=1e-1,
     constraint="monotone",
 )
@@ -491,7 +491,7 @@ check(
 
 pos_t = np.linspace(0.0, 1.0, 60)
 pos_y = np.exp(np.sin(4 * pos_t)) * 0.2
-pos = fb.smooth(pos_y - 0.02, pos_t, constraint="positive", lam=1e-6)
+pos = fdt.smooth(pos_y - 0.02, pos_t, constraint="positive", lam=1e-6)
 check("positive fit stays above zero", np.min(pos(np.linspace(0, 1, 500))) > 0)
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
@@ -505,9 +505,9 @@ fig.tight_layout()
 
 # %%
 # Seasonal data: Fourier basis + harmonic accelerator, lambda by GCV
-temp_gcv = fb.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam="gcv")
-temp_fit = fb.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam=1e2)
-precip_fit = fb.smooth(weather.log10precip, day, basis=fourier, penalty=harmonic, lam=1e4)
+temp_gcv = fdt.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam="gcv")
+temp_fit = fdt.smooth(weather.temp, day, basis=fourier, penalty=harmonic, lam=1e2)
+precip_fit = fdt.smooth(weather.log10precip, day, basis=fourier, penalty=harmonic, lam=1e4)
 temp, precip = temp_fit.fd, precip_fit.fd
 print(f"GCV lambda for temperature: {temp_gcv.lam:.3g}, df = {temp_gcv.df:.1f}")
 stations = ["Montreal", "Edmonton", "Pr. Rupert", "Resolute"]
@@ -530,7 +530,7 @@ check("seasonal smooth residual is small", np.sqrt(np.mean((temp(day) - weather.
 
 # %%
 PART = "5 stats"
-from fabel import stats
+from fdatools import stats
 
 cor_tp = stats.cor(temp, precip, s=day, t=day)
 cor_tt = stats.cor(temp, s=day, t=day)
@@ -587,7 +587,7 @@ check("cycleplot draws one loop", len(ax.lines) >= 1)
 
 # %%
 PART = "6 FPCA"
-from fabel.decomposition import FCCA, FPCA
+from fdatools.decomposition import FCCA, FPCA
 
 pca = FPCA(n=4).fit(temp)
 print("share of variance:", pca.varprop.round(4), " total:", pca.varprop.sum().round(4))
@@ -700,10 +700,10 @@ fig.tight_layout()
 
 # %%
 PART = "8 regression"
-from fabel.regression import FRegress, fregress, linmod
+from fdatools.regression import FRegress, fregress, linmod
 
 log_precip = np.log10(weather.precip.sum(axis=0))
-beta_basis = fb.Fourier(domain=(0.0, 365.0), n_basis=35)
+beta_basis = fdt.Fourier(domain=(0.0, 365.0), n_basis=35)
 model = fregress(
     log_precip, {"const": 1.0, "temp": temp}, beta={"temp": (beta_basis, 10**12.5, harmonic)}
 )
@@ -757,8 +757,8 @@ conc = fregress(
     precip,
     {"const": 1.0, "temp": temp},
     beta={
-        "const": (fb.Fourier(domain=(0.0, 365.0), n_basis=11), 0.0, 2),
-        "temp": (fb.Fourier(domain=(0.0, 365.0), n_basis=11), 0.0, 2),
+        "const": (fdt.Fourier(domain=(0.0, 365.0), n_basis=11), 0.0, 2),
+        "temp": (fdt.Fourier(domain=(0.0, 365.0), n_basis=11), 0.0, 2),
     },
 )
 print("concurrent terms:", conc.names)
@@ -771,8 +771,8 @@ check(
 fof = linmod(
     precip,
     temp,
-    s_basis=fb.Fourier(domain=(0.0, 365.0), n_basis=11),
-    t_basis=fb.Fourier(domain=(0.0, 365.0), n_basis=11),
+    s_basis=fdt.Fourier(domain=(0.0, 365.0), n_basis=11),
+    t_basis=fdt.Fourier(domain=(0.0, 365.0), n_basis=11),
     lam_s=1e4,
     lam_t=1e4,
     penalty_s=harmonic,
@@ -815,14 +815,14 @@ check(
 # (here: growth speed of boys vs girls).
 
 # %%
-from fabel.stats import f_test, t_test
+from fdatools.stats import f_test, t_test
 
 regions = sorted(set(weather.region))
 dummies = [np.array([1.0 if r == name else 0.0 for r in weather.region]) for name in regions[1:]]
 ftest = f_test(
     temp,
     [np.ones(35), *dummies],
-    basis=fb.Fourier(domain=(0.0, 365.0), n_basis=11),
+    basis=fdt.Fourier(domain=(0.0, 365.0), n_basis=11),
     n_perm=200,
     random_state=1,
 )
@@ -832,9 +832,9 @@ print(
 )
 check("region effect on temperature is significant", ftest.pvalue < 0.05)
 
-hb = fb.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
-boys_v = fb.smooth(growth.hgtm, growth.age, basis=hb, lam=1e-1, penalty=3).fd.derivative()
-girls_v = fb.smooth(growth.hgtf, growth.age, basis=hb, lam=1e-1, penalty=3).fd.derivative()
+hb = fdt.BSpline(domain=(1.0, 18.0), n_basis=20, order=6)
+boys_v = fdt.smooth(growth.hgtm, growth.age, basis=hb, lam=1e-1, penalty=3).fd.derivative()
+girls_v = fdt.smooth(growth.hgtf, growth.age, basis=hb, lam=1e-1, penalty=3).fd.derivative()
 ttest = t_test(boys_v, girls_v, n_perm=200, random_state=0, t=np.linspace(1, 18, 200))
 print(f"t test: statistic {ttest.statistic:.2f}, p-value {ttest.pvalue}")
 check("boys and girls grow at different speeds", ttest.pvalue < 0.05)
@@ -864,10 +864,10 @@ fig.tight_layout()
 
 # %%
 PART = "9 registration"
-from fabel.registration import Registrator, landmark_register, register
+from fdatools.registration import Registrator, landmark_register, register
 
-b6 = fb.BSpline(domain=(1.0, 18.0), n_basis=35, order=6)
-gfit = fb.smooth(growth.hgtf[:, :20], growth.age, basis=b6, penalty=4, lam=1e-2)
+b6 = fdt.BSpline(domain=(1.0, 18.0), n_basis=35, order=6)
+gfit = fdt.smooth(growth.hgtf[:, :20], growth.age, basis=b6, penalty=4, lam=1e-2)
 vel, accel = gfit.fd.derivative(1), gfit.fd.derivative(2)
 search = np.linspace(8.0, 16.0, 801)
 peak = search[np.argmax(vel(search), axis=0)]
@@ -890,7 +890,7 @@ check(
     np.allclose(lm.apply(accel).coefs, lm.registered.coefs),
 )
 
-cont = register(accel, warp_basis=fb.BSpline(domain=(1.0, 18.0), n_basis=6), lam=1.0)
+cont = register(accel, warp_basis=fdt.BSpline(domain=(1.0, 18.0), n_basis=6), lam=1.0)
 amp, phase, rsq, c = lm.decompose(domain=(3.0, 17.0))
 rsq_c = cont.decompose(domain=(3.0, 17.0)).rsq
 print(f"share of variation due to timing: landmark {rsq:.2f}, continuous {rsq_c:.2f}")
@@ -910,16 +910,16 @@ fig.tight_layout()
 
 # %%
 # a synthetic check with a known answer: shifted bumps
-bb = fb.BSpline(domain=(0.0, 1.0), n_basis=15)
+bb = fdt.BSpline(domain=(0.0, 1.0), n_basis=15)
 ts = np.linspace(0.0, 1.0, 400)
 shifts = [0.40, 0.45, 0.5, 0.55, 0.60]
-bumps = fb.FData(
+bumps = fdt.FData(
     np.linalg.lstsq(
         bb(ts), np.stack([np.exp(-(((ts - s) / 0.1) ** 2)) for s in shifts], 1), rcond=None
     )[0],
     bb,
 )
-ls_reg = register(bumps, criterion="least_squares", warp_basis=fb.BSpline(n_basis=5), lam=1e-3)
+ls_reg = register(bumps, criterion="least_squares", warp_basis=fdt.BSpline(n_basis=5), lam=1e-3)
 peaks_after = ts[np.argmax(ls_reg.registered(ts), axis=0)]
 check(
     "least-squares registration pulls the peaks together",
@@ -928,12 +928,12 @@ check(
 )
 
 # scikit-learn transformer
-reg = Registrator(fb.BSpline(n_basis=5), lam=1e-3, criterion="least_squares", basis=bb)
+reg = Registrator(fdt.BSpline(n_basis=5), lam=1e-3, criterion="least_squares", basis=bb)
 out = reg.fit_transform(np.asarray(bumps.coefs).T)
 check("Registrator.fit_transform returns coefficient rows", out.shape == (5, 15))
 
 # multivariate registration: hip and knee angles share one warp per boy
-mv = register(gait_mv[:10], criterion="least_squares", warp_basis=fb.BSpline(n_basis=5), lam=1e-2)
+mv = register(gait_mv[:10], criterion="least_squares", warp_basis=fdt.BSpline(n_basis=5), lam=1e-2)
 check("multivariate registration keeps both variables", mv.registered.coefs.shape == (21, 10, 2))
 check("one warping function per boy", mv.latent.n_curves == 10)
 
@@ -955,10 +955,10 @@ fig.tight_layout()
 
 # %%
 PART = "10 dynamics"
-from fabel.dynamics import PDA, phase_plane
+from fdatools.dynamics import PDA, phase_plane
 
-lip_basis = fb.BSpline(domain=(0.0, 0.35), n_basis=31, order=6)
-lip_fd = fb.smooth(lip.value, lip.t, basis=lip_basis, penalty=4, lam=1e-8).fd
+lip_basis = fdt.BSpline(domain=(0.0, 0.35), n_basis=31, order=6)
+lip_fd = fdt.smooth(lip.value, lip.t, basis=lip_basis, penalty=4, lam=1e-8).fd
 constant = PDA(order=2).fit(lip_fd)
 b0 = float(constant.weights_[0].coefs[0, 0])
 b1 = float(constant.weights_[1].coefs[0, 0])
@@ -966,7 +966,7 @@ print(
     f"constant weights: beta0 = {b0:.1f}, beta1 = {b1:.2f}, "
     f"period = {2 * np.pi / np.sqrt(b0):.2f} s"
 )
-pda = PDA(order=2, weight_basis=fb.BSpline(domain=(0.0, 0.35), n_basis=21), lam=1e-8).fit(lip_fd)
+pda = PDA(order=2, weight_basis=fdt.BSpline(domain=(0.0, 0.35), n_basis=21), lam=1e-8).fit(lip_fd)
 mean_lip = lip_fd.mean()
 start = np.array([0.0])
 init = [float(mean_lip(start)[0, 0]), float(mean_lip(start, 1)[0, 0])]
@@ -995,8 +995,8 @@ fig.tight_layout()
 
 # %%
 # a known system: sin and cos solve D²x + x = 0
-sc = fb.FData(
-    np.array([[0.0, 0.0], [1.0, 0.5], [0.0, 2.0]]), fb.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
+sc = fdt.FData(
+    np.array([[0.0, 0.0], [1.0, 0.5], [0.0, 2.0]]), fdt.Fourier(domain=(0.0, 2 * np.pi), n_basis=3)
 )
 harm = PDA(order=2, n_grid=None).fit(sc)
 check(
@@ -1011,9 +1011,9 @@ check(
 
 # forcing: Dx + 4x = 2u with a step input u = 1 -> x -> 0.5
 tf = np.linspace(0.0, 1.0, 101)
-fb24 = fb.BSpline(domain=(0.0, 1.0), n_basis=24, order=5)
-forced = fb.smooth(0.5 * (1 - np.exp(-4 * tf)), tf, basis=fb24, lam=0.0).fd
-u = fb.FData(np.array([1.0]), fb.Constant(domain=(0.0, 1.0)))
+fb24 = fdt.BSpline(domain=(0.0, 1.0), n_basis=24, order=5)
+forced = fdt.smooth(0.5 * (1 - np.exp(-4 * tf)), tf, basis=fb24, lam=0.0).fd
+u = fdt.FData(np.array([1.0]), fdt.Constant(domain=(0.0, 1.0)))
 fp = PDA(order=1).fit(forced, forcing=u)
 bw, fw = float(fp.weights_[0].coefs[0, 0]), float(fp.forcing_weights_[0].coefs[0, 0])
 check(
@@ -1028,7 +1028,7 @@ fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
 stab_lip = pda.stability()
 stab_lip.plot(ax=axes[0])
 axes[0].set_title("Lip PDA: eigenvalues over time")
-gg = fb.smooth(growth.hgtf[:, :3], growth.age, basis=b6, penalty=4, lam=1e-2).fd
+gg = fdt.smooth(growth.hgtf[:, :3], growth.age, basis=b6, penalty=4, lam=1e-2).fd
 phase_plane(gg, np.linspace(4.0, 17.0, 300), labels={6.0: "6", 11.0: "11", 14.0: "14"}, ax=axes[1])
 axes[1].set(title="Phase plane: growth spurt loops", xlabel="speed", ylabel="acceleration")
 fig.tight_layout()
@@ -1046,10 +1046,10 @@ fig.tight_layout()
 
 # %%
 PART = "11 sparse"
-from fabel.sparse import PACE, sparse_cov, sparse_mean
+from fdatools.sparse import PACE, sparse_cov, sparse_mean
 
 rng = np.random.default_rng(3)
-dense_v = fb.smooth(growth.hgtf, growth.age, basis=hb, lam=1e-1, penalty=3).fd.derivative()
+dense_v = fdt.smooth(growth.hgtf, growth.age, basis=hb, lam=1e-1, penalty=3).fd.derivative()
 ts_sp, ys_sp = [], []
 for i in range(54):
     ti = np.sort(rng.uniform(2.0, 17.0, 4))
@@ -1058,7 +1058,7 @@ for i in range(54):
 
 lo = min(ti.min() for ti in ts_sp)
 hi = max(ti.max() for ti in ts_sp)  # PACE works inside the observed range
-sp_basis = fb.BSpline(domain=(lo, hi), n_basis=8)
+sp_basis = fdt.BSpline(domain=(lo, hi), n_basis=8)
 mu = sparse_mean(ys_sp, ts_sp, sp_basis, lam=1e-2)
 est = sparse_cov(ys_sp, ts_sp, basis=sp_basis, lam=1e-1)
 pace = PACE(n=2, basis=sp_basis, lam_mean=1e-2, lam_cov=1e-1, sigma2=0.01).fit(ys_sp, t=ts_sp)
@@ -1099,7 +1099,7 @@ tq = [np.sort(rng.uniform(0, 1, 4)) for _ in range(200)]
 yq = [1.0 + rng.normal() * np.cos(np.pi * ti) + 0.05 * rng.normal(size=4) for ti in tq]
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
-    PACE(n=2, basis=fb.BSpline(n_basis=5), sigma2=0.05**2).fit(yq, t=tq)
+    PACE(n=2, basis=fdt.BSpline(n_basis=5), sigma2=0.05**2).fit(yq, t=tq)
 check(
     "PACE(sigma2=...) is silent on data with a negative sigma2 estimate",
     len(caught) == 0,
@@ -1107,7 +1107,7 @@ check(
 )
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
-    PACE(n=2, basis=fb.BSpline(n_basis=5)).fit(yq, t=tq)
+    PACE(n=2, basis=fdt.BSpline(n_basis=5)).fit(yq, t=tq)
 check(
     "PACE without sigma2 still warns on the same data",
     any("not positive" in str(w.message) for w in caught),
@@ -1123,7 +1123,7 @@ check(
 PART = "12 density"
 rng = np.random.default_rng(0)
 sample = np.concatenate([rng.normal(-1.5, 0.5, 300), rng.normal(1.0, 0.8, 500)])
-dens = fb.fit_density(sample, basis=fb.BSpline(domain=(-4.0, 4.0), n_basis=13), lam=1e-3)
+dens = fdt.fit_density(sample, basis=fdt.BSpline(domain=(-4.0, 4.0), n_basis=13), lam=1e-3)
 xs = np.linspace(-4.0, 4.0, 4001)
 pdf = dens(xs)
 true_pdf = 0.375 * np.exp(-0.5 * ((xs + 1.5) / 0.5) ** 2) / (
@@ -1146,7 +1146,7 @@ def lam_true(s):
 
 cand = np.sort(rng.uniform(0, 10, rng.poisson(35 * 10)))
 events = cand[rng.uniform(0, 35, cand.size) < lam_true(cand)]
-inten = fb.fit_intensity(events, basis=fb.BSpline(domain=(0.0, 10.0), n_basis=10), lam=1.0)
+inten = fdt.fit_intensity(events, basis=fdt.BSpline(domain=(0.0, 10.0), n_basis=10), lam=1.0)
 tg = np.linspace(0, 10, 500)
 check(
     "expected count equals number of events",
@@ -1179,7 +1179,7 @@ fig.tight_layout()
 
 # %%
 PART = "13 profiling"
-from fabel.profiling import (
+from fdatools.profiling import (
     ODEModel,
     ProfiledODE,
     cstr_inputs,
@@ -1196,7 +1196,7 @@ x_true = fhn.simulate(tp, [-1.0, 1.0], theta_true)
 rng = np.random.default_rng(0)
 y_obs = x_true + 0.05 * rng.standard_normal(x_true.shape)
 y_obs[:, 1] = np.nan  # the second state is never measured
-fb_basis = fb.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201))
+fb_basis = fdt.BSpline(domain=(0.0, 20.0), breaks=np.linspace(0.0, 20.0, 201))
 fhn_fit = profile_ode(fhn, tp, y_obs, fb_basis, lam=1e3, theta0=[0.3, 0.3, 2.5])
 print("estimated theta:", fhn_fit.theta.round(3), " true:", theta_true)
 print("standard errors:", fhn_fit.stderr.round(3))
@@ -1212,7 +1212,7 @@ logistic = ODEModel(lambda x, t, th: th[0] * x * (1 - x / th[1]), n_states=1, n_
 tl = np.linspace(0.0, 10.0, 60)
 xl = logistic.simulate(tl, [0.5], [0.9, 10.0])
 yl = xl + 0.1 * np.random.default_rng(2).standard_normal(xl.shape)
-lb = fb.BSpline(domain=(0.0, 10.0), breaks=np.linspace(0.0, 10.0, 31))
+lb = fdt.BSpline(domain=(0.0, 10.0), breaks=np.linspace(0.0, 10.0, 31))
 problem = ProfiledODE(logistic, tl, yl, lb, lam=1e2)
 lfit = problem.fit([0.5, 8.0])
 print("logistic: r, K =", lfit.theta.round(3), "(true 0.9, 10)")
@@ -1254,7 +1254,7 @@ fig.tight_layout()
 #
 # `Smoother`, `FPCA`, `FCCA`, `Registrator`, `FRegress`, `PDA` and `PACE` follow
 # the scikit-learn API, so they fit into a `Pipeline` and `GridSearchCV`.
-# `fabel.nn` has PyTorch layers: `SmoothingLayer` (raw data → coefficients,
+# `fdatools.nn` has PyTorch layers: `SmoothingLayer` (raw data → coefficients,
 # with a learnable λ), `BasisLayer` (coefficients → values) and `FDataDataset`.
 # Task: tell boys from girls using only their height curves.
 
@@ -1264,7 +1264,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 
-from fabel.smoothing import Smoother
+from fdatools.smoothing import Smoother
 
 X = np.hstack([growth.hgtm, growth.hgtf]).T  # (93, 31): one row per child
 y = np.r_[np.zeros(39), np.ones(54)]  # 0 = boy, 1 = girl
@@ -1285,10 +1285,10 @@ check("sklearn pipeline classifies boys/girls well above chance", acc > 0.8, rou
 
 # %%
 import torch
-from fabel.nn import BasisLayer, FDataDataset, SmoothingLayer
+from fdatools.nn import BasisLayer, FDataDataset, SmoothingLayer
 
 torch.manual_seed(0)
-curves = fb.smooth(X.T, growth.age, basis=hb, lam=1e-2, penalty=3).fd
+curves = fdt.smooth(X.T, growth.age, basis=hb, lam=1e-2, penalty=3).fd
 dataset = FDataDataset(curves, y)
 loader = torch.utils.data.DataLoader(dataset, batch_size=16, shuffle=True)
 grid = np.linspace(1.0, 18.0, 69)
@@ -1357,12 +1357,12 @@ check(
     "to_pandas gives a long table",
     list(frame.columns) == ["t", "curve", "value"] and len(frame) == 15,
 )
-check("fb.to_pandas == FData.to_pandas", fb.to_pandas(girls[:3], grid5).equals(frame))
+check("fdt.to_pandas == FData.to_pandas", fdt.to_pandas(girls[:3], grid5).equals(frame))
 da = girls[:3].to_xarray(grid5)
 print(da)
 check("to_xarray has dims (t, curve)", da.dims == ("t", "curve"))
 
-long = fb.from_pandas(frame, "curve", "t", "value")
+long = fdt.from_pandas(frame, "curve", "t", "value")
 check("from_pandas(to_pandas(fd)) round-trips the values", np.allclose(long.y, girls[:3](grid5)))
 
 fixtures = next(
@@ -1374,12 +1374,12 @@ fixtures = next(
     None,
 )
 if fixtures is not None:
-    rb = fb.read_rds(fixtures / "bspline_basis.rds")
-    rfd = fb.read_rds(fixtures / "bspline_fd.rds")
+    rb = fdt.read_rds(fixtures / "bspline_basis.rds")
+    rfd = fdt.read_rds(fixtures / "bspline_fd.rds")
     print("from R:", rb, "|", rfd)
     check(
         "read_rds reads an R basis and an R fd object",
-        isinstance(rb, fb.Basis) and isinstance(rfd, fb.FData),
+        isinstance(rb, fdt.Basis) and isinstance(rfd, fdt.FData),
     )
 else:
     print("no R test files found next to this notebook; skipping read_rds")
@@ -1446,7 +1446,7 @@ if HAVE_R:
         rows.append({"quantity": name, "max rel. difference": f"{err:.1e}", "tolerance": tol})
         check(f"R parity: {name}", err < tol, f"{err:.1e}")
 
-    py = fb.smooth(growth.hgtf, growth.age, basis=hb, lam=0.1, penalty=3)
+    py = fdt.smooth(growth.hgtf, growth.age, basis=hb, lam=0.1, penalty=3)
     compare("B-spline values (eval.basis)", hb(growth.age), r["basis"])
     compare("B-spline 2nd derivatives", hb(growth.age, deriv=2), r["basis_d2"])
     compare("Gram matrix (bsplinepen, exact)", hb.gram(), r["gram_exact"])
@@ -1460,7 +1460,7 @@ if HAVE_R:
         r["df_at_our_lambda"],
     )
     # R's day grid is 0.5, 1.5, ..., 364.5 (day.5); smooth on the same points
-    temp_r = fb.smooth(weather.temp, day - 0.5, basis=fourier, penalty=harmonic, lam=1e2).fd
+    temp_r = fdt.smooth(weather.temp, day - 0.5, basis=fourier, penalty=harmonic, lam=1e2).fd
     pca_r = FPCA(n=4).fit(temp_r)
     compare("pca.fd variance proportions", pca_r.varprop, r["varprop"])
     compare("pca.fd eigenvalues (first 4)", pca_r.values[:4], r["values"])

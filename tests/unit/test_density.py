@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`fabel.density` (penalised density and intensity fits)."""
+"""Unit tests for :mod:`fdatools.density` (penalised density and intensity fits)."""
 
 from __future__ import annotations
 
@@ -11,9 +11,9 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from fabel import LDO, BSpline, FData, Fourier, Monomial
-from fabel._linalg import composite_gauss_legendre
-from fabel.density import (
+from fdatools import LDO, BSpline, FData, Fourier, Monomial
+from fdatools._linalg import composite_gauss_legendre
+from fdatools.density import (
     DensityResult,
     IntensityResult,
     _null_direction,

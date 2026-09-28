@@ -1,4 +1,4 @@
-"""Fabel estimators inside scikit-learn tooling (SPEC 5.1).
+"""fdatools estimators inside scikit-learn tooling (SPEC 5.1).
 
 Covers the SPEC pipeline (``Smoother -> FPCA -> LogisticRegression``) under
 ``GridSearchCV`` and, for all five estimators including the two-view ``FCCA``,
@@ -22,12 +22,12 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
 
-from fabel.basis import BSpline
-from fabel.core import FData
-from fabel.decomposition import FCCA, FPCA
-from fabel.registration import Registrator
-from fabel.regression import FRegress
-from fabel.smoothing import Smoother, smooth
+from fdatools.basis import BSpline
+from fdatools.core import FData
+from fdatools.decomposition import FCCA, FPCA
+from fdatools.registration import Registrator
+from fdatools.regression import FRegress
+from fdatools.smoothing import Smoother, smooth
 
 GRID = np.linspace(0.0, 1.0, 31)
 BASIS = BSpline(domain=(0.0, 1.0), n_basis=9)

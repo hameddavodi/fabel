@@ -10,17 +10,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import solve_ivp
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 plt.rcParams["figure.autolayout"] = True
 
-lip = fb.datasets.load_lip()
+lip = fdt.datasets.load_lip()
 lip_domain = (float(lip.t[0]), float(lip.t[-1]))
-lip_basis = fb.BSpline(domain=lip_domain, breaks=lip.t, order=6)
-lip_fd = fb.smooth(lip.value, lip.t, basis=lip_basis, lam=1e-12, penalty=4).fd
+lip_basis = fdt.BSpline(domain=lip_domain, breaks=lip.t, order=6)
+lip_fd = fdt.smooth(lip.value, lip.t, basis=lip_basis, lam=1e-12, penalty=4).fd
 lip_grid = np.linspace(lip_domain[0], lip_domain[1], 201)
-lip_pda = fb.PDA(order=2, weight_basis=fb.BSpline(domain=lip_domain, n_basis=7)).fit(lip_fd)
+lip_pda = fdt.PDA(order=2, weight_basis=fdt.BSpline(domain=lip_domain, n_basis=7)).fit(lip_fd)
 
 # %% [markdown]
 # ### Figure 11.1
@@ -44,7 +44,7 @@ fig
 
 # %%
 fig, ax = plt.subplots(figsize=(6, 5.5))
-fb.phase_plane(
+fdt.phase_plane(
     lip_fd.mean(),
     lip_grid,
     labels={0.05: "0.05 s", 0.15: "0.15 s", 0.25: "0.25 s", 0.33: "0.33 s"},
@@ -111,16 +111,16 @@ fig
 # ### Figure 11.6
 # A coupled third-order PDA of handwriting, D^3 x_i = -sum_k sum_j beta_ikj(t) D^j x_k,
 # fitted to 20 samples and solved from the mean curve's initial state. The book uses
-# Chinese script, which Fabel does not ship; the cursive "fda" data stand in for it.
+# Chinese script, which fdatools does not ship; the cursive "fda" data stand in for it.
 
 # %%
-writing = fb.datasets.load_handwriting()
+writing = fdt.datasets.load_handwriting()
 pen_domain = (0.0, 2300.0)
-pen_basis = fb.BSpline(domain=pen_domain, n_basis=105, order=6)
-pen_fit = fb.smooth(writing.value[::2], writing.t[::2], basis=pen_basis, lam=1e2, penalty=4)
-pen_pda = fb.PDA(order=3, weight_basis=fb.BSpline(domain=pen_domain, n_basis=43), n_grid=1001).fit(
-    pen_fit.fd
-)
+pen_basis = fdt.BSpline(domain=pen_domain, n_basis=105, order=6)
+pen_fit = fdt.smooth(writing.value[::2], writing.t[::2], basis=pen_basis, lam=1e2, penalty=4)
+pen_pda = fdt.PDA(
+    order=3, weight_basis=fdt.BSpline(domain=pen_domain, n_basis=43), n_grid=1001
+).fit(pen_fit.fd)
 pen_grid = np.linspace(pen_domain[0], pen_domain[1], 461)
 pen_mean = pen_fit.fd.mean()
 mean_values = pen_mean(pen_grid)[:, 0, :]
@@ -144,22 +144,22 @@ fig
 # The refinery data: a step drop in reflux flow (bottom) and the tray 47 level (top),
 # with the solution of the forced first-order model Dx = -beta x + alpha u. The
 # constant coefficients come from a concurrent regression of Dx on x and u with
-# constant coefficient bases (PDA forcing functions are not in Fabel).
+# constant coefficient bases (PDA forcing functions are not in fdatools).
 
 # %%
-refinery = fb.datasets.load_refinery()
+refinery = fdt.datasets.load_refinery()
 ref_domain = (0.0, 193.0)
-reflux_fd = fb.smooth(
+reflux_fd = fdt.smooth(
     refinery.reflux,
     refinery.time,
-    basis=fb.BSpline(ref_domain, order=1, breaks=[0.0, 67.0, 193.0]),
+    basis=fdt.BSpline(ref_domain, order=1, breaks=[0.0, 67.0, 193.0]),
     lam=0.0,
 ).fd
 tray_breaks = np.unique(np.r_[np.linspace(0.0, 67.0, 5), np.linspace(70.0, 193.0, 30)])
-tray_basis = fb.BSpline(ref_domain, breaks=tray_breaks, order=4)
-tray_fd = fb.smooth(refinery.tray47, refinery.time, basis=tray_basis, lam=1.0).fd
-forced = fb.fregress(
-    tray_fd.derivative(), {"tray": tray_fd, "reflux": reflux_fd}, beta=fb.Constant(ref_domain)
+tray_basis = fdt.BSpline(ref_domain, breaks=tray_breaks, order=4)
+tray_fd = fdt.smooth(refinery.tray47, refinery.time, basis=tray_basis, lam=1.0).fd
+forced = fdt.fregress(
+    tray_fd.derivative(), {"tray": tray_fd, "reflux": reflux_fd}, beta=fdt.Constant(ref_domain)
 )
 beta_hat = -float(np.asarray(forced.beta[0].coefs)[0, 0])
 alpha_hat = float(np.asarray(forced.beta[1].coefs)[0, 0])
@@ -186,7 +186,7 @@ fig
 # ### Figure 11.8
 # A continuously stirred tank reactor: input flow and input temperature (bottom) drive
 # output concentration C and temperature T (top). The book's CSTR measurements are not
-# in Fabel, so a dimensionless CSTR model is simulated (fixed seed) and noise is added.
+# in fdatools, so a dimensionless CSTR model is simulated (fixed seed) and noise is added.
 
 
 # %%
@@ -236,11 +236,11 @@ fig
 # ### Figure 11.9
 # Gradient matching for the reactor: the noisy outputs are smoothed, the smooth curves
 # and their derivatives give the three reactor constants by least squares, and the
-# model is re-solved with them (dashed) over the data. Fabel has no nonlinear ODE
+# model is re-solved with them (dashed) over the data. fdatools has no nonlinear ODE
 # estimator (parameter cascading), so this is built from smooth() and derivatives.
 
 # %%
-cstr_fd = fb.smooth(observed, cstr_time, basis=fb.BSpline((0.0, 64.0), n_basis=70), lam=1e-2).fd
+cstr_fd = fdt.smooth(observed, cstr_time, basis=fdt.BSpline((0.0, 64.0), n_basis=70), lam=1e-2).fd
 inner = np.linspace(1.0, 63.0, 621)
 conc_s, temp_s = cstr_fd(inner).T
 dconc_s, dtemp_s = cstr_fd(inner, 1).T

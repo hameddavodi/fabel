@@ -1,6 +1,6 @@
-"""Matplotlib helpers mixed into :class:`fabel.core.FData`.
+"""Matplotlib helpers mixed into :class:`fdatools.core.FData`.
 
-Matplotlib is imported lazily inside the methods so that importing ``fabel``
+Matplotlib is imported lazily inside the methods so that importing ``fdatools``
 never pulls in a plotting stack.
 """
 
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from fabel._backend import default_namespace, to_numpy
+from fdatools._backend import default_namespace, to_numpy
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -49,8 +49,8 @@ class PlotMixin:
         >>> import matplotlib
         >>> matplotlib.use("Agg")
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.ones((5, 2)), fb.BSpline(domain=(0.0, 1.0), n_basis=5))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.ones((5, 2)), fdt.BSpline(domain=(0.0, 1.0), n_basis=5))
         >>> type(fd.plot()).__name__
         'Axes'
         """
@@ -89,8 +89,8 @@ class PlotMixin:
         >>> import matplotlib
         >>> matplotlib.use("Agg")
         >>> import numpy as np
-        >>> import fabel as fb
-        >>> fd = fb.FData(np.ones((5, 1)), fb.BSpline(domain=(0.0, 1.0), n_basis=5))
+        >>> import fdatools as fdt
+        >>> fd = fdt.FData(np.ones((5, 1)), fdt.BSpline(domain=(0.0, 1.0), n_basis=5))
         >>> t = np.linspace(0.0, 1.0, 7)
         >>> len(fd.plot_fit(np.ones(7), t).lines) > 1
         True
@@ -107,7 +107,7 @@ class PlotMixin:
 
 
 # --------------------------------------------------------------------------- #
-# standalone plot helpers behind fabel.stats (cycleplot, plot_scores, bands)
+# standalone plot helpers behind fdatools.stats (cycleplot, plot_scores, bands)
 # --------------------------------------------------------------------------- #
 
 

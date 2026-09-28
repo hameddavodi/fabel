@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.regression` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.regression` against golden output from R ``fda`` 6.3.0.
 
 Two references are used.
 
@@ -13,7 +13,7 @@ observations -- so that the known defect of R's harmonic-accelerator penalty
 comparison.
 
 Every golden case puts a functional term into the design, and R's ``fRegress``
-evaluates the integrals of such a term by an approximate quadrature; Fabel's are
+evaluates the integrals of such a term by an approximate quadrature; fdatools' are
 exact.  Where the difference exceeds the 1e-8 tolerance the field is a strict
 xfail carrying the measured error of R's integrals.  To still check the rest of
 the pipeline -- solve, df, GCV, OCV, coefficient covariance, standard errors,
@@ -33,8 +33,8 @@ from typing import Any, cast
 import numpy as np
 import pytest
 
-from fabel import LDO, Constant, FData, Fourier
-from fabel.regression import FRegressResult, fregress
+from fdatools import LDO, Constant, FData, Fourier
+from fdatools.regression import FRegressResult, fregress
 
 from ._datasets import weather_daily, weather_region
 from .conftest import build_basis, case_rtol, compare, golden_cases
@@ -56,7 +56,7 @@ _SCALAR_QUADRATURE = (
     "R integrates int x_i(t) theta_k(t) dt approximately.  The response basis is "
     "an orthonormal Fourier basis, so the exact integral is simply the k-th "
     "coefficient of x_i; against that R's Dmat is up to 3.4e-8 (relative) out "
-    "and its Cmat up to 8.2e-8.  Fabel's Cmat and Dmat are the exact values."
+    "and its Cmat up to 8.2e-8.  fdatools' Cmat and Dmat are the exact values."
 )
 _REGION_QUADRATURE = (
     "R's Gram matrix of the Fourier(65) coefficient basis is not the identity: "
@@ -70,14 +70,14 @@ _CONCURRENT_QUADRATURE = (
     "trapezoid rule (20000 points, exact for trigonometric polynomials) gives "
     "sum_i int temp_i^2 theta_1^2 = 5861.19665 and int theta_1 sum_i temp_i "
     "logprecip_i = 4187.25630; fRegress's Cmat[6, 6] is 5855.72278 (9.3e-4 low) "
-    "and Dmat[6] 4172.91107 (3.4e-3 low).  Fabel reproduces the dense values "
+    "and Dmat[6] 4172.91107 (3.4e-3 low).  fdatools reproduces the dense values "
     "(5861.19665, 4187.25630).  The betas inherit a 1.2e-2 relative error."
 )
 _SYNTHETIC_QUADRATURE = (
     "R's int x_i(t) theta_k(t) dt for the B-spline covariate is off by up to "
     "1.7e-3 (relative): fRegress's Dmat[9] is -0.2107866 while R's own exact "
     "inprod.bspline and a 200001-point trapezoid rule both give -0.2104203, "
-    "which is Fabel's value.  Every quantity downstream of the design inherits "
+    "which is fdatools' value.  Every quantity downstream of the design inherits "
     "the error (betas 1.7e-4 / 4.3e-2 at lambda 1e-2 / 0, fitted values 1.6e-4)."
 )
 

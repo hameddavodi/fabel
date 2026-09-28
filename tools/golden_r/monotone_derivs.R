@@ -18,7 +18,7 @@
 # fda API notes (black-box behaviour):
 #   - eval.monfd documents derivatives 0-3 only and eval.posfd 0-2 only.
 #   - eval.monfd(t, W, 0) integrates exp W numerically; its accuracy is
-#     measured by the parity test against Fabel's exact quadrature.
+#     measured by the parity test against fdatools' exact quadrature.
 
 deriv_values <- function(fun, t, Wfd, orders) {
   lapply(orders, function(k) unname(as.matrix(fun(t, Wfd, k))))

@@ -10,7 +10,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fabel as fb
+import fdatools as fdt
 
 plt.rcParams["figure.max_open_warning"] = 0
 
@@ -20,11 +20,11 @@ plt.rcParams["figure.max_open_warning"] = 0
 # by smoothing the daily data with a 65-term Fourier basis.
 
 # %%
-weather = fb.datasets.load_canadian_weather()
+weather = fdt.datasets.load_canadian_weather()
 day = np.asarray(weather.t, dtype=float) - 0.5
-temp_basis = fb.Fourier(domain=(0.0, 365.0), n_basis=65)
-harmonic = fb.LDO.harmonic(365.0)
-temp_fd = fb.smooth(weather.temp, day, basis=temp_basis, lam=1e4, penalty=harmonic).fd
+temp_basis = fdt.Fourier(domain=(0.0, 365.0), n_basis=65)
+harmonic = fdt.LDO.harmonic(365.0)
+temp_fd = fdt.smooth(weather.temp, day, basis=temp_basis, lam=1e4, penalty=harmonic).fd
 
 fig, ax = plt.subplots(figsize=(8, 5))
 temp_fd.plot(ax=ax, color="k", linewidth=0.6)
@@ -39,10 +39,10 @@ fig
 
 # %%
 montreal = weather.stations.index("Montreal")
-regression_basis = fb.Fourier(domain=(0.0, 365.0), n_basis=13)
+regression_basis = fdt.Fourier(domain=(0.0, 365.0), n_basis=13)
 design = regression_basis(day)
 montreal_coefs, *_ = np.linalg.lstsq(design, weather.temp[:, montreal], rcond=None)
-montreal_fd = fb.FData(montreal_coefs, regression_basis)
+montreal_fd = fdt.FData(montreal_coefs, regression_basis)
 
 fig, ax = plt.subplots(figsize=(8, 5))
 montreal_fd.plot_fit(weather.temp[:, montreal], day, ax=ax, color="k", linewidth=1.5)

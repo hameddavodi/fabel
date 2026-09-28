@@ -1,8 +1,8 @@
 """The linear differential operator :class:`LDO`.
 
-Lives in a private module rather than in :mod:`fabel.core` because
-:mod:`fabel.basis` needs it too and ``core`` imports ``basis``.  It is
-re-exported from :mod:`fabel.core` and :mod:`fabel`, which is where users see it.
+Lives in a private module rather than in :mod:`fdatools.core` because
+:mod:`fdatools.basis` needs it too and ``core`` imports ``basis``.  It is
+re-exported from :mod:`fdatools.core` and :mod:`fdatools`, which is where users see it.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from math import pi
 from types import ModuleType
 from typing import Any
 
-from fabel._backend import asarray
+from fdatools._backend import asarray
 
 __all__ = ["LDO"]
 
@@ -36,7 +36,7 @@ class LDO:
         (the identity operator) when both arguments are omitted.
     weights : sequence, optional
         Weights ``w_0 .. w_{m-1}``.  Each entry is either a real scalar or a
-        callable functional weight (an :class:`~fabel.core.FData` holding a
+        callable functional weight (an :class:`~fdatools.core.FData` holding a
         single curve).
 
     Attributes
@@ -53,7 +53,7 @@ class LDO:
 
     Examples
     --------
-    >>> from fabel import LDO
+    >>> from fdatools import LDO
     >>> LDO(2).order
     2
     >>> LDO(2).is_derivative
@@ -91,7 +91,7 @@ class LDO:
 
         Examples
         --------
-        >>> from fabel import LDO
+        >>> from fdatools import LDO
         >>> LDO.harmonic(period=1.0).weights[1] > 39.0
         True
         """
@@ -109,7 +109,7 @@ class LDO:
 
         Examples
         --------
-        >>> from fabel import LDO
+        >>> from fdatools import LDO
         >>> LDO(weights=[1.0, 2.0]).order
         2
         """
@@ -127,7 +127,7 @@ class LDO:
 
         Examples
         --------
-        >>> from fabel import LDO
+        >>> from fdatools import LDO
         >>> LDO(weights=[0.0, 1.0]).is_derivative
         False
         """
@@ -145,7 +145,7 @@ class LDO:
 
         Examples
         --------
-        >>> from fabel import LDO
+        >>> from fdatools import LDO
         >>> LDO(weights=[1.0, 2.0]).is_constant
         True
         """
@@ -177,8 +177,8 @@ class LDO:
         Examples
         --------
         >>> import numpy as np
-        >>> from fabel import LDO
-        >>> from fabel._backend import default_namespace
+        >>> from fdatools import LDO
+        >>> from fdatools._backend import default_namespace
         >>> t = np.linspace(0.0, 1.0, 3)
         >>> LDO(1).apply(lambda j: np.ones((3, 2)) * j, t, default_namespace()).tolist()
         [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]

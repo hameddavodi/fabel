@@ -13,8 +13,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline, FData
-from fabel.smoothing import SmoothResult
+from fdatools import BSpline, FData
+from fdatools.smoothing import SmoothResult
 
 N_CURVES = 54
 N_BASIS = 35

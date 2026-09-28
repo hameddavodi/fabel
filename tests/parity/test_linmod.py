@@ -1,4 +1,4 @@
-"""Parity of :func:`fabel.regression.linmod` against R ``fda`` 6.3.0's ``linmod``.
+"""Parity of :func:`fdatools.regression.linmod` against R ``fda`` 6.3.0's ``linmod``.
 
 ``tests/golden/linmod.json`` (generator ``tools/golden_r/linmod.R``) records
 R's intercept, regression surface and fitted curves on the weather data
@@ -6,11 +6,11 @@ R's intercept, regression surface and fitted curves on the weather data
 field is asserted on its own.
 
 R evaluates the integrals of the model numerically.  On the monomial designs
-those rules are exact, and Fabel matches R to rounding on every field.  On the
+those rules are exact, and fdatools matches R to rounding on every field.  On the
 Fourier and B-spline designs R's integrals are off in the 6th and 5th digit;
 the affected fields are strict xfails carrying the measured error.  The
 synthetic cases also record the integral and penalty matrices R's ``inprod``
-and ``eval.penalty`` return, and feeding *those* into Fabel's normal equations
+and ``eval.penalty`` return, and feeding *those* into fdatools' normal equations
 reproduces R's coefficients to 1e-8 -- so the model is the same and only the
 quadrature differs.
 """
@@ -24,10 +24,10 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import LDO, BSpline, FData, Monomial, inprod
-from fabel._backend import default_namespace
-from fabel.basis import Basis
-from fabel.regression import (
+from fdatools import LDO, BSpline, FData, Monomial, inprod
+from fdatools._backend import default_namespace
+from fdatools.basis import Basis
+from fdatools.regression import (
     LinmodResult,
     _linmod_normal_equations,
     _linmod_solve,
@@ -51,17 +51,17 @@ _WEATHER_QUADRATURE = (
     "R's integrals over the Fourier bases are approximate.  Its harmonic-"
     "accelerator penalty of the Fourier(11) coefficient basis (eval.penalty) is "
     "1.2e-4 (relative) off the closed form k^2 w^6 (k^2 - 1)^2, and its Fourier "
-    "Gram inprod(fb11, fb11) 1.4e-6 off the identity.  Fabel's exact fit is "
+    "Gram inprod(fb11, fb11) 1.4e-6 off the identity.  fdatools' exact fit is "
     "{alpha} (intercept), {beta} (surface) and {yhat} (fitted curves) off R, "
     "relative to the largest entry."
 )
 _BSPLINE_QUADRATURE = (
     "R's inprod of cubic B-spline bases is 2.2e-5 (Gram) and 1.1e-4 (the "
-    "covariate integrals int x_i theta_s) off the exact values; Fabel's exact "
+    "covariate integrals int x_i theta_s) off the exact values; fdatools' exact "
     "intercept and surface are 5.9e-5 and 9.6e-5 off R.  With R's own matrices "
-    "(r_integrals) Fabel reproduces R's coefficients to 1e-15 "
+    "(r_integrals) fdatools reproduces R's coefficients to 1e-15 "
     "(test_normal_equations_with_r_integrals).  R's fitted curves are further a "
-    "201-point least-squares fit, not the L2 projection: 1.4e-3 off Fabel "
+    "201-point least-squares fit, not the L2 projection: 1.4e-3 off fdatools "
     "(test_r_fitted_curves_are_a_grid_least_squares_fit)."
 )
 
@@ -162,7 +162,7 @@ def _relative(actual: Any, expected: Any) -> float:
     return float(np.max(np.abs(got - want)) / np.max(np.abs(want)))
 
 
-#: Relative error of Fabel against R quoted in the xfail reasons, as (low, high).
+#: Relative error of fdatools against R quoted in the xfail reasons, as (low, high).
 MEASURED = {
     ("linmod_weather_logprecip_on_temp", "beta0estfd_coefs"): (4e-7, 6e-7),
     ("linmod_weather_logprecip_on_temp", "beta1estbifd_coefs"): (1.5e-6, 2.5e-6),
@@ -199,7 +199,7 @@ def _r_integrals(name: str) -> tuple[np.ndarray, _LinmodIntegrals]:
 
 @pytest.mark.parametrize("name", _WITH_INTEGRALS)
 def test_normal_equations_with_r_integrals(name: str) -> None:
-    """Fabel's normal equations on R's integral matrices give R's coefficients."""
+    """fdatools' normal equations on R's integral matrices give R's coefficients."""
     case = CASES[name]
     inputs = case["input"]
     xp = default_namespace()
@@ -216,8 +216,8 @@ def test_normal_equations_with_r_integrals(name: str) -> None:
 
 
 @pytest.mark.parametrize("name", [name for name in _WITH_INTEGRALS if "monomial" in name])
-def test_r_integrals_match_fabel_where_r_is_exact(name: str) -> None:
-    """On the monomial designs R's integrals are exact, so Fabel's agree."""
+def test_r_integrals_match_fdatools_where_r_is_exact(name: str) -> None:
+    """On the monomial designs R's integrals are exact, so fdatools' agree."""
     inputs = CASES[name]["input"]
     z, integrals = _r_integrals(name)
     alpha, sbasis, tbasis = (_basis(inputs[f"{k}_basis"]) for k in ("alpha", "s", "t"))

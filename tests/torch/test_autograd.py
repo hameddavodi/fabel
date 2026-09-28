@@ -13,7 +13,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import BSpline, FData, Fourier, inprod
+from fdatools import BSpline, FData, Fourier, inprod
 
 torch = pytest.importorskip("torch", reason="torch extra not installed")
 

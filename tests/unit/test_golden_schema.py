@@ -1,7 +1,7 @@
 """Validate every ``tests/golden/*.json`` file against the schema in
 ``docs/dev/conventions.md``.
 
-Structure only -- numeric parity against ``fabel`` is exercised by
+Structure only -- numeric parity against ``fdatools`` is exercised by
 ``tests/parity/test_<module>.py``, not here.
 """
 

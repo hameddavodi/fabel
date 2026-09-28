@@ -1,8 +1,8 @@
 # API reference
 
-One page per module of Fabel's public API. Every name in `fabel.__all__`, every
-public function and class of `fabel.stats`, `fabel.sparse`, `fabel.density`,
-`fabel.profiling`, `fabel.datasets`, `fabel.io` and `fabel.nn`, and every result class is documented here. For worked examples,
+One page per module of fdatools' public API. Every name in `fdatools.__all__`, every
+public function and class of `fdatools.stats`, `fdatools.sparse`, `fdatools.density`,
+`fdatools.profiling`, `fdatools.datasets`, `fdatools.io` and `fdatools.nn`, and every result class is documented here. For worked examples,
 see the [tutorials](../tutorials/index.md).
 
 | Module | Contents |

@@ -4,7 +4,7 @@
 records ``eval.monfd`` (``h = ∫ exp W``, derivatives 0-3), ``eval.posfd``
 (``exp W``, derivatives 0-2) and ``predict`` of a ``smooth.monotone`` fit
 (``β₀ + β₁ h`` and ``β₁ Dᵏ h``) for given latent functions ``W``.  The
-:class:`~fabel.smoothing.SmoothResult` below is built from R's ``W`` and ``β``
+:class:`~fdatools.smoothing.SmoothResult` below is built from R's ``W`` and ``β``
 directly, so the comparison tests evaluation only, not the iterative fit.
 
 Two R outputs are measurably wrong and are strict xfails (with a passing test
@@ -12,7 +12,7 @@ that pins down what R computes instead):
 
 * ``eval.monfd(t, W, 0)`` integrates ``exp W`` numerically.  Against an
   adaptive-quadrature reference (``scipy.integrate.quad``, tolerance 1e-14)
-  Fabel's Gauss-Legendre value is off by at most 4.3e-14 of the curve's range,
+  fdatools' Gauss-Legendre value is off by at most 4.3e-14 of the curve's range,
   R's by 2.4e-6 (growth) and 1.8e-6 (fixed W); 9e-5 relative at a point.
 * ``eval.posfd(t, W, 2)`` returns ``exp(W) D²W`` (to 1.5e-16), which misses the
   ``exp(W) (DW)²`` term of ``D² exp W``.
@@ -26,8 +26,8 @@ import numpy as np
 import pytest
 from scipy.integrate import quad
 
-from fabel import FData
-from fabel.smoothing import SmoothResult
+from fdatools import FData
+from fdatools.smoothing import SmoothResult
 
 from .conftest import build_basis, case_rtol, compare, golden_cases
 
@@ -67,7 +67,7 @@ def test_every_golden_case_is_covered() -> None:
 _MONFD_QUADRATURE = (
     "R's eval.monfd(t, W, 0) integrates exp W numerically: measured against "
     "scipy.integrate.quad (tol 1e-14) R is off by 2.4e-6 (growth) / 1.8e-6 (fixed W) "
-    "of the range, 9e-5 relative pointwise; Fabel by at most 4.3e-14"
+    "of the range, 9e-5 relative pointwise; fdatools by at most 4.3e-14"
 )
 
 

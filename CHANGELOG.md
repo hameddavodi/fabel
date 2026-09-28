@@ -5,6 +5,16 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Changed
+- The project is renamed from **fabel** to **fdatools**: `pip install fdatools`,
+  `import fdatools as fdt`. The GitHub repository moves to
+  `hameddavodi/fdatools` and the documentation to
+  <https://hameddavodi.github.io/fdatools>. The environment variables
+  `FABEL_DATA_DIR` / `FABEL_RUN_NETWORK_TESTS` become `FDATOOLS_DATA_DIR` /
+  `FDATOOLS_RUN_NETWORK_TESTS`, and the dataset cache moves to
+  `~/.cache/fdatools`. The 1.0.0 entry below describes the release published
+  under the old name.
+
 ### Fixed
 - `PACE(sigma2=...)` no longer raises a `RuntimeWarning` about a non-positive
   measurement-error estimate: with `sigma2` given, the estimate is kept in

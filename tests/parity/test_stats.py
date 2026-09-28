@@ -1,4 +1,4 @@
-"""Parity of :mod:`fabel.stats` against golden output from R ``fda`` 6.3.0.
+"""Parity of :mod:`fdatools.stats` against golden output from R ``fda`` 6.3.0.
 
 Every case is built on the CanadianWeather temperatures, smoothed exactly as
 ``tools/golden_r/stats.R`` does: a 25-function Fourier basis on ``[0, 365]``,
@@ -6,7 +6,7 @@ observations at days ``1..365``, a second-derivative penalty and
 ``lambda = 1e2`` (``1e4`` for precipitation).
 
 The two permutation tests are seeded in R (``set.seed(42)`` / ``set.seed(11)``).
-Fabel draws permutations from whatever ``random_state`` it is given, so the
+fdatools draws permutations from whatever ``random_state`` it is given, so the
 tests pass :class:`tests.parity._rrng.RRandom`, which answers ``permutation(n)``
 with the very permutation R's ``sample(n)`` returns.  That turns the null
 distributions into deterministic, comparable outputs.
@@ -20,10 +20,10 @@ from typing import Any
 import numpy as np
 import pytest
 
-from fabel import FData, Fourier
-from fabel.regression import fregress
-from fabel.smoothing import smooth
-from fabel.stats import boxplot, cor, cov, depth, f_test, t_test
+from fdatools import FData, Fourier
+from fdatools.regression import fregress
+from fdatools.smoothing import smooth
+from fdatools.stats import boxplot, cor, cov, depth, f_test, t_test
 
 from ._datasets import weather_daily, weather_region
 from ._rrng import RRandom
@@ -41,7 +41,7 @@ _FPERM_REASON = (
     "25-function Fourier basis on [0, 365] departs from the identity -- the exact "
     "Gram matrix of that orthonormal basis -- by up to 1.383e-6, and the "
     "right-hand side Dmat carries a 7.28e-6 relative error.  Feeding R's own "
-    "Cmat and Dmat (read from fRegress()$Cmat / $Dmat) through Fabel's solver and "
+    "Cmat and Dmat (read from fRegress()$Cmat / $Dmat) through fdatools' solver and "
     "F statistic reproduces R's betas to 1.5e-15 and R's Fobs to 3.0e-15, so the "
     "whole gap is R's quadrature; with the exact Gram matrices the maximal "
     "F statistic is 0.44257145697174 against R's 0.44261503693042 (9.85e-5 "
