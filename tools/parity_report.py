@@ -117,6 +117,12 @@ SYMBOLS: tuple[Symbol, ...] = (
     Symbol("stats.boxplot", "fabel.stats", "boxplot", "fbplot, boxplot.fd"),
     Symbol("stats.f_test", "fabel.stats", "f_test", "Fperm.fd"),
     Symbol("stats.t_test", "fabel.stats", "t_test", "tperm.fd"),
+    Symbol(
+        "stats.confidence_band",
+        "fabel.stats",
+        "confidence_band",
+        "smooth.basis y2cMap variance, fRegress.stderr",
+    ),
     Symbol("datasets.load_*", "fabel.datasets", "load_growth", "data(package='fda')"),
     Symbol("nn.BasisLayer", "fabel.nn", "BasisLayer", "(new: PyTorch layer)"),
     Symbol("nn.FDataDataset", "fabel.nn", "FDataDataset", "(new: PyTorch dataset)"),
@@ -159,6 +165,7 @@ CASE_RULES: tuple[tuple[str, str, str], ...] = (
     ("stats", r"[Ff]perm[._]fd", "stats.f_test"),
     ("stats", r"var[._]fd", "stats.cov"),
     ("stats", r".", "FData"),
+    ("bands", r".", "stats.confidence_band"),
     ("datasets", r".", "datasets.load_*"),
     ("io", r".", "read_rds"),
 )

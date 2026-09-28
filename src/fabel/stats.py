@@ -1,7 +1,8 @@
-r"""Functional statistics: covariance, correlation, depth, boxplots and tests.
+r"""Functional statistics: covariance, correlation, depth, boxplots, tests and bands.
 
-Replaces R's ``var.fd``, ``cor.fd``, ``fbplot``, ``fdepth``, ``tperm.fd`` and
-``Fperm.fd``.
+Replaces R's ``var.fd``, ``cor.fd``, ``fbplot``, ``fdepth``, ``tperm.fd``,
+``Fperm.fd``, the pointwise-variance use of ``y2cMap``/``fRegress.stderr``,
+``plotbeta``, ``plotscores`` and ``cycleplot.fd``.
 
 * :func:`cov` and :func:`cor` give the (cross-)covariance surface and the
   correlation matrix of one or two sets of curves.
@@ -11,6 +12,10 @@ Replaces R's ``var.fd``, ``cor.fd``, ``fbplot``, ``fdepth``, ``tperm.fd`` and
   Genton (2011) on top of it.
 * :func:`t_test` and :func:`f_test` are permutation tests whose statistic is
   the largest pointwise two-sample *t* or regression *F* statistic.
+* :func:`confidence_band` gives pointwise confidence limits of a smooth or of
+  regression coefficients; :func:`plot_beta` draws the latter.
+* :func:`cycleplot` and :func:`plot_scores` draw bivariate cycles and
+  principal component score scatters.
 
 Depths and tests work on curve values sampled on a grid, so they return NumPy
 arrays whatever the input namespace; :func:`cov` and :func:`cor` stay in the
@@ -32,9 +37,10 @@ import math
 import operator
 from collections.abc import Sequence
 from dataclasses import dataclass
+from statistics import NormalDist
 from typing import TYPE_CHECKING, Any, Protocol, overload
 
-from fabel import _linalg
+from fabel import _linalg, _plot
 from fabel._backend import (
     array_namespace,
     asarray,
@@ -46,6 +52,7 @@ from fabel._operator import LDO
 from fabel.basis import Basis, _same_domain
 from fabel.core import BiFData, FData, _quadrature, inprod
 from fabel.regression import FRegressResult
+from fabel.smoothing import SmoothResult
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import numpy as np
@@ -67,13 +74,18 @@ else:
 
 __all__ = [
     "BoxplotResult",
+    "ConfidenceBand",
     "DepthResult",
     "PermutationTestResult",
     "boxplot",
+    "confidence_band",
     "cor",
     "cov",
+    "cycleplot",
     "depth",
     "f_test",
+    "plot_beta",
+    "plot_scores",
     "t_test",
 ]
 
@@ -1335,3 +1347,550 @@ def _permutation_f_test(
         return _summarise(observed, null, q, points)
     observed, null = _scalar_response(response, covariates, bases, lams, ops, orders, obs_weights)
     return _summarise(observed, null, q, None)
+
+
+# --------------------------------------------------------------------------- #
+# pointwise confidence bands
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True, eq=False)
+class ConfidenceBand:
+    """Pointwise confidence band of a smooth or of a regression coefficient.
+
+    Attributes
+    ----------
+    t : array
+        Evaluation points, shape ``(n_t,)``.
+    estimate : array
+        The estimate at ``t``: ``fd(t)`` for a smooth (shape ``(n_t, n_curves)``
+        or ``(n_t, n_curves, n_vars)``), ``beta_j(t)`` for a coefficient
+        (shape ``(n_t,)``).
+    stderr : array
+        Pointwise standard error, shape ``(n_t,)``.  Every curve of a smooth
+        shares it: the curves are fitted by the same linear map and share the
+        error covariance.
+    lower, upper : array
+        ``estimate -/+ z * stderr`` with ``z`` the ``(1 + level) / 2`` quantile
+        of the standard normal distribution; shaped like ``estimate``.
+    level : float
+        Pointwise coverage of the band.
+    name : str or None
+        Term name for a regression coefficient, ``None`` for a smooth.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from fabel import BSpline
+    >>> from fabel.smoothing import smooth
+    >>> from fabel.stats import confidence_band
+    >>> t = np.linspace(0.0, 1.0, 40)
+    >>> fit = smooth(np.sin(6.0 * t), t, basis=BSpline(n_basis=8), lam=1e-6)
+    >>> band = confidence_band(fit, np.array([0.25, 0.5]), sigma_e=0.01)
+    >>> band.stderr.shape, band.lower.shape
+    ((2,), (2, 1))
+    """
+
+    t: Array
+    estimate: Array
+    stderr: Array
+    lower: Array
+    upper: Array
+    level: float
+    name: str | None = None
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Draw the estimate with its lower and upper limits.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            Axes to draw on.  A new figure is created when omitted.
+        **kwargs
+            Passed to :meth:`matplotlib.axes.Axes.plot` for the estimate.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+            The axes drawn on.  The estimate lines come first, then the lower
+            and the upper limits (dashed); a dotted zero line is added last
+            when the band crosses zero.
+
+        Examples
+        --------
+        >>> import matplotlib
+        >>> matplotlib.use("Agg")
+        >>> import numpy as np
+        >>> from fabel.stats import ConfidenceBand
+        >>> t = np.linspace(0.0, 1.0, 5)
+        >>> band = ConfidenceBand(t, t, 0.1 + 0 * t, t - 0.2, t + 0.2, 0.95)
+        >>> len(band.plot().lines)
+        4
+        """
+        return _plot.band_lines(
+            self.t, self.estimate, self.lower, self.upper, ax, self.name, **kwargs
+        )
+
+
+def _normal_quantile(level: float) -> float:
+    """Return ``z`` with ``P(|Z| <= z) = level`` for a standard normal ``Z``."""
+    if not 0.0 < level < 1.0:
+        raise ValueError(f"level must lie strictly between 0 and 1, got {level}")
+    return NormalDist().inv_cdf(0.5 + 0.5 * level)
+
+
+def _check_deriv(deriv: int) -> int:
+    """Return ``deriv`` as a non-negative ``int``."""
+    if isinstance(deriv, bool):
+        raise TypeError("deriv must be an integer, got bool")
+    try:
+        order = operator.index(deriv)
+    except TypeError:
+        raise TypeError(f"deriv must be an integer, got {type(deriv).__name__}") from None
+    if order < 0:
+        raise ValueError(f"deriv must be non-negative, got {deriv}")
+    return order
+
+
+def _row_variance(amap: Array, sigma: Any, xp: Any) -> Array:
+    """Return the diagonal of ``A Σ Aᵀ`` for a scalar, diagonal or full ``Σ``.
+
+    ``sigma`` is a Python float (``σ² I``), a vector (``diag``) or a matrix.
+    """
+    if isinstance(sigma, float):
+        return sigma * xp.sum(amap * amap, axis=1)
+    if len(sigma.shape) == 1:
+        return xp.sum(amap * amap * sigma[None, :], axis=1)
+    return xp.sum((amap @ sigma) * amap, axis=1)
+
+
+def _smooth_sigma(fit: SmoothResult, sigma_e: Any, n_obs: int, xp: Any) -> Any:
+    """Resolve the observation-error covariance of a smooth.
+
+    ``None`` means ``σ² I`` with ``σ² = SSE / (N (n - df))``: every one of the
+    ``N`` curves spends ``df`` of its ``n`` observations on the fit.
+    """
+    if sigma_e is None:
+        n_curves = math.prod(int(size) for size in fit.fd.coefs.shape[1:])
+        dof = n_curves * (n_obs - float(fit.df))
+        if dof <= 0.0:
+            raise ValueError(
+                f"cannot estimate the error variance: df = {float(fit.df):.6g} leaves no "
+                f"residual degrees of freedom out of {n_obs} observations; pass sigma_e"
+            )
+        return float(fit.sse) / dof
+    if isinstance(sigma_e, int | float) and not isinstance(sigma_e, bool):
+        return float(sigma_e)
+    sigma = asarray(sigma_e, xp)
+    if tuple(sigma.shape) not in ((n_obs,), (n_obs, n_obs)):
+        raise ValueError(
+            f"sigma_e must be a number, a vector of {n_obs} variances or a "
+            f"({n_obs}, {n_obs}) matrix, got shape {tuple(sigma.shape)}"
+        )
+    return sigma
+
+
+def _smooth_band(
+    fit: SmoothResult, t: Any, sigma_e: Any, level: float, deriv: int
+) -> ConfidenceBand:
+    """Band of a linear smooth: ``Var x(t) = φ(t)ᵀ S Σ Sᵀ φ(t)``."""
+    if fit.constraint is not None:
+        raise ValueError(
+            f"a {fit.constraint!r} fit is not linear in the data, so it has no "
+            "standard errors of this kind"
+        )
+    if isinstance(fit.y2c_map, tuple):
+        raise ValueError(
+            "an irregular (per-curve) smooth has one data-to-coefficient map per "
+            "curve; smooth the curves one at a time to get their bands"
+        )
+    z = _normal_quantile(level)
+    xp = array_namespace(fit.fd.coefs)
+    smap = asarray(fit.y2c_map, xp)
+    n_obs = int(smap.shape[1])
+    sigma = _smooth_sigma(fit, sigma_e, n_obs, xp)
+    points = asarray(_default_grid(fit.fd.domain) if t is None else t, xp)
+    phi = asarray(fit.fd.basis(points, deriv), xp)
+    variance = _row_variance(phi @ smap, sigma, xp)
+    stderr = xp.sqrt(xp.clip(variance, 0.0, None))
+    estimate = fit.fd(points, deriv)
+    margin = z * xp.reshape(stderr, (-1,) + (1,) * (len(estimate.shape) - 1))
+    return ConfidenceBand(
+        t=points,
+        estimate=estimate,
+        stderr=stderr,
+        lower=estimate - margin,
+        upper=estimate + margin,
+        level=level,
+    )
+
+
+def _regression_bands(
+    fit: FRegressResult, t: Any, sigma_e: Any, y2c_map: Any, level: float, deriv: int
+) -> tuple[ConfidenceBand, ...]:
+    """Bands of every coefficient: ``Var β_j(t) = θ_j(t)ᵀ V_jj θ_j(t)``."""
+    z = _normal_quantile(level)
+    cov = fit.stderr(sigma_e=sigma_e, y2c_map=y2c_map).cov
+    xp = array_namespace(cov)
+    bands = []
+    start = 0
+    for name, beta in zip(fit.names, fit.beta, strict=True):
+        size = beta.basis.n_basis
+        block = cov[start : start + size, start : start + size]
+        start += size
+        points = asarray(_default_grid(beta.domain) if t is None else t, xp)
+        theta = asarray(beta.basis(points, deriv), xp)
+        variance = xp.sum((theta @ block) * theta, axis=1)
+        stderr = xp.sqrt(xp.clip(variance, 0.0, None))
+        estimate = asarray(beta(points, deriv), xp)[:, 0]
+        bands.append(
+            ConfidenceBand(
+                t=points,
+                estimate=estimate,
+                stderr=stderr,
+                lower=estimate - z * stderr,
+                upper=estimate + z * stderr,
+                level=level,
+                name=name,
+            )
+        )
+    return tuple(bands)
+
+
+@overload
+def confidence_band(
+    fit: SmoothResult,
+    t: Any = None,
+    *,
+    sigma_e: Any = None,
+    level: float = 0.95,
+    deriv: int = 0,
+    y2c_map: Any = None,
+) -> ConfidenceBand: ...
+
+
+@overload
+def confidence_band(
+    fit: FRegressResult,
+    t: Any = None,
+    *,
+    sigma_e: Any = None,
+    level: float = 0.95,
+    deriv: int = 0,
+    y2c_map: Any = None,
+) -> tuple[ConfidenceBand, ...]: ...
+
+
+def confidence_band(
+    fit: SmoothResult | FRegressResult,
+    t: Any = None,
+    *,
+    sigma_e: Any = None,
+    level: float = 0.95,
+    deriv: int = 0,
+    y2c_map: Any = None,
+) -> ConfidenceBand | tuple[ConfidenceBand, ...]:
+    r"""Pointwise confidence band of a smooth or of regression coefficients.
+
+    Replaces the variance computations R users build from ``smooth.basis``'s
+    ``y2cMap`` and from ``fRegress.stderr`` (Ramsay, Hooker and Graves, 2009,
+    sections 5.5 and 9.4).  Both fits are linear in the data, so the
+    covariance of their coefficients follows from the error covariance ``Σ``:
+
+    * a smooth has coefficients ``c = S y`` (``S`` its ``y2c_map``) and
+      ``Var x(t) = φ(t)ᵀ S Σ Sᵀ φ(t)``, with ``φ`` the basis (or its
+      ``deriv``-th derivative);
+    * a regression has coefficient covariance ``V`` from
+      :meth:`~fabel.regression.FRegressResult.stderr` and
+      ``Var β_j(t) = θ_j(t)ᵀ V_jj θ_j(t)``, with ``θ_j`` the basis of the
+      ``j``-th coefficient.
+
+    The band is ``estimate ± z · stderr`` with ``z`` the ``(1 + level) / 2``
+    normal quantile.  It is pointwise: it covers the truth at each ``t`` with
+    probability ``level``, not along the whole curve at once, and it ignores
+    the bias the roughness penalty introduces.
+
+    Parameters
+    ----------
+    fit : SmoothResult or FRegressResult
+        A fit from :func:`~fabel.smoothing.smooth` (unconstrained, with the
+        observation points shared by every curve) or from
+        :func:`~fabel.regression.fregress`.
+    t : array, optional
+        Evaluation points.  Default: 101 equally spaced points over the domain
+        (of each coefficient, for a regression).
+    sigma_e : float or array, optional
+        Covariance ``Σ`` of the observation errors.  For a smooth: a number
+        (``σ² I``), a vector of ``n_obs`` variances (a diagonal ``Σ``, e.g. the
+        pointwise residual variance across curves) or an ``(n_obs, n_obs)``
+        matrix; by default ``σ² I`` with ``σ² = SSE / (N (n_obs - df))`` for
+        ``N`` curves.  For a regression it is passed to
+        :meth:`~fabel.regression.FRegressResult.stderr`: optional for a scalar
+        response (default ``SSE / (n - df)``), required for a functional one.
+    level : float, optional
+        Pointwise coverage, strictly between 0 and 1.  Default ``0.95``.
+    deriv : int, optional
+        Derivative order of the band.  Default ``0``.
+    y2c_map : array, optional
+        Regression only: data-to-coefficient map of the response smooth,
+        passed to :meth:`~fabel.regression.FRegressResult.stderr`.
+
+    Returns
+    -------
+    ConfidenceBand or tuple of ConfidenceBand
+        One band for a smooth; one band per term, in model order, for a
+        regression.
+
+    Raises
+    ------
+    ValueError
+        If ``level`` or ``sigma_e`` is invalid, the smooth is constrained or
+        irregular, ``y2c_map`` is given for a smooth, or a functional-response
+        regression lacks ``sigma_e``.
+    TypeError
+        If ``fit`` is neither a smooth nor a regression, or ``deriv`` is not an
+        integer.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from fabel.regression import fregress
+    >>> from fabel.stats import confidence_band
+    >>> z = np.linspace(-1.0, 1.0, 30)
+    >>> model = fregress(1.0 + 2.0 * z + 0.1 * np.cos(9.0 * z), [1.0, z])
+    >>> const, slope = confidence_band(model)
+    >>> slope.name, bool(np.all(slope.lower < 2.0) and np.all(slope.upper > 2.0))
+    ('x1', True)
+    """
+    order = _check_deriv(deriv)
+    if isinstance(fit, SmoothResult):
+        if y2c_map is not None:
+            raise ValueError("y2c_map applies to a regression; a smooth carries its own")
+        return _smooth_band(fit, t, sigma_e, level, order)
+    if isinstance(fit, FRegressResult):
+        return _regression_bands(fit, t, sigma_e, y2c_map, level, order)
+    raise TypeError(f"fit must be a SmoothResult or an FRegressResult, got {type(fit).__name__}")
+
+
+# --------------------------------------------------------------------------- #
+# plots
+# --------------------------------------------------------------------------- #
+
+
+def plot_beta(
+    fit: FRegressResult | ConfidenceBand | Sequence[ConfidenceBand],
+    t: Any = None,
+    *,
+    level: float = 0.95,
+    sigma_e: Any = None,
+    y2c_map: Any = None,
+    axes: Sequence[Axes] | None = None,
+    **kwargs: Any,
+) -> list[Axes]:
+    """Plot regression coefficients with their pointwise confidence limits.
+
+    Replaces R's ``plotbeta``: one panel per coefficient, the estimate as a
+    solid line, the limits dashed, and a dotted zero line when the band
+    crosses zero (R's ``zerofind``).
+
+    Parameters
+    ----------
+    fit : FRegressResult, ConfidenceBand or sequence of ConfidenceBand
+        A fitted regression (its bands are computed with
+        :func:`confidence_band`), or bands computed already.
+    t : array, optional
+        Evaluation points, used when ``fit`` is a regression.
+    level : float, optional
+        Pointwise coverage, used when ``fit`` is a regression.  Default
+        ``0.95``.
+    sigma_e, y2c_map : optional
+        Passed to :func:`confidence_band` when ``fit`` is a regression.
+    axes : sequence of matplotlib.axes.Axes, optional
+        One axes per band.  A new figure with stacked panels when omitted.
+    **kwargs
+        Passed to :meth:`matplotlib.axes.Axes.plot` for the estimates.
+
+    Returns
+    -------
+    list of matplotlib.axes.Axes
+        The axes drawn on, one per band, each titled with its term name.
+
+    Raises
+    ------
+    ValueError
+        If ``axes`` does not hold one axes per band.
+
+    Examples
+    --------
+    >>> import matplotlib
+    >>> matplotlib.use("Agg")
+    >>> import numpy as np
+    >>> from fabel.regression import fregress
+    >>> from fabel.stats import plot_beta
+    >>> z = np.linspace(-1.0, 1.0, 30)
+    >>> model = fregress(z + 0.1 * np.cos(9.0 * z), [1.0, z])
+    >>> [ax.get_title() for ax in plot_beta(model)]
+    ['x0', 'x1']
+    """
+    bands: Sequence[ConfidenceBand]
+    if isinstance(fit, FRegressResult):
+        bands = confidence_band(fit, t, sigma_e=sigma_e, level=level, y2c_map=y2c_map)
+    elif isinstance(fit, ConfidenceBand):
+        bands = (fit,)
+    else:
+        bands = tuple(fit)
+    panels = _plot.panel_axes(len(bands)) if axes is None else list(axes)
+    if len(panels) != len(bands):
+        raise ValueError(f"axes must hold one axes per band: {len(bands)}, got {len(panels)}")
+    for band, ax in zip(bands, panels, strict=True):
+        band.plot(ax=ax, **kwargs)
+    return panels
+
+
+def cycleplot(
+    fd: FData,
+    y: FData | None = None,
+    *,
+    ax: Axes | None = None,
+    n_points: int = 201,
+    **kwargs: Any,
+) -> Axes:
+    """Plot the cycles of a bivariate functional observation (R's ``cycleplot.fd``).
+
+    Each curve traces ``(x(t), y(t))`` over its domain, so a periodic pair --
+    hip against knee angle over a gait cycle, temperature against
+    precipitation over a year -- draws one closed loop per curve.  To see the
+    cycles one at a time, pass ``fd[i]``.
+
+    Parameters
+    ----------
+    fd : FData
+        Curves with two variables, or the first coordinate when ``y`` is given.
+    y : FData, optional
+        The second coordinate, with one variable and as many curves as ``fd``.
+    ax : matplotlib.axes.Axes, optional
+        Axes to draw on.  A new figure is created when omitted.
+    n_points : int, optional
+        Size of the evaluation grid over the domain.  Default ``201``, as in R.
+    **kwargs
+        Passed to :meth:`matplotlib.axes.Axes.plot`.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes drawn on, with one line per curve.
+
+    Raises
+    ------
+    ValueError
+        If the curves are not bivariate, ``fd`` and ``y`` disagree in their
+        number of curves or domain, or ``n_points < 2``.
+
+    Examples
+    --------
+    >>> import matplotlib
+    >>> matplotlib.use("Agg")
+    >>> import numpy as np
+    >>> from fabel import FData, Fourier
+    >>> from fabel.stats import cycleplot
+    >>> basis = Fourier(domain=(0.0, 1.0), n_basis=3)
+    >>> coefs = np.zeros((3, 2, 2))
+    >>> coefs[1, :, 0] = coefs[2, :, 1] = 1.0
+    >>> len(cycleplot(FData(coefs, basis)).lines)
+    2
+    """
+    if n_points < 2:
+        raise ValueError(f"n_points must be at least 2, got {n_points}")
+    nxp = default_namespace()
+    grid = nxp.linspace(fd.domain[0], fd.domain[1], n_points, dtype=nxp.float64)
+    if y is None:
+        if fd.n_vars != 2:
+            raise ValueError(f"cycleplot needs curves with two variables, got {fd.n_vars}")
+        values = to_numpy(fd(grid))
+        first, second = values[:, :, 0], values[:, :, 1]
+    else:
+        if fd.n_vars != 1 or y.n_vars != 1:
+            raise ValueError("with a second coordinate, both FData must hold one variable")
+        if fd.n_curves != y.n_curves or not _same_domain(fd.domain, y.domain):
+            raise ValueError(
+                "the two coordinates must have the same number of curves and domain, got "
+                f"{fd.n_curves} on {fd.domain} and {y.n_curves} on {y.domain}"
+            )
+        first = to_numpy(fd(grid)).reshape(n_points, -1)
+        second = to_numpy(y(grid)).reshape(n_points, -1)
+    ax = _plot.cycle_lines(first, second, ax, **kwargs)
+    ax.set_xlabel("x(t)")
+    ax.set_ylabel("y(t)")
+    return ax
+
+
+def plot_scores(
+    scores: Any,
+    components: tuple[int, int] = (0, 1),
+    *,
+    ax: Axes | None = None,
+    labels: Sequence[Any] | None = None,
+    **kwargs: Any,
+) -> Axes:
+    """Scatter two principal component scores against each other (R's ``plotscores``).
+
+    Parameters
+    ----------
+    scores : FPCA or array
+        A fitted :class:`~fabel.decomposition.FPCA` (its ``scores`` are used,
+        and its ``varprop`` labels the axes) or a score matrix of shape
+        ``(n_curves, n_components)``.
+    components : tuple of int, optional
+        Zero-based indices of the two components.  Default ``(0, 1)``.
+    ax : matplotlib.axes.Axes, optional
+        Axes to draw on.  A new figure is created when omitted.
+    labels : sequence, optional
+        One label per curve, written next to its point.
+    **kwargs
+        Passed to :meth:`matplotlib.axes.Axes.scatter`.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes drawn on; the points are its single collection.
+
+    Raises
+    ------
+    ValueError
+        If the scores are not a matrix, a component index is out of range, or
+        ``labels`` has the wrong length.
+
+    Examples
+    --------
+    >>> import matplotlib
+    >>> matplotlib.use("Agg")
+    >>> import numpy as np
+    >>> from fabel.stats import plot_scores
+    >>> ax = plot_scores(np.array([[1.0, 2.0], [3.0, -1.0], [0.0, 0.5]]))
+    >>> ax.collections[0].get_offsets().shape
+    (3, 2)
+    """
+    fitted = hasattr(scores, "scores")
+    matrix = to_numpy(scores.scores if fitted else scores)
+    varprop = to_numpy(scores.varprop) if fitted else None
+    if len(matrix.shape) != 2:
+        raise ValueError(
+            f"scores must be a (n_curves, n_components) matrix, got shape {matrix.shape}"
+        )
+    n_curves, n_components = int(matrix.shape[0]), int(matrix.shape[1])
+    first, second = (operator.index(c) for c in components)
+    for index in (first, second):
+        if not 0 <= index < n_components:
+            raise ValueError(f"component {index} is out of range for {n_components} components")
+    if labels is not None and len(labels) != n_curves:
+        raise ValueError(f"labels must have one entry per curve ({n_curves}), got {len(labels)}")
+
+    def axis_label(index: int) -> str:
+        text = f"Harmonic {index + 1} score"
+        if varprop is None:
+            return text
+        return f"{text} ({100.0 * float(varprop[index]):.1f}%)"
+
+    return _plot.score_scatter(
+        matrix, (first, second), ax, labels, axis_label(first), axis_label(second), **kwargs
+    )
