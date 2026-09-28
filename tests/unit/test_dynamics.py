@@ -18,7 +18,8 @@ from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 
 from fabel import LDO, BSpline, Constant, FData, Fourier, Monomial
-from fabel.dynamics import PDA, phase_plane
+from fabel.dynamics import PDA, PDAStability, phase_plane
+from fabel.smoothing import smooth
 
 TWO_PI = 2.0 * np.pi
 
@@ -51,6 +52,21 @@ def oscillator_system(n_curves: int = 3, seed: int = 1) -> FData:
         # cos(t + p) = cos p cos t - sin p sin t
         coefs[1, n, 1], coefs[2, n, 1] = -r * np.sin(p) * scale, r * np.cos(p) * scale
     return FData(coefs, basis)
+
+
+def forced_curves(n_curves: int = 4, seed: int = 3) -> tuple[FData, FData]:
+    """Curves ``x = a sin t + b cos t`` and inputs ``u`` with ``Dx = -x + u`` exactly.
+
+    ``Dx + x = (a - b) sin t + (a + b) cos t``, which is ``u`` for each curve.
+    """
+    rng = np.random.default_rng(seed)
+    basis = Fourier(domain=(0.0, TWO_PI), n_basis=3)
+    a, b = rng.normal(size=(2, n_curves))
+    x = np.zeros((3, n_curves))
+    u = np.zeros((3, n_curves))
+    x[1], x[2] = a, b
+    u[1], u[2] = a - b, a + b
+    return FData(x, basis), FData(u, basis)
 
 
 def quadratic_curve() -> FData:
@@ -239,6 +255,304 @@ def test_solve_a_system() -> None:
 def test_solve_a_single_point_returns_the_initial_value() -> None:
     pda = PDA(order=2, n_grid=None).fit(harmonic_curves())
     np.testing.assert_allclose(pda.solve([1.0], [0.25, 3.0]), [0.25])
+
+
+# --------------------------------------------------------------------------- #
+# forcing functions
+# --------------------------------------------------------------------------- #
+
+
+def test_forcing_weights_recover_the_forced_equation() -> None:
+    x, u = forced_curves()
+    pda = PDA(order=1, n_grid=None).fit(x, forcing=u)
+    assert float(pda.weights_[0].coefs[0, 0]) == pytest.approx(1.0, abs=1e-12)
+    assert len(pda.forcing_weights_) == 1
+    assert float(pda.forcing_weights_[0].coefs[0, 0]) == pytest.approx(1.0, abs=1e-12)
+    np.testing.assert_allclose(pda.residuals_(np.linspace(0.0, TWO_PI, 9)), 0.0, atol=1e-10)
+
+
+def test_unforced_fit_has_no_forcing_weights() -> None:
+    assert PDA(order=2).fit(harmonic_curves()).forcing_weights_ == ()
+    assert PDA(order=1).fit(oscillator_system()).forcing_weights_ == ()
+
+
+def test_forcing_weight_scales_inversely_with_the_input() -> None:
+    x, u = forced_curves()
+    half = FData(0.5 * np.asarray(u.coefs), u.basis)
+    pda = PDA(order=1, n_grid=None).fit(x, forcing=[half])
+    assert float(pda.forcing_weights_[0].coefs[0, 0]) == pytest.approx(2.0, abs=1e-11)
+
+
+@settings(max_examples=20, deadline=None)
+@given(
+    scale=st.floats(min_value=1e-2, max_value=1e2),
+    seed=st.integers(min_value=0, max_value=10_000),
+)
+def test_forced_weights_are_invariant_to_scaling_curves_and_inputs(scale: float, seed: int) -> None:
+    rng = np.random.default_rng(seed)
+    basis = BSpline(domain=(0.0, 1.0), n_basis=9, order=5)
+    curves = FData(rng.normal(size=(9, 4)), basis)
+    inputs = FData(rng.normal(size=(9, 4)), basis)
+    a = PDA(order=1).fit(curves, forcing=inputs)
+    b = PDA(order=1).fit(
+        FData(scale * np.asarray(curves.coefs), basis),
+        forcing=FData(scale * np.asarray(inputs.coefs), basis),
+    )
+    np.testing.assert_allclose(b.weights_[0].coefs, a.weights_[0].coefs, rtol=1e-7, atol=1e-10)
+    np.testing.assert_allclose(
+        b.forcing_weights_[0].coefs, a.forcing_weights_[0].coefs, rtol=1e-7, atol=1e-10
+    )
+
+
+def test_a_single_forcing_curve_is_shared_by_all_curves() -> None:
+    basis = BSpline(domain=(0.0, 1.0), n_basis=9, order=5)
+    rng = np.random.default_rng(4)
+    curves = FData(rng.normal(size=(9, 3)), basis)
+    one = FData(rng.normal(size=(9, 1)), basis)
+    three = FData(np.repeat(np.asarray(one.coefs), 3, axis=1), basis)
+    shared = PDA(order=1).fit(curves, forcing=one)
+    repeated = PDA(order=1).fit(curves, forcing=three)
+    np.testing.assert_allclose(
+        shared.forcing_weights_[0].coefs, repeated.forcing_weights_[0].coefs, rtol=1e-12
+    )
+    np.testing.assert_allclose(shared.residuals_.coefs, repeated.residuals_.coefs, atol=1e-12)
+
+
+def test_several_forcing_functions_with_their_own_bases_and_penalties() -> None:
+    x, u = forced_curves(6)
+    rng = np.random.default_rng(7)
+    extra = FData(rng.normal(size=(3, 6)), u.basis)
+    bspline = BSpline(domain=(0.0, TWO_PI), n_basis=6)
+    pda = PDA(
+        order=1,
+        n_grid=None,
+        forcing_basis=[Constant(domain=(0.0, TWO_PI)), bspline],
+        forcing_lam=[0.0, 1e-2],
+    ).fit(x, forcing=[u, extra])
+    first, second = pda.forcing_weights_
+    assert isinstance(first.basis, Constant)
+    assert second.basis is bspline
+    assert float(first.coefs[0, 0]) == pytest.approx(1.0, abs=1e-8)
+    np.testing.assert_allclose(second(np.linspace(0.0, TWO_PI, 7)), 0.0, atol=1e-8)
+
+
+def test_the_forcing_penalty_smooths_the_forcing_weight() -> None:
+    basis = BSpline(domain=(0.0, 1.0), n_basis=9, order=5)
+    rng = np.random.default_rng(5)
+    curves = FData(rng.normal(size=(9, 4)), basis)
+    inputs = FData(rng.normal(size=(9, 4)), basis)
+    wbasis = BSpline(domain=(0.0, 1.0), n_basis=7)
+    rough = PDA(order=1, forcing_basis=wbasis).fit(curves, forcing=inputs)
+    smoothed = PDA(order=1, forcing_basis=wbasis, forcing_lam=10.0).fit(curves, forcing=inputs)
+    grid = np.linspace(0.0, 1.0, 201)
+    rough_curvature = np.sum(rough.forcing_weights_[0](grid, 2) ** 2)
+    smooth_curvature = np.sum(smoothed.forcing_weights_[0](grid, 2) ** 2)
+    assert smooth_curvature < rough_curvature
+
+
+def test_a_forced_system_with_an_unforced_equation() -> None:
+    # x1 + phi0 (phi0 the constant Fourier function) and x2 solve
+    # D x1 = x2 and D x2 = -(x1 + phi0) + phi0: equation 2 is forced by phi0.
+    curves = oscillator_system()
+    coefs = np.asarray(curves.coefs).copy()
+    coefs[0, :, 0] = 1.0
+    phi0 = FData(np.array([[1.0], [0.0], [0.0]]), curves.basis)
+    pda = PDA(order=1, n_grid=None).fit(FData(coefs, curves.basis), forcing=[None, phi0])
+    assert pda.forcing_weights_[0] == ()
+    (alpha,) = pda.forcing_weights_[1]
+    assert float(alpha.coefs[0, 0]) == pytest.approx(1.0, abs=1e-9)
+    assert float(pda.weights_[1][0][0].coefs[0, 0]) == pytest.approx(1.0, abs=1e-9)
+    assert float(pda.weights_[0][1][0].coefs[0, 0]) == pytest.approx(-1.0, abs=1e-9)
+
+
+def test_transform_and_fit_transform_with_forcing() -> None:
+    x, u = forced_curves()
+    pda = PDA(order=1, n_grid=None).fit(x, forcing=u)
+    fresh_x, fresh_u = forced_curves(2, seed=11)
+    residuals = pda.transform(fresh_x, forcing=fresh_u)
+    np.testing.assert_allclose(residuals(np.linspace(0.0, TWO_PI, 7)), 0.0, atol=1e-10)
+    both = PDA(order=1).fit_transform(x, forcing=u)
+    np.testing.assert_allclose(both.coefs, PDA(order=1).fit(x, forcing=u).residuals_.coefs)
+
+
+def test_transform_needs_matching_forcing() -> None:
+    x, u = forced_curves()
+    forced = PDA(order=1).fit(x, forcing=u)
+    with pytest.raises(ValueError, match="forcing functions per equation"):
+        forced.transform(x)
+    with pytest.raises(ValueError, match="forcing functions per equation"):
+        PDA(order=1).fit(x).transform(x, forcing=u)
+
+
+def decaying_to_a_level() -> tuple[PDA, FData]:
+    """PDA of solutions of ``x'' + 1.5 x' + 2 x = 3`` (level 1.5) forced by ``u = 1``."""
+    domain = (0.0, 30.0)
+    t = np.linspace(0.0, 30.0, 601)
+    omega = np.sqrt(2.0 - 0.75**2)
+    decay = np.exp(-0.75 * t)
+    y = np.column_stack(
+        [
+            1.5 + decay * np.cos(omega * t),
+            1.5 + decay * np.sin(omega * t),
+            1.5 - decay * (np.cos(omega * t) + 0.5 * np.sin(omega * t)),
+        ]
+    )
+    basis = BSpline(domain=domain, n_basis=120, order=6)
+    curves = smooth(y, t, basis=basis, lam=0.0).fd
+    one = FData(np.array([1.0]), Constant(domain=domain))
+    return PDA(order=2, n_grid=1001).fit(curves, forcing=one), one
+
+
+def test_solve_with_forcing_follows_the_inhomogeneous_equation() -> None:
+    pda, one = decaying_to_a_level()
+    beta0, beta1 = (float(w.coefs[0, 0]) for w in pda.weights_)
+    alpha = float(pda.forcing_weights_[0].coefs[0, 0])
+    assert (beta0, beta1, alpha) == pytest.approx((2.0, 1.5, 3.0), rel=1e-4)
+    grid = np.linspace(0.0, 30.0, 7)
+    level = alpha / beta0
+    forced = pda.solve(grid, [level, 0.0], forcing=one)
+    np.testing.assert_allclose(forced, level, rtol=1e-8)
+    free = pda.solve(grid, [level, 0.0])
+    assert abs(free[-1]) < 1e-6
+    with pytest.raises(ValueError, match="1 curves"):
+        pda.solve(grid, [0.0, 0.0], forcing=FData(np.ones((1, 2)), one.basis))
+
+
+@pytest.mark.parametrize(
+    ("forcing", "error", "match"),
+    [
+        ("not data", TypeError, "FData"),
+        ([np.ones(3)], TypeError, "FData"),
+        ("three curves", ValueError, "curves"),
+        ("two variables", ValueError, "one variable"),
+        ("other domain", ValueError, "domain"),
+    ],
+)
+def test_invalid_forcing(forcing: Any, error: type[Exception], match: str) -> None:
+    x, u = forced_curves()
+    value = (
+        {
+            "three curves": FData(np.ones((3, 3)), u.basis),
+            "two variables": FData(np.ones((3, 4, 2)), u.basis),
+            "other domain": FData(np.ones((3, 1)), Fourier(domain=(0.0, 1.0), n_basis=3)),
+        }.get(forcing, forcing)
+        if isinstance(forcing, str)
+        else forcing
+    )
+    with pytest.raises(error, match=match):
+        PDA(order=1).fit(x, forcing=value)
+
+
+def test_invalid_system_forcing() -> None:
+    curves = oscillator_system()
+    u = FData(np.ones((3, 1)), curves.basis)
+    with pytest.raises(ValueError, match="one forcing entry per equation"):
+        PDA(order=1).fit(curves, forcing=u)
+    with pytest.raises(ValueError, match="2 entries"):
+        PDA(order=1).fit(curves, forcing=[u])
+
+
+@pytest.mark.parametrize(
+    ("params", "error", "match"),
+    [
+        ({"forcing_lam": -1.0}, ValueError, "forcing_lam"),
+        ({"forcing_lam": [0.0, 0.0]}, ValueError, "forcing_lam"),
+        ({"forcing_lam": ["x"]}, TypeError, "forcing_lam"),
+        ({"forcing_basis": Constant(domain=(0.0, 1.0))}, ValueError, "domain"),
+        ({"forcing_basis": [None, None]}, ValueError, "forcing_basis"),
+    ],
+)
+def test_invalid_forcing_parameters(
+    params: dict[str, Any], error: type[Exception], match: str
+) -> None:
+    x, u = forced_curves()
+    with pytest.raises(error, match=match):
+        PDA(order=1, **params).fit(x, forcing=u)
+
+
+def test_system_forcing_parameters_per_equation() -> None:
+    curves = oscillator_system()
+    u = FData(np.ones((3, 1)), curves.basis)
+    bspline = BSpline(domain=(0.0, TWO_PI), n_basis=5)
+    pda = PDA(order=1, n_grid=None, forcing_basis=[None, [bspline]], forcing_lam=[0.0, [1.0]]).fit(
+        curves, forcing=[u, [u]]
+    )
+    assert isinstance(pda.forcing_weights_[0][0].basis, Constant)
+    assert pda.forcing_weights_[1][0].basis is bspline
+    with pytest.raises(ValueError, match="one per equation"):
+        PDA(order=1, forcing_basis=[None]).fit(curves, forcing=[u, u])
+
+
+# --------------------------------------------------------------------------- #
+# stability
+# --------------------------------------------------------------------------- #
+
+
+def test_stability_of_the_harmonic_equation() -> None:
+    result = PDA(order=2, n_grid=None).fit(harmonic_curves()).stability(n_points=5)
+    assert isinstance(result, PDAStability)
+    np.testing.assert_allclose(result.t, np.linspace(0.0, TWO_PI, 5))
+    np.testing.assert_allclose(result.eigenvalues, np.tile([1j, -1j], (5, 1)), atol=1e-10)
+    np.testing.assert_array_equal(result.limits, 0.0)
+
+
+def test_stability_of_a_system_at_given_times() -> None:
+    result = PDA(order=1, n_grid=None).fit(oscillator_system()).stability([0.0, 1.0, 2.0])
+    assert result.eigenvalues.shape == (3, 2)
+    np.testing.assert_allclose(np.abs(result.eigenvalues), 1.0, atol=1e-10)
+
+
+def test_eigenvalues_are_ordered_by_decreasing_modulus() -> None:
+    t = np.linspace(0.0, 1.0, 201)
+    basis = BSpline(domain=(0.0, 1.0), n_basis=30, order=6)
+    # x'' + 3x' + 2x = 0 has the roots -1 and -2
+    y = np.column_stack([np.exp(-t), np.exp(-2 * t), np.exp(-t) - 0.5 * np.exp(-2 * t)])
+    pda = PDA(order=2).fit(smooth(y, t, basis=basis, lam=0.0).fd)
+    values = pda.stability(n_points=3).eigenvalues
+    np.testing.assert_allclose(values, np.tile([-2.0, -1.0], (3, 1)), atol=1e-4)
+
+
+def test_the_equilibrium_is_where_the_forced_solution_settles() -> None:
+    pda, one = decaying_to_a_level()
+    beta0 = float(pda.weights_[0].coefs[0, 0])
+    alpha = float(pda.forcing_weights_[0].coefs[0, 0])
+    limits = pda.stability(n_points=4).limits
+    np.testing.assert_allclose(limits, np.tile([alpha / beta0, 0.0], (4, 1)), atol=1e-12)
+    settled = pda.solve(np.linspace(0.0, 30.0, 3), [0.0, 0.0], forcing=one)[-1]
+    assert settled == pytest.approx(limits[0, 0], rel=1e-8)
+
+
+def test_limits_are_nan_where_the_system_matrix_is_singular() -> None:
+    x, u = forced_curves()
+    pda = PDA(order=1).fit(x, forcing=FData(np.ones((3, 1)), u.basis))
+    pda._nested = [[[FData(np.array([0.0]), Constant(domain=pda.domain_))]]]
+    assert np.all(np.isnan(pda.stability(n_points=3).limits))
+
+
+def test_stability_uses_the_single_curve_fitting_forcing_by_default() -> None:
+    x, u = forced_curves()
+    one = FData(np.ones((3, 1)), u.basis)
+    pda = PDA(order=1).fit(x, forcing=one)
+    np.testing.assert_allclose(
+        pda.stability(n_points=4).limits, pda.stability(n_points=4, forcing=one).limits
+    )
+    several = PDA(order=1).fit(x, forcing=u)
+    with pytest.raises(ValueError, match="one curve per forcing function"):
+        several.stability()
+    with pytest.raises(ValueError, match="forcing functions per equation"):
+        PDA(order=1).fit(x).stability(forcing=one)
+    with pytest.raises(ValueError, match="n_points"):
+        pda.stability(n_points=0)
+    with pytest.raises(ValueError, match="domain"):
+        pda.stability([100.0])
+
+
+def test_stability_plot_draws_real_and_imaginary_parts() -> None:
+    result = PDA(order=2).fit(harmonic_curves()).stability(n_points=11)
+    axes = result.plot(color="k")
+    assert len(axes.lines) == 5
+    _, given_ax = plt.subplots()
+    assert result.plot(ax=given_ax) is given_ax
 
 
 # --------------------------------------------------------------------------- #
