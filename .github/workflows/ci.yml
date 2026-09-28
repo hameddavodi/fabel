@@ -35,7 +35,7 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-      - run: uv sync --extra dev --extra pandas --extra plot --extra io
+      - run: uv sync --extra dev --extra pandas --extra plot --extra io --extra torch
       - run: uv run mypy src tests tools benchmarks
 
   test:
