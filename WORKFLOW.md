@@ -85,6 +85,7 @@ Order matters: `_backend` → `basis` → `core`.
 - [x] `CHANGELOG.md`, `LICENSE` (BSD-3), `CITATION.cff`, README with badges
 - [x] Version `1.0.0` tagged. Publish command prepared but **not executed** (`twine upload` is the only human step)
   - 2026-09-27: GATE 5 green, annotated tag `v1.0.0` (local). Publish commands in PROGRESS.md "Human steps"
+- [x] Version `1.1.0` (first release named `fdatools`): GATE 5 green, tag `v1.1.0`, GitHub release with wheel + sdist. PyPI upload is the human step
 
 **GATE 5 (final):**
 ```bash

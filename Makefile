@@ -44,7 +44,7 @@ build:
 # Datasets not shipped in the package come from the data-v1 release (or FDATOOLS_DATA_DIR).
 book:
 	$(PY) tools/build_book_notebook.py
-	$(PY) -m pytest --nbmake notebooks/book_figures.ipynb
+	$(PY) -m pytest --nbmake notebooks/book_figures.ipynb notebooks/tour.ipynb
 
 # The exact GATE 5 (final) chain from WORKFLOW.md; stops at the first failure.
 gate5: export FDATOOLS_DATA_DIR := $(FDATOOLS_DATA_DIR)
@@ -55,4 +55,4 @@ gate5:
 	$(PY) -m ruff check .
 	$(PY) -m mkdocs build --strict
 	$(PY) -m build && $(PY) -m twine check dist/*
-	$(PY) -m pytest --nbmake notebooks/book_figures.ipynb
+	$(PY) -m pytest --nbmake notebooks/book_figures.ipynb notebooks/tour.ipynb

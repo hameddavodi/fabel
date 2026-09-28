@@ -7,8 +7,8 @@ abstract: >-
   basis expansions, penalised smoothing, functional principal component and
   canonical correlation analysis, functional regression, curve registration
   and principal differential analysis, with numerical parity against R.
-version: 1.0.0
-date-released: 2026-09-27
+version: 1.1.0
+date-released: 2026-09-28
 license: BSD-3-Clause
 authors:
   - family-names: Davodi

@@ -1,5 +1,5 @@
 # PROGRESS
-## Status: enhancement round merged on main 2026-09-28 (7 builders; SPEC extended on purpose), full gate green. The local tag v1.0.0 still points at the older release commit a709e6e: the cleanup wave must move it. Open: cleanup wave (owner references, independent review, GATE 5, tag), book notebook at 70 of 76 figures.
+## Status: 2026-09-28 release 1.1.0, the first under the name fdatools (renamed from fabel). Public at github.com/hameddavodi/fdatools, docs at hameddavodi.github.io/fdatools, CI green. Open: PyPI upload (needs the user's PyPI token), book notebook at 70 of 76 figures.
 ## Release 1.0.0 (2026-09-27)
 - GATE 5 (WORKFLOW.md) run on main with `.venv/bin/*` and `FABEL_DATA_DIR=data_release`, all steps green: `pytest` 1654 passed, 5 skipped, 154 strict xfail; `pytest tests/parity` 525 passed, 154 strict xfail; `mypy --strict src/fabel` clean (18 files); `ruff check .` and `ruff format --check .` clean; `mkdocs build --strict` clean; `python -m build` gives `fabel-1.0.0.tar.gz` + `fabel-1.0.0-py3-none-any.whl`, `twine check dist/*` PASSED; `pytest --nbmake notebooks/book_figures.ipynb` 1 passed.
 - `PARITY_REPORT.md` regenerated with `tools/parity_report.py`: no change (679 checks, 525 pass, 154 strict xfail, 0 fail).

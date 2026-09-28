@@ -3,7 +3,9 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
-## [Unreleased]
+## [1.1.0] - 2026-09-28
+
+First release under the name **fdatools** (the first one on PyPI).
 
 ### Changed
 - The project is renamed from **fabel** to **fdatools**: `pip install fdatools`,
@@ -19,6 +21,10 @@ All notable changes to this project are documented here. Format follows
 - `PACE(sigma2=...)` no longer raises a `RuntimeWarning` about a non-positive
   measurement-error estimate: with `sigma2` given, the estimate is kept in
   `cov_estimate_` but not used, so it is not worth a warning.
+- `FPCA`, `FCCA` and `PACE` reject a NumPy bool for `n` on every NumPy version
+  (NumPy 2.2 only warned in `operator.index`).
+- `rpy2` moved from the `dev` extra to a new `golden` extra (only
+  `tools/make_golden.py` uses it), so the development install no longer needs R.
 
 ### Added
 - `notebooks/tour.ipynb`: a full tour that uses every public module on the

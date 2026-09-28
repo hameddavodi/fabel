@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fdatools"
-version = "1.0.0"
+version = "1.1.0"
 description = "Functional data analysis for Python: a clean-room rewrite of R's fda package."
 readme = "README.md"
 license = "BSD-3-Clause"
