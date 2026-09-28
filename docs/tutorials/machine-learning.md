@@ -93,7 +93,8 @@ this API.
 
 ## 4. PyTorch: a dataset of curves
 
-The rest of this page needs the `torch` extra: `pip install fdatools[torch]`.
+The rest of this page needs the `torch` extra:
+`uv add "fdatools[torch] @ git+https://github.com/hameddavodi/fdatools@v1.1.0"`.
 `import fdatools` never imports PyTorch; `fdatools.nn` loads it on first use.
 
 `FDataDataset` serves the curves of an `FData` to a PyTorch `DataLoader`.

@@ -21,8 +21,11 @@ curve registration and principal differential analysis.
 ## Install
 
 ```bash
-pip install fdatools
+uv add "fdatools @ git+https://github.com/hameddavodi/fdatools@v1.1.0"
 ```
+
+fdatools is installed from GitHub with [uv](https://docs.astral.sh/uv/). With an
+extra, put it in brackets: `uv add "fdatools[plot] @ git+https://github.com/hameddavodi/fdatools@v1.1.0"`.
 
 | Extra | Adds |
 |---|---|

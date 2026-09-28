@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [Unreleased]
+
+### Changed
+- Install instructions use uv and GitHub (`uv add "fdatools @ git+https://github.com/hameddavodi/fdatools@v1.1.0"`):
+  fdatools is not on PyPI yet, so `pip install fdatools` does not work. The
+  README badges read the GitHub release instead of PyPI.
+
 ## [1.1.0] - 2026-09-28
 
 First release under the name **fdatools** (the first one on PyPI).
