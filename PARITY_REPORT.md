@@ -1,7 +1,7 @@
 # Parity report
 
 Fabel 1.0.0 against R `fda` 6.3.0 (R version 4.6.1 (2026-06-24)).
-Generated 2026-09-27 by `tools/parity_report.py` from a live run of `tests/parity`.
+Generated 2026-09-28 by `tools/parity_report.py` from a live run of `tests/parity`.
 
 Errors are measured on every `assert_allclose` a parity test makes:
 absolute error is `max |fabel - R|`, relative error is the normwise
@@ -10,7 +10,7 @@ that are zero up to rounding). The summary columns show
 the worst value over **passing** cases only; strict xfails (cases where R is
 demonstrably the less accurate side) are listed with their measured reason below.
 
-**Totals:** 679 parity checks -- 525 pass, 154 strict xfail (R defect), 0 fail, 0 skipped.
+**Totals:** 935 parity checks -- 724 pass, 211 strict xfail (R defect), 0 fail, 0 skipped.
 
 ## By public symbol
 
@@ -29,7 +29,7 @@ demonstrably the less accurate side) are listed with their measured reason below
 | `Constant` | create.constant.basis | 4 | 4 | 0 | 0 | pass |
 | `Polygonal` | create.polygonal.basis, polyg, polygpen | 12 | 12 | 7.11e-15 | 2.77e-15 | pass, 3 xfail (R defect) |
 | `smooth` | smooth.basis, smooth.basisPar, Data2fd, smooth.monotone, smooth.pos | 30 | 176 | 5.00e-05 | 3.02e-06 | pass, 43 xfail (R defect) |
-| `SmoothResult` | smooth.basis return list | 0 | 0 | — | — | no golden cases |
+| `SmoothResult` | smooth.basis return list | 2 | 19 | 6.77e-12 | 3.66e-13 | pass, 4 xfail (R defect) |
 | `Smoother` | (new: sklearn estimator) | 0 | 0 | — | — | no golden cases |
 | `gcv_curve` | lambda2gcv | 6 | 7 | 4.98e-10 | 4.01e-10 | pass, 2 xfail (R defect) |
 | `lambda_to_df` | lambda2df | 3 | 3 | 6.32e-13 | 1.20e-14 | pass |
@@ -38,17 +38,25 @@ demonstrably the less accurate side) are listed with their measured reason below
 | `FCCA` | cca.fd | 2 | 10 | 3.93e-12 | 6.32e-13 | pass |
 | `fregress` | fRegress, predict.fRegress, fRegress.stderr, fRegress.CV | 9 | 60 | 8.86e-09 | 6.74e-09 | pass, 34 xfail (R defect) |
 | `FRegress` | fRegress (estimator form) | 0 | 0 | — | — | no golden cases |
-| `register` | register.fd, AmpPhaseDecomp | 3 | 17 | 1.22e-04 | 3.07e-06 | pass, 10 xfail (R defect) |
-| `landmark_register` | landmarkreg | 1 | 4 | 4.92e-07 | 5.89e-07 | pass, 3 xfail (R defect) |
+| `linmod` | linmod | 4 | 25 | 4.49e-11 | 4.42e-12 | pass, 6 xfail (R defect) |
+| `register` | register.fd, AmpPhaseDecomp | 6 | 56 | 1.22e-04 | 1.93e-05 | pass, 31 xfail (R defect) |
+| `landmark_register` | landmarkreg | 2 | 4 | 4.92e-07 | 5.89e-07 | pass, 3 xfail (R defect) |
 | `Registrator` | register.fd (estimator form) | 0 | 0 | — | — | no golden cases |
-| `PDA` | pda.fd, pda.overlay | 3 | 20 | 5.40e-10 | 1.04e-09 | pass |
+| `PDA` | pda.fd, pda.overlay | 9 | 52 | 1.24e-09 | 1.32e-06 | pass |
+| `PDAStability` | eigen.pda | 2 | 10 | 9.35e-12 | 1.23e-12 | pass, 4 xfail (R defect) |
 | `phase_plane` | phaseplanePlot | 0 | 0 | — | — | no golden cases |
+| `sparse_mean` | smooth.sparse.mean | 3 | 3 | 1.17e-12 | 6.77e-15 | pass |
+| `PACE` | pcaPACE, covPACE, scoresPACE | 4 | 27 | 3.35e-10 | 4.01e-11 | pass, 11 xfail (R defect) |
+| `fit_density` | density.fd (dropped in fda 6.3.0; checked via intensity.fd / n) | 5 | 36 | 1.33e-04 | 4.27e-06 | pass, 4 xfail (R defect) |
+| `fit_intensity` | intensity.fd | 4 | 20 | 1.64e-04 | 2.79e-06 | pass, 1 xfail (R defect) |
+| `profile_ode` | CSTR2in, CSTR2, CSTRfitLS, CSTRfn, CSTRres, CSTRsse, quadset | 21 | 21 | 2.04e-06 | 1.39e-06 | pass |
 | `stats.cov` | var.fd | 1 | 1 | 4.41e-13 | 4.70e-15 | pass |
 | `stats.cor` | cor.fd | 1 | 1 | 3.22e-15 | 4.03e-15 | pass |
 | `stats.depth` | fdepth | 1 | 6 | 7.11e-15 | 4.01e-16 | pass |
 | `stats.boxplot` | fbplot, boxplot.fd | 1 | 2 | 7.82e-14 | 1.38e-14 | pass |
 | `stats.f_test` | Fperm.fd | 1 | 5 | 0 | 0 | pass, 3 xfail (R defect) |
 | `stats.t_test` | tperm.fd | 1 | 5 | 3.38e-14 | 1.44e-14 | pass |
+| `stats.confidence_band` | smooth.basis y2cMap variance, fRegress.stderr | 4 | 24 | 1.48e-12 | 1.22e-13 | pass, 6 xfail (R defect) |
 | `datasets.load_*` | data(package='fda') | 11 | 12 | 3.21e-09 | 5.94e-14 | pass |
 | `nn.BasisLayer` | (new: PyTorch layer) | 0 | 0 | — | — | no golden cases |
 | `nn.FDataDataset` | (new: PyTorch dataset) | 0 | 0 | — | — | no golden cases |
@@ -59,6 +67,12 @@ demonstrably the less accurate side) are listed with their measured reason below
 
 ## Strict xfails (R fda is the less accurate side)
 
+- `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-beta1]` (bands, rel err 2.15e-04): R integrates int temp_i(t) theta_k(t) dt approximately; Fabel's integrals are exact. R's own dense trapezoid rule (365001 points) gives int temp_1 theta_4 = 943.854155886, Fabel's value to 1e-13, while R's inprod() gives 947.596583972 (4.0e-3 off); fRegress's integrals carry the same kind of error (see tests/parity/test_regression.py). Downstream, measured relative to the largest entry: beta1 2.2e-4, df 3.1e-8, sigma2 1.8e-5, bvar 9.2e-5, the intercept standard error 3.5e-6 and the pointwise standard error of the temperature coefficient 4.9e-5.
+- `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-df]` (bands, rel err 3.11e-08): R integrates int temp_i(t) theta_k(t) dt approximately; Fabel's integrals are exact. R's own dense trapezoid rule (365001 points) gives int temp_1 theta_4 = 943.854155886, Fabel's value to 1e-13, while R's inprod() gives 947.596583972 (4.0e-3 off); fRegress's integrals carry the same kind of error (see tests/parity/test_regression.py). Downstream, measured relative to the largest entry: beta1 2.2e-4, df 3.1e-8, sigma2 1.8e-5, bvar 9.2e-5, the intercept standard error 3.5e-6 and the pointwise standard error of the temperature coefficient 4.9e-5.
+- `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-sigma2]` (bands, rel err 1.80e-05): R integrates int temp_i(t) theta_k(t) dt approximately; Fabel's integrals are exact. R's own dense trapezoid rule (365001 points) gives int temp_1 theta_4 = 943.854155886, Fabel's value to 1e-13, while R's inprod() gives 947.596583972 (4.0e-3 off); fRegress's integrals carry the same kind of error (see tests/parity/test_regression.py). Downstream, measured relative to the largest entry: beta1 2.2e-4, df 3.1e-8, sigma2 1.8e-5, bvar 9.2e-5, the intercept standard error 3.5e-6 and the pointwise standard error of the temperature coefficient 4.9e-5.
+- `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-bvar]` (bands, rel err 9.20e-05): R integrates int temp_i(t) theta_k(t) dt approximately; Fabel's integrals are exact. R's own dense trapezoid rule (365001 points) gives int temp_1 theta_4 = 943.854155886, Fabel's value to 1e-13, while R's inprod() gives 947.596583972 (4.0e-3 off); fRegress's integrals carry the same kind of error (see tests/parity/test_regression.py). Downstream, measured relative to the largest entry: beta1 2.2e-4, df 3.1e-8, sigma2 1.8e-5, bvar 9.2e-5, the intercept standard error 3.5e-6 and the pointwise standard error of the temperature coefficient 4.9e-5.
+- `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-stderr0]` (bands, rel err 3.49e-06): R integrates int temp_i(t) theta_k(t) dt approximately; Fabel's integrals are exact. R's own dense trapezoid rule (365001 points) gives int temp_1 theta_4 = 943.854155886, Fabel's value to 1e-13, while R's inprod() gives 947.596583972 (4.0e-3 off); fRegress's integrals carry the same kind of error (see tests/parity/test_regression.py). Downstream, measured relative to the largest entry: beta1 2.2e-4, df 3.1e-8, sigma2 1.8e-5, bvar 9.2e-5, the intercept standard error 3.5e-6 and the pointwise standard error of the temperature coefficient 4.9e-5.
+- `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-stderr1]` (bands, rel err 4.93e-05): R integrates int temp_i(t) theta_k(t) dt approximately; Fabel's integrals are exact. R's own dense trapezoid rule (365001 points) gives int temp_1 theta_4 = 943.854155886, Fabel's value to 1e-13, while R's inprod() gives 947.596583972 (4.0e-3 off); fRegress's integrals carry the same kind of error (see tests/parity/test_regression.py). Downstream, measured relative to the largest entry: beta1 2.2e-4, df 3.1e-8, sigma2 1.8e-5, bvar 9.2e-5, the intercept standard error 3.5e-6 and the pointwise standard error of the temperature coefficient 4.9e-5.
 - `bspline_penalty_k4_n4_dom0_1_L0` (basis, rel err 8.57e-01): With no interior knots R returns the monomial Gram (the Hilbert matrix) instead of the Bernstein-basis Gram; Fabel's [0, 0] entry is 1/7.
 - `bspline_penalty_k4_n4_dom0_1_L1` (basis, rel err 1.33e+00): Same zero-interior-knot path as L0: R's first rows are identically zero, which is impossible for a basis with nonzero first derivatives.
 - `bspline_penalty_k4_n4_dom0_1_L2` (basis, rel err 3.00e+00): R returns [[0,0,0,0],[0,0,0,0],[0,0,4,6],[0,0,6,12]]. D^2 B_0 = 6(1-t), so entry [0, 0] is the integral of 36 (1-t)^2 = 12, not 0.
@@ -115,6 +129,36 @@ demonstrably the less accurate side) are listed with their measured reason below
 - `pca_fd_gait_multivariate_nharm3-values` (decomposition, rel err 7.56e-10): R's pca.fd builds the covariance operator W V W with the Gram matrix W from inprod(), whose Romberg quadrature is only good to 4-5 digits, while it normalises with the exact Gram matrix. inprod(basis, basis) differs from R's own exact eval.penalty(basis, 0) by 9.1e-5 (absolute) on the synthetic order-4 spline, 2.6e-4 (relative) on the growth order-6 spline and 1.38e-6 on both Fourier bases (weather, gait), where the error sits on the highest-frequency pair. Substituting R's inprod() Gram into Fabel's eigenproblem reproduces R's values and harmonics to 1e-15 (lambda = 0) and 1.9e-11 (weather lambda = 1e4, which also carries R's harmonic accelerator penalty error, see test_smoothing.py). With the exact Gram the gaps are 5.3e-5 (synthetic values), 1.3e-6 (the small gait eigenvalues), 4.9e-4 / 4.6e-5 (synthetic / growth harmonics), 1.38e-6 (weather harmonics, rows 63-64) and 6.9e-8 of the largest coefficient (gait harmonics, spread over the coupled hip/knee blocks). Fabel uses the exact Gram matrix.
 - `pca_fd_gait_multivariate_nharm3-harmonics` (decomposition, rel err 6.87e-08): R's pca.fd builds the covariance operator W V W with the Gram matrix W from inprod(), whose Romberg quadrature is only good to 4-5 digits, while it normalises with the exact Gram matrix. inprod(basis, basis) differs from R's own exact eval.penalty(basis, 0) by 9.1e-5 (absolute) on the synthetic order-4 spline, 2.6e-4 (relative) on the growth order-6 spline and 1.38e-6 on both Fourier bases (weather, gait), where the error sits on the highest-frequency pair. Substituting R's inprod() Gram into Fabel's eigenproblem reproduces R's values and harmonics to 1e-15 (lambda = 0) and 1.9e-11 (weather lambda = 1e4, which also carries R's harmonic accelerator penalty error, see test_smoothing.py). With the exact Gram the gaps are 5.3e-5 (synthetic values), 1.3e-6 (the small gait eigenvalues), 4.9e-4 / 4.6e-5 (synthetic / growth harmonics), 1.38e-6 (weather harmonics, rows 63-64) and 6.9e-8 of the largest coefficient (gait harmonics, spread over the coupled hip/knee blocks). Fabel uses the exact Gram matrix.
 - `pca_fd_gait_multivariate_nharm3-scores` (decomposition, rel err 6.51e-04): R's pca.fd scores are inprod(centred curves, harmonics), a Romberg quadrature good to 4-5 digits, not the exact C' W h. Measured inside R: inprod() differs from t(C) %*% eval.penalty(basis, 0) %*% h by 0.660 on weather scores of size ~150 and by 2.2e-3 on growth scores of size 48.7. Fabel's scores are the exact inner products; the relative gaps asserted here are 1.7e-3 to 7.7e-3 (weather), 4.5e-5 (growth), 1.9e-4 (synthetic) and 6.5e-4 (gait).
+- `intensity_sine_bspline11_order3_L1_lam0-coefs` (density, rel err 2.17e-06): R's intensity.fd integrates exp(W) with a quadrature that is off by up to 1.6e-4 in its reported criterion f; its coefficients are therefore not stationary for the exact criterion, and Fabel's (exact Gauss-Legendre integral, gradient norm < 2e-13) give a lower exact criterion in every case (test_fabel_improves_on_r_criterion). Exact gradient norm at R's coefficients 4.07e-5. Worst entry: coefficient 7, R 0.11139673524, Fabel 0.11140196492 (abs 5.2e-6, rel 4.7e-5).
+- `density_regina_bspline13_L2_lam0.1-coefs` (density, rel err 2.64e-06): R's intensity.fd integrates exp(W) with a quadrature that is off by up to 1.6e-4 in its reported criterion f; its coefficients are therefore not stationary for the exact criterion, and Fabel's (exact Gauss-Legendre integral, gradient norm < 2e-13) give a lower exact criterion in every case (test_fabel_improves_on_r_criterion). Exact gradient norm at R's coefficients 4.18e-5. Worst entry: coefficient 6, R -0.037409071057, Fabel -0.037405675073 (abs 3.4e-6, rel 9.1e-5).
+- `density_regina_bspline13_L2_lam0.1-log_intensity` (density, rel err 1.24e-06): R's intensity.fd integrates exp(W) with a quadrature that is off by up to 1.6e-4 in its reported criterion f; its coefficients are therefore not stationary for the exact criterion, and Fabel's (exact Gauss-Legendre integral, gradient norm < 2e-13) give a lower exact criterion in every case (test_fabel_improves_on_r_criterion). Worst entry: W(42.85), R 0.033795023457, Fabel 0.033793807749 (abs 1.2e-6, rel 3.6e-5); the intensity itself agrees to 4.3e-6.
+- `density_gamma_bspline9_L2_lam1-log_intensity` (density, rel err 1.38e-07): R's intensity.fd integrates exp(W) with a quadrature that is off by up to 1.6e-4 in its reported criterion f; its coefficients are therefore not stationary for the exact criterion, and Fabel's (exact Gauss-Legendre integral, gradient norm < 2e-13) give a lower exact criterion in every case (test_fabel_improves_on_r_criterion). Exact gradient norm at R's coefficients 1.60e-5. Worst entry: W(8.7), R 0.010768158864, Fabel 0.010768044513 (abs 1.1e-7, rel 1.1e-5).
+- `density_truncnormal_monomial3_L1_lam0-log_intensity` (density, rel err 3.07e-07): R's intensity.fd integrates exp(W) with a quadrature that is off by up to 1.6e-4 in its reported criterion f; its coefficients are therefore not stationary for the exact criterion, and Fabel's (exact Gauss-Legendre integral, gradient norm < 2e-13) give a lower exact criterion in every case (test_fabel_improves_on_r_criterion). Exact gradient norm at R's coefficients 5.16e-5. Worst entry: W(-2.1), R -0.033503115309, Fabel -0.033503752936 (abs 6.4e-7, rel 1.9e-5).
+- `test_golden_field[linmod_weather_logprecip_on_temp-beta0estfd_coefs]` (linmod, rel err 4.68e-07): R's integrals over the Fourier bases are approximate. Its harmonic-accelerator penalty of the Fourier(11) coefficient basis (eval.penalty) is 1.2e-4 (relative) off the closed form k^2 w^6 (k^2 - 1)^2, and its Fourier Gram inprod(fb11, fb11) 1.4e-6 off the identity. Fabel's exact fit is 4.7e-7 (intercept), 1.9e-6 (surface) and 3.7e-7 (fitted curves) off R, relative to the largest entry.
+- `test_golden_field[linmod_weather_logprecip_on_temp-beta1estbifd_coefs]` (linmod, rel err 1.88e-06): R's integrals over the Fourier bases are approximate. Its harmonic-accelerator penalty of the Fourier(11) coefficient basis (eval.penalty) is 1.2e-4 (relative) off the closed form k^2 w^6 (k^2 - 1)^2, and its Fourier Gram inprod(fb11, fb11) 1.4e-6 off the identity. Fabel's exact fit is 4.7e-7 (intercept), 1.9e-6 (surface) and 3.7e-7 (fitted curves) off R, relative to the largest entry.
+- `test_golden_field[linmod_weather_logprecip_on_temp-yhatfdobj_coefs]` (linmod, rel err 3.72e-07): R's integrals over the Fourier bases are approximate. Its harmonic-accelerator penalty of the Fourier(11) coefficient basis (eval.penalty) is 1.2e-4 (relative) off the closed form k^2 w^6 (k^2 - 1)^2, and its Fourier Gram inprod(fb11, fb11) 1.4e-6 off the identity. Fabel's exact fit is 4.7e-7 (intercept), 1.9e-6 (surface) and 3.7e-7 (fitted curves) off R, relative to the largest entry.
+- `test_golden_field[linmod_synthetic_bspline-beta0estfd_coefs]` (linmod, rel err 5.91e-05): R's inprod of cubic B-spline bases is 2.2e-5 (Gram) and 1.1e-4 (the covariate integrals int x_i theta_s) off the exact values; Fabel's exact intercept and surface are 5.9e-5 and 9.6e-5 off R. With R's own matrices (r_integrals) Fabel reproduces R's coefficients to 1e-15 (test_normal_equations_with_r_integrals). R's fitted curves are further a 201-point least-squares fit, not the L2 projection: 1.4e-3 off Fabel (test_r_fitted_curves_are_a_grid_least_squares_fit).
+- `test_golden_field[linmod_synthetic_bspline-beta1estbifd_coefs]` (linmod, rel err 9.55e-05): R's inprod of cubic B-spline bases is 2.2e-5 (Gram) and 1.1e-4 (the covariate integrals int x_i theta_s) off the exact values; Fabel's exact intercept and surface are 5.9e-5 and 9.6e-5 off R. With R's own matrices (r_integrals) Fabel reproduces R's coefficients to 1e-15 (test_normal_equations_with_r_integrals). R's fitted curves are further a 201-point least-squares fit, not the L2 projection: 1.4e-3 off Fabel (test_r_fitted_curves_are_a_grid_least_squares_fit).
+- `test_golden_field[linmod_synthetic_bspline-yhatfdobj_coefs]` (linmod, rel err 1.38e-03): R's inprod of cubic B-spline bases is 2.2e-5 (Gram) and 1.1e-4 (the covariate integrals int x_i theta_s) off the exact values; Fabel's exact intercept and surface are 5.9e-5 and 9.6e-5 off R. With R's own matrices (r_integrals) Fabel reproduces R's coefficients to 1e-15 (test_normal_equations_with_r_integrals). R's fitted curves are further a 201-point least-squares fit, not the L2 projection: 1.4e-3 off Fabel (test_r_fitted_curves_are_a_grid_least_squares_fit).
+- `test_monotone_derivatives_match_eval_monfd[0-monfd_growth_girl1]` (monotone_derivs, rel err 2.44e-06): R's eval.monfd(t, W, 0) integrates exp W numerically: measured against scipy.integrate.quad (tol 1e-14) R is off by 2.4e-6 (growth) / 1.8e-6 (fixed W) of the range, 9e-5 relative pointwise; Fabel by at most 4.3e-14
+- `test_monotone_derivatives_match_eval_monfd[0-monfd_posfd_fixed_w_two_curves]` (monotone_derivs, rel err 1.81e-06): R's eval.monfd(t, W, 0) integrates exp W numerically: measured against scipy.integrate.quad (tol 1e-14) R is off by 2.4e-6 (growth) / 1.8e-6 (fixed W) of the range, 9e-5 relative pointwise; Fabel by at most 4.3e-14
+- `test_positive_derivatives_match_eval_posfd[2]` (monotone_derivs, rel err 8.66e-01): R's eval.posfd(t, W, 2) returns exp(W) D2W (to 1.5e-16), not D2 exp W = exp(W) (D2W + (DW)^2); measured 0.87 relative difference
+- `test_scaled_monotone_derivatives_match_predict[0]` (monotone_derivs, rel err 1.26e-06): R's eval.monfd(t, W, 0) integrates exp W numerically: measured against scipy.integrate.quad (tol 1e-14) R is off by 2.4e-6 (growth) / 1.8e-6 (fixed W) of the range, 9e-5 relative pointwise; Fabel by at most 4.3e-14
+- `pace_growth_bspline6_covlambda0-values` (pace, rel err 7.21e-06): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_growth_bspline6_covlambda0-varprop` (pace, rel err 6.78e-06): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_growth_bspline6_covlambda0-harmonics` (pace, rel err 9.03e-05): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_growth_bspline6_covlambda10-cov_coefs` (pace, rel err 1.16e-05): R's covPACE penalty is lambda (W (x) P + P (x) W) with W = inprod(basis, basis) (Romberg, 4.0e-5 off the exact Gram for this order-4 spline on [1, 18]) and the exact P = eval.penalty(basis, 2). With R's inprod() W (recorded in the golden file) Fabel reproduces R's surface to 1.9e-14 (test_same_math_with_r_inprod_gram); with the exact W the relative gap is 1.2e-5. Unpenalised surfaces (cov lambda 0) match to 6e-14.
+- `pace_growth_bspline6_covlambda10-values` (pace, rel err 4.48e-06): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_growth_bspline6_covlambda10-varprop` (pace, rel err 4.05e-06): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_growth_bspline6_covlambda10-harmonics` (pace, rel err 5.86e-05): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_weather_fourier5_bspline7-values` (pace, rel err 8.95e-06): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_weather_fourier5_bspline7-varprop` (pace, rel err 7.03e-06): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_weather_fourier5_bspline7-harmonics` (pace, rel err 1.59e-04): R's pcaPACE builds the covariance operator J C J' with J = inprod(harmonic basis, covariance basis), a Romberg quadrature good to 4-5 digits, and normalises with the exact eval.penalty Gram. Measured max\|inprod(b, b) - eval.penalty(b, 0)\|: 4.0e-5 for the order-4 spline with 6 functions on [1, 18], 2.9e-4 for the one with 7 functions on [1, 365]; it is exactly 0 for monomial bases. With R's own inprod() J (recorded in the golden file) Fabel's eigenproblem reproduces R's values to 1.5e-15 and harmonics to 1.7e-14 (test_same_math_with_r_inprod_gram). With the exact J the relative gaps are 7.2e-6 / 4.5e-6 / 9.0e-6 (values) and 9.0e-5 / 5.9e-5 / 1.6e-4 (harmonics) for growth cov-lambda 0 / growth cov-lambda 10 / weather. Fabel uses the exact J.
+- `pace_weather_fourier5_bspline7-scores` (pace, rel err 4.52e+00): R's scoresPACE does not compute the conditional expectation Lambda Xi_i' Sigma_i^-1 (y_i - mu_i). Measured as a black box: every finite row of R's score matrix is exactly parallel (to 1e-12) to lambda_k * xi_k(tau) for ONE integer day tau (test_r_scores_use_one_point), so each curve's score vector has rank one in the harmonics, and 33 of the 35 rows are NA. On a dense regular probe (20 points, all curves at t = 1..20) curve i used tau = i, and a unit change of the first observation moved the scores about 365 times more than the same change of the fifth; changing another curve's data moved them too. The same function errors ('evalarg contains 1 NA') for non-integer times such as growth ages. Fabel implements the published PACE estimator (Yao, Mueller & Wang 2005).
+- `test_limits_match_r_limvals[pda_forced_refinery_constant]` (pda_forcing, rel err 2.00e+00): R 6.3.0 eigen.pda limvals is not the equilibrium -A(t)^-1 f(t): measured on refinery (one first-order equation) it is exactly -z* (sign flipped); for the second-order equation it is (0, -a/b0) where z* = (a/b0, 0); for the forced two-equation system it is (-0.5000000338, -1.9e-8) where z* = (0.4999999929, -0.3861262521) -- the second equation's forcing is lost. Fabel returns z*, checked against the ODE solution in tests/unit/test_dynamics.py.
+- `test_limits_match_r_limvals[pda_forced_refinery_two_forcings]` (pda_forcing, rel err 2.00e+00): R 6.3.0 eigen.pda limvals is not the equilibrium -A(t)^-1 f(t): measured on refinery (one first-order equation) it is exactly -z* (sign flipped); for the second-order equation it is (0, -a/b0) where z* = (a/b0, 0); for the forced two-equation system it is (-0.5000000338, -1.9e-8) where z* = (0.4999999929, -0.3861262521) -- the second equation's forcing is lost. Fabel returns z*, checked against the ODE solution in tests/unit/test_dynamics.py.
+- `test_limits_match_r_limvals[pda_forced_order2_constant]` (pda_forcing, rel err 1.00e+00): R 6.3.0 eigen.pda limvals is not the equilibrium -A(t)^-1 f(t): measured on refinery (one first-order equation) it is exactly -z* (sign flipped); for the second-order equation it is (0, -a/b0) where z* = (a/b0, 0); for the forced two-equation system it is (-0.5000000338, -1.9e-8) where z* = (0.4999999929, -0.3861262521) -- the second equation's forcing is lost. Fabel returns z*, checked against the ODE solution in tests/unit/test_dynamics.py.
+- `test_limits_match_r_limvals[pda_forced_system_order1]` (pda_forcing, rel err 2.00e+00): R 6.3.0 eigen.pda limvals is not the equilibrium -A(t)^-1 f(t): measured on refinery (one first-order equation) it is exactly -z* (sign flipped); for the second-order equation it is (0, -a/b0) where z* = (a/b0, 0); for the forced two-equation system it is (-0.5000000338, -1.9e-8) where z* = (0.4999999929, -0.3861262521) -- the second equation's forcing is lost. Fabel returns z*, checked against the ODE solution in tests/unit/test_dynamics.py.
 - `test_registration_matches_r[landmarkreg_growth_hgtf_pubertal_spurt-regfd_coefs]` (registration, rel err 9.77e-01): landmarkreg's regfd is not x(h(t)): for girl 3 it has a coefficient of 3360.37 and a value of 421.27 cm at age 1.2 (the curve spans 67.6-183.2 cm), where x(h(1.2)) = 80.25 cm. It is sampled through R's faulty inverse warp (above), whose steep start leaves the first years almost unsampled. Fabel projects x(h(t)) on the registration grid.
 - `test_registration_matches_r[landmarkreg_growth_hgtf_pubertal_spurt-warpfd_coefs]` (registration, rel err 4.23e-06): landmarkreg's warpfd is not the exact warp of its own Wfd. Integrating exp(W) for R's recorded Wfd to rounding error gives warps that differ from R's warpfd by up to 3.5e-5 years; the order-6 spline coefficients amplify that to 7.6e-5, so 6 of 350 coefficients miss 1e-5 relative (worst 6.9e-5). No 1025-point trapezoid or grid choice reproduces R's values, so the gap is R's quadrature, not a different warp: Fabel's own Wfd agrees with R's to 5.9e-7.
 - `test_registration_matches_r[landmarkreg_growth_hgtf_pubertal_spurt-warpinvfd_coefs]` (registration, rel err 9.89e-02): landmarkreg's warpinvfd is not the inverse of its warpfd: warpinvfd(warpfd(t)) - t reaches 1.73 years (girl 3, t = 2.48), and warpinvfd rises from 1 to 3.53 over the first year for girl 1, where the true inverse reaches 2.17. Fabel inverts its warps by Newton's method; its inverse composes with the warp to the identity within 2e-8.
@@ -128,6 +172,27 @@ demonstrably the less accurate side) are listed with their measured reason below
 - `test_warps_from_r_latent_match_r[register_fd_growth_hgtf_to_mean-regfd_coefs]` (registration, rel err 3.58e-04): R's regfd is not the registered curve of the warp R returns. Given R's own Wfd, x(h(t)) projected on the curve basis differs from R's regfd by 3.6e-4 (growth) / 3.2e-4 (weather) relative. With x(t) = t on a basis that also holds the warp, R's regfd differs from R's warpfd by 9e-5 although both are the same function x(h(t)) = h(t); and R's criterion at a constant W (h(t) = t exactly) is not zero -- its internal warp is about (1 - 1.0e-4) t there, not t.
 - `test_warps_from_r_latent_match_r[register_fd_weather_periodic_crit1-warpfd_coefs]` (registration, rel err 2.16e-06): R integrates exp(W) for warpfd with the trapezoidal rule on 1025 points (monfn) -- reproduced to 2e-12. For the weather warps that rule is off the exact integral by up to 4.7e-4 days, which moves the least-squares warp coefficients by up to 8.1e-4; the smallest coefficient (-0.1143) is then 2.5e-3 out relative. Fabel integrates exp(W) by Gauss-Legendre to rounding error.
 - `test_warps_from_r_latent_match_r[register_fd_weather_periodic_crit1-regfd_coefs]` (registration, rel err 3.19e-04): R's regfd is not the registered curve of the warp R returns. Given R's own Wfd, x(h(t)) projected on the curve basis differs from R's regfd by 3.6e-4 (growth) / 3.2e-4 (weather) relative. With x(t) = t on a basis that also holds the warp, R's regfd differs from R's warpfd by 9e-5 although both are the same function x(h(t)) = h(t); and R's criterion at a constant W (h(t) = t exactly) is not zero -- its internal warp is about (1 - 1.0e-4) t there, not t.
+- `test_register_matches_r[register_fd_gait_hip_knee_crit2-regfd_coefs]` (registration_multivariate, rel err 1.80e-02): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=2, lambda=0.01, first variable), R's Wfd scores 4.005844 / 1.376484 / 1.724921 / 3.736952 / 7.200670 for the five boys, with gradients of max-norm 0.19 to 2.09 there; Fabel's Newton iterate is stationary (gradient < 1e-12) at 3.993467 / 1.369739 / 1.716418 / 3.722099 / 6.791805 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). The optima differ by up to 2.01 in W.
+- `test_register_matches_r[register_fd_gait_hip_knee_crit2-warpfd_coefs]` (registration_multivariate, rel err 4.17e-02): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=2, lambda=0.01, first variable), R's Wfd scores 4.005844 / 1.376484 / 1.724921 / 3.736952 / 7.200670 for the five boys, with gradients of max-norm 0.19 to 2.09 there; Fabel's Newton iterate is stationary (gradient < 1e-12) at 3.993467 / 1.369739 / 1.716418 / 3.722099 / 6.791805 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). The optima differ by up to 2.01 in W.
+- `test_register_matches_r[register_fd_gait_hip_knee_crit2-Wfd_coefs]` (registration_multivariate, rel err 4.03e-01): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=2, lambda=0.01, first variable), R's Wfd scores 4.005844 / 1.376484 / 1.724921 / 3.736952 / 7.200670 for the five boys, with gradients of max-norm 0.19 to 2.09 there; Fabel's Newton iterate is stationary (gradient < 1e-12) at 3.993467 / 1.369739 / 1.716418 / 3.722099 / 6.791805 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). The optima differ by up to 2.01 in W.
+- `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-regfd_coefs]` (registration_multivariate, rel err 1.17e-01): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=1, lambda=0.01, periodic shift, first variable), R's (Wfd, shift) scores 4.772789 / 4.817748 / 13.194021 / 18.376605 for the four boys, with gradients of max-norm 1.09 to 6.20 there; Fabel's Newton iterate is stationary (gradient < 1e-12) at 4.578179 / 3.473667 / 12.702899 / 13.294800 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). Shifts differ by up to 2.32 and W by up to 7.6.
+- `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-warpfd_coefs]` (registration_multivariate, rel err 1.79e-01): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=1, lambda=0.01, periodic shift, first variable), R's (Wfd, shift) scores 4.772789 / 4.817748 / 13.194021 / 18.376605 for the four boys, with gradients of max-norm 1.09 to 6.20 there; Fabel's Newton iterate is stationary (gradient < 1e-12) at 4.578179 / 3.473667 / 12.702899 / 13.294800 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). Shifts differ by up to 2.32 and W by up to 7.6.
+- `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-Wfd_coefs]` (registration_multivariate, rel err 1.22e+00): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=1, lambda=0.01, periodic shift, first variable), R's (Wfd, shift) scores 4.772789 / 4.817748 / 13.194021 / 18.376605 for the four boys, with gradients of max-norm 1.09 to 6.20 there; Fabel's Newton iterate is stationary (gradient < 1e-12) at 4.578179 / 3.473667 / 12.702899 / 13.294800 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). Shifts differ by up to 2.32 and W by up to 7.6.
+- `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-shift]` (registration_multivariate, rel err 9.17e-01): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=1, lambda=0.01, periodic shift, first variable), R's (Wfd, shift) scores 4.772789 / 4.817748 / 13.194021 / 18.376605 for the four boys, with gradients of max-norm 1.09 to 6.20 there; Fabel's Newton iterate is stationary (gradient < 1e-12) at 4.578179 / 3.473667 / 12.702899 / 13.294800 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). Shifts differ by up to 2.32 and W by up to 7.6.
+- `test_register_matches_r[register_fd_handwriting_xy_crit2-regfd_coefs]` (registration_multivariate, rel err 2.68e-03): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=2, lambda=1, first variable), R's Wfd scores 0.495565 / 0.367009 / 1.008572 / 0.924378 / 1.371460 for the five samples, with gradients of max-norm 0.064 to 0.26 there; Fabel's Newton iterate is stationary (gradient < 1e-11) at 0.495236 / 0.366892 / 1.008538 / 0.924099 / 1.371380 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). The optima differ by up to 0.0073 in W.
+- `test_register_matches_r[register_fd_handwriting_xy_crit2-warpfd_coefs]` (registration_multivariate, rel err 1.58e-04): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=2, lambda=1, first variable), R's Wfd scores 0.495565 / 0.367009 / 1.008572 / 0.924378 / 1.371460 for the five samples, with gradients of max-norm 0.064 to 0.26 there; Fabel's Newton iterate is stationary (gradient < 1e-11) at 0.495236 / 0.366892 / 1.008538 / 0.924099 / 1.371380 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). The optima differ by up to 0.0073 in W.
+- `test_register_matches_r[register_fd_handwriting_xy_crit2-Wfd_coefs]` (registration_multivariate, rel err 9.86e-02): register.fd returns a point that is not a minimum of its own criterion. With R's discretisation (grid mean over 211 points, crit=2, lambda=1, first variable), R's Wfd scores 0.495565 / 0.367009 / 1.008572 / 0.924378 / 1.371460 for the five samples, with gradients of max-norm 0.064 to 0.26 there; Fabel's Newton iterate is stationary (gradient < 1e-11) at 0.495236 / 0.366892 / 1.008538 / 0.924099 / 1.371380 -- lower on every curve (checked by test_fabel_optimum_is_below_r_point). The optima differ by up to 0.0073 in W.
+- `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_crit2-warpfd_coefs]` (registration_multivariate, rel err 7.96e-06): R computes the warp h(t) from Wfd with a 1025-point trapezoid rule and linear interpolation; that rule reproduces R's warpfd and register.newfd output to 1e-14 (test_r_warps_use_a_trapezoid_rule). It is off the exact integral by up to 9.4e-5 (gait, of 20) / 5.4e-5 (periodic gait) / 9.7e-5 (handwriting, of 2300), which moves R's warpfd coefficients by up to 3.9e-5 / 3.4e-5 / 6.3e-5 relative and R's register.newfd coefficients by 1.5e-5 / 5.0e-6 / 5.5e-7 normwise, up to 1.5e-2 / 7.4e-3 / 1.8e-5 relative on the smallest coefficients. Fabel integrates exp(W) by Gauss-Legendre to rounding error.
+- `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_crit2-regfd_coefs]` (registration_multivariate, rel err 4.66e-03): R's regfd is not x(h(t)) for the warp R returns: it differs from R's own register.newfd(yfd, Wfd) -- x at R's trapezoid warp, reproduced to 1e-14 -- by 4.66e-3 (gait) / 1.02e-4 (handwriting) normwise relative, and from x(h(t) + shift) at R's trapezoid warp by 3.99e-3 (periodic gait). The univariate cases show the same internal warp defect (test_registration.py).
+- `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_periodic_crit1-warpfd_coefs]` (registration_multivariate, rel err 2.30e-06): R computes the warp h(t) from Wfd with a 1025-point trapezoid rule and linear interpolation; that rule reproduces R's warpfd and register.newfd output to 1e-14 (test_r_warps_use_a_trapezoid_rule). It is off the exact integral by up to 9.4e-5 (gait, of 20) / 5.4e-5 (periodic gait) / 9.7e-5 (handwriting, of 2300), which moves R's warpfd coefficients by up to 3.9e-5 / 3.4e-5 / 6.3e-5 relative and R's register.newfd coefficients by 1.5e-5 / 5.0e-6 / 5.5e-7 normwise, up to 1.5e-2 / 7.4e-3 / 1.8e-5 relative on the smallest coefficients. Fabel integrates exp(W) by Gauss-Legendre to rounding error.
+- `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_periodic_crit1-regfd_coefs]` (registration_multivariate, rel err 3.99e-03): R's regfd is not x(h(t)) for the warp R returns: it differs from R's own register.newfd(yfd, Wfd) -- x at R's trapezoid warp, reproduced to 1e-14 -- by 4.66e-3 (gait) / 1.02e-4 (handwriting) normwise relative, and from x(h(t) + shift) at R's trapezoid warp by 3.99e-3 (periodic gait). The univariate cases show the same internal warp defect (test_registration.py).
+- `test_warps_from_r_latent_match_r[register_fd_handwriting_xy_crit2-warpfd_coefs]` (registration_multivariate, rel err 4.95e-08): R computes the warp h(t) from Wfd with a 1025-point trapezoid rule and linear interpolation; that rule reproduces R's warpfd and register.newfd output to 1e-14 (test_r_warps_use_a_trapezoid_rule). It is off the exact integral by up to 9.4e-5 (gait, of 20) / 5.4e-5 (periodic gait) / 9.7e-5 (handwriting, of 2300), which moves R's warpfd coefficients by up to 3.9e-5 / 3.4e-5 / 6.3e-5 relative and R's register.newfd coefficients by 1.5e-5 / 5.0e-6 / 5.5e-7 normwise, up to 1.5e-2 / 7.4e-3 / 1.8e-5 relative on the smallest coefficients. Fabel integrates exp(W) by Gauss-Legendre to rounding error.
+- `test_warps_from_r_latent_match_r[register_fd_handwriting_xy_crit2-regfd_coefs]` (registration_multivariate, rel err 1.02e-04): R's regfd is not x(h(t)) for the warp R returns: it differs from R's own register.newfd(yfd, Wfd) -- x at R's trapezoid warp, reproduced to 1e-14 -- by 4.66e-3 (gait) / 1.02e-4 (handwriting) normwise relative, and from x(h(t) + shift) at R's trapezoid warp by 3.99e-3 (periodic gait). The univariate cases show the same internal warp defect (test_registration.py).
+- `test_apply_matches_register_newfd[register_fd_gait_hip_knee_crit2]` (registration_multivariate, rel err 1.47e-05): R computes the warp h(t) from Wfd with a 1025-point trapezoid rule and linear interpolation; that rule reproduces R's warpfd and register.newfd output to 1e-14 (test_r_warps_use_a_trapezoid_rule). It is off the exact integral by up to 9.4e-5 (gait, of 20) / 5.4e-5 (periodic gait) / 9.7e-5 (handwriting, of 2300), which moves R's warpfd coefficients by up to 3.9e-5 / 3.4e-5 / 6.3e-5 relative and R's register.newfd coefficients by 1.5e-5 / 5.0e-6 / 5.5e-7 normwise, up to 1.5e-2 / 7.4e-3 / 1.8e-5 relative on the smallest coefficients. Fabel integrates exp(W) by Gauss-Legendre to rounding error.
+- `test_apply_matches_register_newfd[register_fd_gait_hip_knee_periodic_crit1]` (registration_multivariate, rel err 5.02e-06): R computes the warp h(t) from Wfd with a 1025-point trapezoid rule and linear interpolation; that rule reproduces R's warpfd and register.newfd output to 1e-14 (test_r_warps_use_a_trapezoid_rule). It is off the exact integral by up to 9.4e-5 (gait, of 20) / 5.4e-5 (periodic gait) / 9.7e-5 (handwriting, of 2300), which moves R's warpfd coefficients by up to 3.9e-5 / 3.4e-5 / 6.3e-5 relative and R's register.newfd coefficients by 1.5e-5 / 5.0e-6 / 5.5e-7 normwise, up to 1.5e-2 / 7.4e-3 / 1.8e-5 relative on the smallest coefficients. Fabel integrates exp(W) by Gauss-Legendre to rounding error.
+- `test_apply_matches_register_newfd[register_fd_handwriting_xy_crit2]` (registration_multivariate, rel err 5.53e-07): R computes the warp h(t) from Wfd with a 1025-point trapezoid rule and linear interpolation; that rule reproduces R's warpfd and register.newfd output to 1e-14 (test_r_warps_use_a_trapezoid_rule). It is off the exact integral by up to 9.4e-5 (gait, of 20) / 5.4e-5 (periodic gait) / 9.7e-5 (handwriting, of 2300), which moves R's warpfd coefficients by up to 3.9e-5 / 3.4e-5 / 6.3e-5 relative and R's register.newfd coefficients by 1.5e-5 / 5.0e-6 / 5.5e-7 normwise, up to 1.5e-2 / 7.4e-3 / 1.8e-5 relative on the smallest coefficients. Fabel integrates exp(W) by Gauss-Legendre to rounding error.
+- `test_landmark_latent_matches_r[Wfd_coefs_hip]` (registration_multivariate, rel err 1.93e-05): landmarkreg's Wfd does not meet the landmarks it is fitted to: its warps miss the target landmark by 3.9e-6 / 3.9e-7 / 1.3e-7 / 1.6e-6 / 3.3e-7 / 1.1e-5 for the six boys (smooth.morph objective 1.5e-11 to 1.3e-10), while Fabel's meet it to 1e-10 (objective < 1e-23, checked by test_fabel_landmark_warps_meet_the_landmarks). The Wfd of the boy whose landmark is 0.01 from the target is 2.8e-3 in size, so its 1e-6 gap is 3.9e-4 relative; the largest gap is 3.4e-6 in W.
+- `test_landmark_latent_matches_r[Wfd_coefs_knee]` (registration_multivariate, rel err 1.93e-05): landmarkreg's Wfd does not meet the landmarks it is fitted to: its warps miss the target landmark by 3.9e-6 / 3.9e-7 / 1.3e-7 / 1.6e-6 / 3.3e-7 / 1.1e-5 for the six boys (smooth.morph objective 1.5e-11 to 1.3e-10), while Fabel's meet it to 1e-10 (objective < 1e-23, checked by test_fabel_landmark_warps_meet_the_landmarks). The Wfd of the boy whose landmark is 0.01 from the target is 2.8e-3 in size, so its 1e-6 gap is 3.9e-4 relative; the largest gap is 3.4e-6 in W.
 - `test_golden_field[fregress_scalar_precip_on_temp-OCV]` (regression, rel err 1.90e-08): R integrates int x_i(t) theta_k(t) dt approximately. The response basis is an orthonormal Fourier basis, so the exact integral is simply the k-th coefficient of x_i; against that R's Dmat is up to 3.4e-8 (relative) out and its Cmat up to 8.2e-8. Fabel's Cmat and Dmat are the exact values.
 - `test_golden_field[fregress_scalar_precip_on_temp-Cmat]` (regression, rel err 1.19e-09): R integrates int x_i(t) theta_k(t) dt approximately. The response basis is an orthonormal Fourier basis, so the exact integral is simply the k-th coefficient of x_i; against that R's Dmat is up to 3.4e-8 (relative) out and its Cmat up to 8.2e-8. Fabel's Cmat and Dmat are the exact values.
 - `test_golden_field[fregress_scalar_precip_on_temp-Dmat]` (regression, rel err 1.28e-09): R integrates int x_i(t) theta_k(t) dt approximately. The response basis is an orthonormal Fourier basis, so the exact integral is simply the k-th coefficient of x_i; against that R's Dmat is up to 3.4e-8 (relative) out and its Cmat up to 8.2e-8. Fabel's Cmat and Dmat are the exact values.
@@ -218,6 +283,30 @@ demonstrably the less accurate side) are listed with their measured reason below
 
 | Module | Case | Symbol | rtol | Max abs err | Max rel err | Status |
 |---|---|---|---:|---:|---:|---|
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-df]` | `stats.confidence_band` | 1.00e-08 | 7.28e-14 | 5.27e-15 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-SSE]` | `stats.confidence_band` | 1.00e-08 | 1.48e-12 | 3.08e-15 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-sigma2]` | `stats.confidence_band` | 1.00e-08 | 1.25e-16 | 3.20e-15 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-stderr]` | `stats.confidence_band` | 1.00e-08 | 7.08e-15 | 1.10e-13 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-stderr_deriv1]` | `stats.confidence_band` | 1.00e-08 | 2.88e-16 | 7.77e-14 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-z]` | `stats.confidence_band` | 1.00e-08 | 0 | 0 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-lower_curve1]` | `stats.confidence_band` | 1.00e-08 | 6.71e-14 | 1.10e-13 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_scalar-upper_curve1]` | `stats.confidence_band` | 1.00e-08 | 9.48e-14 | 1.22e-13 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_pointwise-varvec]` | `stats.confidence_band` | 1.00e-08 | 9.95e-15 | 1.01e-13 | pass |
+| bands | `test_golden_field[band_smooth_logprec_bspline53_sigma_pointwise-stderr]` | `stats.confidence_band` | 1.00e-08 | 5.82e-15 | 1.01e-13 | pass |
+| bands | `test_golden_field[band_fregress_logannualprec_on_meantemp_latitude-beta]` | `stats.confidence_band` | 1.00e-08 | 1.85e-15 | 4.51e-16 | pass |
+| bands | `test_golden_field[band_fregress_logannualprec_on_meantemp_latitude-sigma2]` | `stats.confidence_band` | 1.00e-08 | 1.04e-16 | 2.97e-15 | pass |
+| bands | `test_golden_field[band_fregress_logannualprec_on_meantemp_latitude-bvar]` | `stats.confidence_band` | 1.00e-08 | 8.33e-16 | 3.65e-15 | pass |
+| bands | `test_golden_field[band_fregress_logannualprec_on_meantemp_latitude-stderr]` | `stats.confidence_band` | 1.00e-08 | 8.88e-16 | 1.86e-15 | pass |
+| bands | `test_golden_field[band_fregress_logannualprec_on_meantemp_latitude-lower]` | `stats.confidence_band` | 1.00e-08 | 1.82e-15 | 5.75e-16 | pass |
+| bands | `test_golden_field[band_fregress_logannualprec_on_meantemp_latitude-upper]` | `stats.confidence_band` | 1.00e-08 | 3.55e-15 | 7.04e-16 | pass |
+| bands | `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-beta1]` | `stats.confidence_band` | 1.00e-08 | 9.48e-07 | 2.15e-04 | xfail |
+| bands | `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-df]` | `stats.confidence_band` | 1.00e-08 | 2.49e-07 | 3.11e-08 | xfail |
+| bands | `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-sigma2]` | `stats.confidence_band` | 1.00e-08 | 3.43e-07 | 1.80e-05 | xfail |
+| bands | `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-bvar]` | `stats.confidence_band` | 1.00e-08 | 1.56e-09 | 9.20e-05 | xfail |
+| bands | `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-stderr0]` | `stats.confidence_band` | 1.00e-08 | 2.76e-09 | 3.49e-06 | xfail |
+| bands | `test_golden_field[band_fregress_logannualprec_on_temp_bspline7-stderr1]` | `stats.confidence_band` | 1.00e-08 | 2.03e-07 | 4.93e-05 | xfail |
+| bands | `test_every_defect_names_a_real_field` | `stats.confidence_band` | — | — | — | pass |
+| bands | `test_every_case_has_an_accessor` | `stats.confidence_band` | — | — | — | pass |
 | basis | `bspline_eval_k1_n4_dom0_1_d0` | `BSpline` | 1.00e-08 | 0 | 0 | pass |
 | basis | `bspline_eval_k1_n7_dom0_1_d0` | `BSpline` | 1.00e-08 | 0 | 0 | pass |
 | basis | `bspline_eval_k1_n10_dom0_1_d0` | `BSpline` | 1.00e-08 | 0 | 0 | pass |
@@ -579,6 +668,62 @@ demonstrably the less accurate side) are listed with their measured reason below
 | decomposition | `cca_fd_weather_temp_vs_logprecip_lambda1e+06-ccavar1` | `FCCA` | 1.00e-08 | 8.17e-14 | 1.59e-15 | pass |
 | decomposition | `cca_fd_weather_temp_vs_logprecip_lambda1e+06-ccavar2` | `FCCA` | 1.00e-08 | 3.91e-14 | 3.44e-15 | pass |
 | decomposition | `test_pca_harmonics_follow_r_sign_rule` | `FPCA` | — | — | — | pass |
+| density | `intensity_homogeneous_bspline13_L1_lam10-coefs` | `fit_intensity` | 1.00e-05 | 1.35e-06 | 1.16e-06 | pass |
+| density | `intensity_homogeneous_bspline13_L1_lam10-log_intensity` | `fit_intensity` | 1.00e-05 | 4.29e-07 | 3.71e-07 | pass |
+| density | `intensity_homogeneous_bspline13_L1_lam10-intensity` | `fit_intensity` | 1.00e-05 | 9.94e-07 | 3.12e-07 | pass |
+| density | `intensity_homogeneous_bspline13_L1_lam10-f` | `fit_intensity` | 1.00e-05 | 2.34e-06 | 7.22e-08 | pass |
+| density | `intensity_sine_bspline23_L2_lam1-coefs` | `fit_intensity` | 1.00e-05 | 7.65e-07 | 3.29e-07 | pass |
+| density | `intensity_sine_bspline23_L2_lam1-log_intensity` | `fit_intensity` | 1.00e-05 | 5.92e-07 | 2.58e-07 | pass |
+| density | `intensity_sine_bspline23_L2_lam1-intensity` | `fit_intensity` | 1.00e-05 | 5.88e-06 | 5.92e-07 | pass |
+| density | `intensity_sine_bspline23_L2_lam1-f` | `fit_intensity` | 1.00e-05 | 1.54e-04 | 1.81e-06 | pass |
+| density | `intensity_sine_bspline11_order3_L1_lam0-coefs` | `fit_intensity` | 1.00e-05 | 7.30e-06 | 2.17e-06 | xfail |
+| density | `intensity_sine_bspline11_order3_L1_lam0-log_intensity` | `fit_intensity` | 1.00e-05 | 4.17e-06 | 1.62e-06 | pass |
+| density | `intensity_sine_bspline11_order3_L1_lam0-intensity` | `fit_intensity` | 1.00e-05 | 3.65e-05 | 2.79e-06 | pass |
+| density | `intensity_sine_bspline11_order3_L1_lam0-f` | `fit_intensity` | 1.00e-05 | 1.64e-04 | 1.87e-06 | pass |
+| density | `intensity_sine_fourier7_L2_lam0.1-coefs` | `fit_intensity` | 1.00e-05 | 4.49e-07 | 6.49e-08 | pass |
+| density | `intensity_sine_fourier7_L2_lam0.1-log_intensity` | `fit_intensity` | 1.00e-05 | 2.15e-07 | 9.03e-08 | pass |
+| density | `intensity_sine_fourier7_L2_lam0.1-intensity` | `fit_intensity` | 1.00e-05 | 1.39e-06 | 1.29e-07 | pass |
+| density | `intensity_sine_fourier7_L2_lam0.1-f` | `fit_intensity` | 1.00e-05 | 4.98e-07 | 5.81e-09 | pass |
+| density | `density_regina_bspline13_L2_lam0.1-coefs` | `fit_density` | 1.00e-05 | 1.05e-05 | 2.64e-06 | xfail |
+| density | `density_regina_bspline13_L2_lam0.1-log_intensity` | `fit_density` | 1.00e-05 | 4.27e-06 | 1.24e-06 | xfail |
+| density | `density_regina_bspline13_L2_lam0.1-intensity` | `fit_density` | 1.00e-05 | 1.33e-04 | 4.27e-06 | pass |
+| density | `density_regina_bspline13_L2_lam0.1-f` | `fit_density` | 1.00e-05 | 3.11e-05 | 1.01e-07 | pass |
+| density | `density_regina_bspline13_L2_lam0.1-density` | `fit_density` | 1.00e-05 | 6.46e-07 | 4.27e-06 | pass |
+| density | `density_regina_bspline13_L2_lam0.1-log_density` | `fit_density` | 1.00e-05 | 4.27e-06 | 5.12e-07 | pass |
+| density | `density_regina_bspline13_L2_lam10-coefs` | `fit_density` | 1.00e-05 | 3.02e-06 | 8.68e-07 | pass |
+| density | `density_regina_bspline13_L2_lam10-log_intensity` | `fit_density` | 1.00e-05 | 1.43e-06 | 4.11e-07 | pass |
+| density | `density_regina_bspline13_L2_lam10-intensity` | `fit_density` | 1.00e-05 | 4.64e-05 | 1.43e-06 | pass |
+| density | `density_regina_bspline13_L2_lam10-f` | `fit_density` | 1.00e-05 | 1.16e-05 | 3.80e-08 | pass |
+| density | `density_regina_bspline13_L2_lam10-density` | `fit_density` | 1.00e-05 | 2.25e-07 | 1.43e-06 | pass |
+| density | `density_regina_bspline13_L2_lam10-log_density` | `fit_density` | 1.00e-05 | 1.43e-06 | 2.15e-07 | pass |
+| density | `density_normal_bspline12_order5_L3_lam0.01-coefs` | `fit_density` | 1.00e-05 | 8.40e-07 | 1.87e-07 | pass |
+| density | `density_normal_bspline12_order5_L3_lam0.01-log_intensity` | `fit_density` | 1.00e-05 | 8.40e-07 | 1.92e-07 | pass |
+| density | `density_normal_bspline12_order5_L3_lam0.01-intensity` | `fit_density` | 1.00e-05 | 2.87e-06 | 3.60e-08 | pass |
+| density | `density_normal_bspline12_order5_L3_lam0.01-f` | `fit_density` | 1.00e-05 | 2.06e-07 | 3.52e-10 | pass |
+| density | `density_normal_bspline12_order5_L3_lam0.01-density` | `fit_density` | 1.00e-05 | 1.44e-08 | 3.60e-08 | pass |
+| density | `density_normal_bspline12_order5_L3_lam0.01-log_density` | `fit_density` | 1.00e-05 | 8.40e-07 | 8.69e-08 | pass |
+| density | `density_gamma_bspline9_L2_lam1-coefs` | `fit_density` | 1.00e-05 | 1.17e-06 | 2.37e-07 | pass |
+| density | `density_gamma_bspline9_L2_lam1-log_intensity` | `fit_density` | 1.00e-05 | 6.83e-07 | 1.38e-07 | xfail |
+| density | `density_gamma_bspline9_L2_lam1-intensity` | `fit_density` | 1.00e-05 | 1.42e-05 | 3.09e-07 | pass |
+| density | `density_gamma_bspline9_L2_lam1-f` | `fit_density` | 1.00e-05 | 2.48e-06 | 7.56e-09 | pass |
+| density | `density_gamma_bspline9_L2_lam1-density` | `fit_density` | 1.00e-05 | 9.47e-08 | 3.09e-07 | pass |
+| density | `density_gamma_bspline9_L2_lam1-log_density` | `fit_density` | 1.00e-05 | 6.83e-07 | 6.87e-08 | pass |
+| density | `density_truncnormal_monomial3_L1_lam0-coefs` | `fit_density` | 1.00e-05 | 1.05e-07 | 2.91e-08 | pass |
+| density | `density_truncnormal_monomial3_L1_lam0-log_intensity` | `fit_density` | 1.00e-05 | 1.19e-06 | 3.07e-07 | xfail |
+| density | `density_truncnormal_monomial3_L1_lam0-intensity` | `fit_density` | 1.00e-05 | 6.15e-06 | 1.29e-07 | pass |
+| density | `density_truncnormal_monomial3_L1_lam0-f` | `fit_density` | 1.00e-05 | 1.18e-05 | 4.11e-08 | pass |
+| density | `density_truncnormal_monomial3_L1_lam0-density` | `fit_density` | 1.00e-05 | 5.13e-08 | 1.29e-07 | pass |
+| density | `density_truncnormal_monomial3_L1_lam0-log_density` | `fit_density` | 1.00e-05 | 1.19e-06 | 1.55e-07 | pass |
+| density | `intensity_homogeneous_bspline13_L1_lam10` | `fit_intensity` | — | — | — | pass |
+| density | `intensity_sine_bspline23_L2_lam1` | `fit_intensity` | — | — | — | pass |
+| density | `intensity_sine_bspline11_order3_L1_lam0` | `fit_intensity` | — | — | — | pass |
+| density | `intensity_sine_fourier7_L2_lam0.1` | `fit_intensity` | — | — | — | pass |
+| density | `density_regina_bspline13_L2_lam0.1` | `fit_density` | — | — | — | pass |
+| density | `density_regina_bspline13_L2_lam10` | `fit_density` | — | — | — | pass |
+| density | `density_normal_bspline12_order5_L3_lam0.01` | `fit_density` | — | — | — | pass |
+| density | `density_gamma_bspline9_L2_lam1` | `fit_density` | — | — | — | pass |
+| density | `density_truncnormal_monomial3_L1_lam0` | `fit_density` | — | — | — | pass |
+| density | `test_regina_sample_is_the_dataset` | `fit_density` | — | — | — | pass |
 | dynamics | `test_every_golden_case_is_covered` | `PDA` | — | — | — | pass |
 | dynamics | `test_input_curves_reproduce_the_golden_design` | `PDA` | 1.00e-12 | 7.22e-15 | 7.22e-15 | pass |
 | dynamics | `test_weight_coefficients[pda_fd_order1_analytic_exp_decay-0-bwt_coefs-None]` | `PDA` | 1.00e-08 | 0 | 0 | pass |
@@ -601,6 +746,143 @@ demonstrably the less accurate side) are listed with their measured reason below
 | dynamics | `test_solution_tracks_the_analytic_ground_truth` | `PDA` | 1.00e-15 | 0 | 0 | pass |
 | io | `test_fd_coefs_and_eval_match_r` | `read_rds` | 1.00e-08 | 2.22e-16 | 9.98e-17 | pass |
 | io | `test_bifd_coefs_and_eval_match_r` | `read_rds` | 1.00e-08 | 5.55e-17 | 2.43e-17 | pass |
+| linmod | `test_golden_field[linmod_weather_logprecip_on_temp-beta0estfd_coefs]` | `linmod` | 1.00e-08 | 8.71e-06 | 4.68e-07 | xfail |
+| linmod | `test_golden_field[linmod_weather_logprecip_on_temp-beta1estbifd_coefs]` | `linmod` | 1.00e-08 | 1.71e-06 | 1.88e-06 | xfail |
+| linmod | `test_golden_field[linmod_weather_logprecip_on_temp-yhatfdobj_coefs]` | `linmod` | 1.00e-08 | 4.31e-06 | 3.72e-07 | xfail |
+| linmod | `test_golden_field[linmod_synthetic_monomial-beta0estfd_coefs]` | `linmod` | 1.00e-08 | 3.21e-14 | 5.33e-14 | pass |
+| linmod | `test_golden_field[linmod_synthetic_monomial-beta1estbifd_coefs]` | `linmod` | 1.00e-08 | 2.81e-13 | 1.27e-13 | pass |
+| linmod | `test_golden_field[linmod_synthetic_monomial-yhatfdobj_coefs]` | `linmod` | 1.00e-08 | 9.79e-14 | 8.49e-14 | pass |
+| linmod | `test_golden_field[linmod_synthetic_monomial_lambda0-beta0estfd_coefs]` | `linmod` | 1.00e-08 | 2.16e-13 | 5.32e-13 | pass |
+| linmod | `test_golden_field[linmod_synthetic_monomial_lambda0-beta1estbifd_coefs]` | `linmod` | 1.00e-08 | 1.11e-11 | 1.09e-12 | pass |
+| linmod | `test_golden_field[linmod_synthetic_monomial_lambda0-yhatfdobj_coefs]` | `linmod` | 1.00e-08 | 1.83e-12 | 1.13e-12 | pass |
+| linmod | `test_golden_field[linmod_synthetic_bspline-beta0estfd_coefs]` | `linmod` | 1.00e-08 | 1.50e-05 | 5.91e-05 | xfail |
+| linmod | `test_golden_field[linmod_synthetic_bspline-beta1estbifd_coefs]` | `linmod` | 1.00e-08 | 3.32e-04 | 9.55e-05 | xfail |
+| linmod | `test_golden_field[linmod_synthetic_bspline-yhatfdobj_coefs]` | `linmod` | 1.00e-08 | 1.31e-03 | 1.38e-03 | xfail |
+| linmod | `test_every_defect_names_a_real_field` | `linmod` | — | — | — | pass |
+| linmod | `test_defect_is_as_measured[linmod_synthetic_bspline-beta0estfd_coefs]` | `linmod` | — | — | — | pass |
+| linmod | `test_defect_is_as_measured[linmod_synthetic_bspline-beta1estbifd_coefs]` | `linmod` | — | — | — | pass |
+| linmod | `test_defect_is_as_measured[linmod_synthetic_bspline-yhatfdobj_coefs]` | `linmod` | — | — | — | pass |
+| linmod | `test_defect_is_as_measured[linmod_weather_logprecip_on_temp-beta0estfd_coefs]` | `linmod` | — | — | — | pass |
+| linmod | `test_defect_is_as_measured[linmod_weather_logprecip_on_temp-beta1estbifd_coefs]` | `linmod` | — | — | — | pass |
+| linmod | `test_defect_is_as_measured[linmod_weather_logprecip_on_temp-yhatfdobj_coefs]` | `linmod` | — | — | — | pass |
+| linmod | `test_normal_equations_with_r_integrals[linmod_synthetic_bspline]` | `linmod` | 1.00e-08 | 2.66e-15 | 7.67e-16 | pass |
+| linmod | `test_normal_equations_with_r_integrals[linmod_synthetic_monomial]` | `linmod` | 1.00e-08 | 4.73e-13 | 2.14e-13 | pass |
+| linmod | `test_normal_equations_with_r_integrals[linmod_synthetic_monomial_lambda0]` | `linmod` | 1.00e-08 | 4.49e-11 | 4.42e-12 | pass |
+| linmod | `test_r_integrals_match_fabel_where_r_is_exact[linmod_synthetic_monomial]` | `linmod` | 1.00e-12 | 1.78e-15 | 2.91e-16 | pass |
+| linmod | `test_r_integrals_match_fabel_where_r_is_exact[linmod_synthetic_monomial_lambda0]` | `linmod` | 1.00e-12 | 1.78e-15 | 2.78e-16 | pass |
+| linmod | `test_r_fitted_curves_are_a_grid_least_squares_fit` | `linmod` | 1.00e-08 | 4.88e-15 | 5.13e-15 | pass |
+| monotone_derivs | `test_every_golden_case_is_covered` | `SmoothResult` | — | — | — | pass |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[0-monfd_growth_girl1]` | `SmoothResult` | 1.00e-08 | 4.52e-05 | 2.44e-06 | xfail |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[0-monfd_posfd_fixed_w_two_curves]` | `SmoothResult` | 1.00e-08 | 5.62e-06 | 1.81e-06 | xfail |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[1-monfd_growth_girl1]` | `SmoothResult` | 1.00e-08 | 4.44e-16 | 1.41e-16 | pass |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[1-monfd_posfd_fixed_w_two_curves]` | `SmoothResult` | 1.00e-08 | 4.44e-16 | 1.93e-16 | pass |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[2-monfd_growth_girl1]` | `SmoothResult` | 1.00e-08 | 2.66e-15 | 1.64e-15 | pass |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[2-monfd_posfd_fixed_w_two_curves]` | `SmoothResult` | 1.00e-08 | 1.78e-15 | 2.06e-16 | pass |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[3-monfd_growth_girl1]` | `SmoothResult` | 1.00e-08 | 6.42e-14 | 4.09e-14 | pass |
+| monotone_derivs | `test_monotone_derivatives_match_eval_monfd[3-monfd_posfd_fixed_w_two_curves]` | `SmoothResult` | 1.00e-08 | 2.40e-14 | 1.61e-16 | pass |
+| monotone_derivs | `test_positive_derivatives_match_eval_posfd[0]` | `SmoothResult` | 1.00e-08 | 4.44e-16 | 1.93e-16 | pass |
+| monotone_derivs | `test_positive_derivatives_match_eval_posfd[1]` | `SmoothResult` | 1.00e-08 | 1.78e-15 | 2.06e-16 | pass |
+| monotone_derivs | `test_positive_derivatives_match_eval_posfd[2]` | `SmoothResult` | 1.00e-08 | 8.14e+01 | 8.66e-01 | xfail |
+| monotone_derivs | `test_scaled_monotone_derivatives_match_predict[0]` | `SmoothResult` | 1.00e-08 | 2.00e-04 | 1.26e-06 | xfail |
+| monotone_derivs | `test_scaled_monotone_derivatives_match_predict[1]` | `SmoothResult` | 1.00e-08 | 1.78e-15 | 1.27e-16 | pass |
+| monotone_derivs | `test_scaled_monotone_derivatives_match_predict[2]` | `SmoothResult` | 1.00e-08 | 1.15e-14 | 1.61e-15 | pass |
+| monotone_derivs | `test_scaled_monotone_derivatives_match_predict[3]` | `SmoothResult` | 1.00e-08 | 2.83e-13 | 4.08e-14 | pass |
+| monotone_derivs | `test_monotone_values_match_adaptive_quadrature[monfd_growth_girl1]` | `SmoothResult` | 1.00e-12 | 6.77e-12 | 3.66e-13 | pass |
+| monotone_derivs | `test_monotone_values_match_adaptive_quadrature[monfd_posfd_fixed_w_two_curves]` | `SmoothResult` | 1.00e-12 | 4.07e-13 | 1.31e-13 | pass |
+| monotone_derivs | `test_r_second_derivative_of_a_positive_function_drops_the_square_term` | `SmoothResult` | 1.00e-14 | 1.42e-14 | 1.51e-16 | pass |
+| pace | `smooth_sparse_mean_growth_bspline_lambda0` | `sparse_mean` | 1.00e-08 | 9.81e-13 | 5.69e-15 | pass |
+| pace | `smooth_sparse_mean_growth_bspline_lambda1` | `sparse_mean` | 1.00e-08 | 1.17e-12 | 6.77e-15 | pass |
+| pace | `smooth_sparse_mean_weather_fourier5` | `sparse_mean` | 1.00e-08 | 1.31e-13 | 6.73e-16 | pass |
+| pace | `test_sparse_mean_accepts_r_list_form` | `PACE` | 1.00e-08 | 9.81e-13 | 5.69e-15 | pass |
+| pace | `pace_growth_bspline6_covlambda0-mean_coefs` | `PACE` | 1.00e-08 | 9.81e-13 | 5.69e-15 | pass |
+| pace | `pace_growth_bspline6_covlambda0-cov_coefs` | `PACE` | 1.00e-08 | 6.62e-12 | 6.09e-14 | pass |
+| pace | `pace_growth_bspline6_covlambda0-values` | `PACE` | 1.00e-08 | 3.78e-03 | 7.21e-06 | xfail |
+| pace | `pace_growth_bspline6_covlambda0-varprop` | `PACE` | 1.00e-08 | 5.57e-06 | 6.78e-06 | xfail |
+| pace | `pace_growth_bspline6_covlambda0-harmonics` | `PACE` | 1.00e-08 | 8.28e-05 | 9.03e-05 | xfail |
+| pace | `pace_growth_bspline6_covlambda10-mean_coefs` | `PACE` | 1.00e-08 | 9.81e-13 | 5.69e-15 | pass |
+| pace | `pace_growth_bspline6_covlambda10-cov_coefs` | `PACE` | 1.00e-08 | 1.10e-03 | 1.16e-05 | xfail |
+| pace | `pace_growth_bspline6_covlambda10-values` | `PACE` | 1.00e-08 | 2.24e-03 | 4.48e-06 | xfail |
+| pace | `pace_growth_bspline6_covlambda10-varprop` | `PACE` | 1.00e-08 | 3.33e-06 | 4.05e-06 | xfail |
+| pace | `pace_growth_bspline6_covlambda10-harmonics` | `PACE` | 1.00e-08 | 5.42e-05 | 5.86e-05 | xfail |
+| pace | `pace_growth_monomial3_penalised-mean_coefs` | `PACE` | 1.00e-08 | 1.79e-12 | 2.54e-14 | pass |
+| pace | `pace_growth_monomial3_penalised-cov_coefs` | `PACE` | 1.00e-08 | 3.35e-10 | 4.01e-11 | pass |
+| pace | `pace_growth_monomial3_penalised-values` | `PACE` | 1.00e-08 | 1.66e-10 | 3.50e-13 | pass |
+| pace | `pace_growth_monomial3_penalised-varprop` | `PACE` | 1.00e-08 | 2.38e-13 | 2.86e-13 | pass |
+| pace | `pace_growth_monomial3_penalised-harmonics` | `PACE` | 1.00e-08 | 4.15e-13 | 1.51e-12 | pass |
+| pace | `pace_weather_fourier5_bspline7-mean_coefs` | `PACE` | 1.00e-08 | 1.31e-13 | 6.73e-16 | pass |
+| pace | `pace_weather_fourier5_bspline7-cov_coefs` | `PACE` | 1.00e-08 | 9.80e-12 | 4.01e-14 | pass |
+| pace | `pace_weather_fourier5_bspline7-values` | `PACE` | 1.00e-08 | 1.21e-01 | 8.95e-06 | xfail |
+| pace | `pace_weather_fourier5_bspline7-varprop` | `PACE` | 1.00e-08 | 5.55e-06 | 7.03e-06 | xfail |
+| pace | `pace_weather_fourier5_bspline7-harmonics` | `PACE` | 1.00e-08 | 2.38e-05 | 1.59e-04 | xfail |
+| pace | `pace_weather_fourier5_bspline7-scores` | `PACE` | 1.00e-08 | 1.28e+02 | 4.52e+00 | xfail |
+| pace | `pace_growth_bspline6_covlambda0` | `PACE` | 1.00e-08 | 6.62e-12 | 6.09e-14 | pass |
+| pace | `pace_growth_bspline6_covlambda10` | `PACE` | 1.00e-08 | 1.78e-12 | 1.87e-14 | pass |
+| pace | `pace_growth_monomial3_penalised` | `PACE` | 1.00e-08 | 3.35e-10 | 4.01e-11 | pass |
+| pace | `pace_weather_fourier5_bspline7` | `PACE` | 1.00e-08 | 2.00e-11 | 4.01e-14 | pass |
+| pace | `test_r_scores_use_one_point` | `PACE` | — | — | — | pass |
+| pda_forcing | `test_weight_coefficients[pda_forced_order1_constant_exp]` | `PDA` | 1.00e-08 | 1.24e-14 | 3.11e-15 | pass |
+| pda_forcing | `test_weight_coefficients[pda_forced_multicurve_bspline_weights]` | `PDA` | 1.00e-08 | 3.55e-15 | 1.57e-15 | pass |
+| pda_forcing | `test_weight_coefficients[pda_forced_refinery_constant]` | `PDA` | 1.00e-08 | 6.94e-18 | 3.09e-16 | pass |
+| pda_forcing | `test_weight_coefficients[pda_forced_refinery_two_forcings]` | `PDA` | 1.00e-08 | 1.75e-14 | 9.75e-13 | pass |
+| pda_forcing | `test_weight_coefficients[pda_forced_order2_constant]` | `PDA` | 1.00e-08 | 3.55e-14 | 5.07e-13 | pass |
+| pda_forcing | `test_forcing_weight_coefficients[pda_forced_order1_constant_exp]` | `PDA` | 1.00e-08 | 7.55e-15 | 3.77e-15 | pass |
+| pda_forcing | `test_forcing_weight_coefficients[pda_forced_multicurve_bspline_weights]` | `PDA` | 1.00e-08 | 2.22e-15 | 1.79e-15 | pass |
+| pda_forcing | `test_forcing_weight_coefficients[pda_forced_refinery_constant]` | `PDA` | 1.00e-08 | 5.55e-17 | 2.75e-16 | pass |
+| pda_forcing | `test_forcing_weight_coefficients[pda_forced_refinery_two_forcings]` | `PDA` | 1.00e-08 | 1.45e-13 | 4.28e-13 | pass |
+| pda_forcing | `test_forcing_weight_coefficients[pda_forced_order2_constant]` | `PDA` | 1.00e-08 | 3.55e-15 | 1.78e-16 | pass |
+| pda_forcing | `test_residual_coefficients[pda_forced_order1_constant_exp]` | `PDA` | 1.00e-08 | 1.12e-14 | 2.61e-09 | pass |
+| pda_forcing | `test_residual_coefficients[pda_forced_multicurve_bspline_weights]` | `PDA` | 1.00e-08 | 1.28e-14 | 8.57e-15 | pass |
+| pda_forcing | `test_residual_coefficients[pda_forced_refinery_constant]` | `PDA` | 1.00e-08 | 1.25e-16 | 1.09e-15 | pass |
+| pda_forcing | `test_residual_coefficients[pda_forced_refinery_two_forcings]` | `PDA` | 1.00e-08 | 2.81e-15 | 2.82e-14 | pass |
+| pda_forcing | `test_residual_coefficients[pda_forced_order2_constant]` | `PDA` | 1.00e-08 | 1.85e-12 | 8.97e-13 | pass |
+| pda_forcing | `test_transform_reproduces_the_residuals[pda_forced_order1_constant_exp]` | `PDA` | 1.00e-08 | 1.12e-14 | 2.61e-09 | pass |
+| pda_forcing | `test_transform_reproduces_the_residuals[pda_forced_multicurve_bspline_weights]` | `PDA` | 1.00e-08 | 1.28e-14 | 8.57e-15 | pass |
+| pda_forcing | `test_transform_reproduces_the_residuals[pda_forced_refinery_constant]` | `PDA` | 1.00e-08 | 1.25e-16 | 1.09e-15 | pass |
+| pda_forcing | `test_transform_reproduces_the_residuals[pda_forced_refinery_two_forcings]` | `PDA` | 1.00e-08 | 2.81e-15 | 2.82e-14 | pass |
+| pda_forcing | `test_transform_reproduces_the_residuals[pda_forced_order2_constant]` | `PDA` | 1.00e-08 | 1.85e-12 | 8.97e-13 | pass |
+| pda_forcing | `test_weight_values_on_a_grid` | `PDA` | 1.00e-08 | 3.55e-15 | 1.79e-15 | pass |
+| pda_forcing | `test_system_weights[pda_forced_system_order1]` | `PDA` | 1.00e-08 | 6.79e-13 | 1.32e-06 | pass |
+| pda_forcing | `test_system_weights[eigen_pda_handwriting_system]` | `PDA` | 1.00e-08 | 1.67e-10 | 2.18e-12 | pass |
+| pda_forcing | `test_system_forcing_weights` | `PDA` | 1.00e-08 | 3.58e-13 | 1.21e-13 | pass |
+| pda_forcing | `test_system_residuals[pda_forced_system_order1]` | `PDA` | 1.00e-08 | 1.11e-13 | 1.71e-08 | pass |
+| pda_forcing | `test_system_residuals[eigen_pda_handwriting_system]` | `PDA` | 1.00e-08 | 3.22e-13 | 3.57e-13 | pass |
+| pda_forcing | `test_stability_eigenvalues[pda_forced_refinery_constant]` | `PDAStability` | 1.00e-08 | 6.94e-18 | 3.09e-16 | pass |
+| pda_forcing | `test_stability_eigenvalues[pda_forced_refinery_two_forcings]` | `PDAStability` | 1.00e-08 | 1.75e-14 | 1.23e-12 | pass |
+| pda_forcing | `test_stability_eigenvalues[pda_forced_order2_constant]` | `PDAStability` | 1.00e-08 | 2.66e-15 | 5.07e-13 | pass |
+| pda_forcing | `test_stability_eigenvalues[pda_forced_system_order1]` | `PDAStability` | 1.00e-08 | 1.26e-12 | 3.16e-13 | pass |
+| pda_forcing | `test_stability_eigenvalues[eigen_pda_lip_bspline11]` | `PDAStability` | 1.00e-08 | 7.41e-13 | 1.03e-13 | pass |
+| pda_forcing | `test_stability_eigenvalues[eigen_pda_handwriting_system]` | `PDAStability` | 1.00e-08 | 9.35e-12 | 5.06e-13 | pass |
+| pda_forcing | `test_unforced_limits_are_zero[eigen_pda_lip_bspline11]` | `PDA` | — | — | — | pass |
+| pda_forcing | `test_unforced_limits_are_zero[eigen_pda_handwriting_system]` | `PDA` | — | — | — | pass |
+| pda_forcing | `test_first_order_limits_are_r_limvals_with_the_sign_flipped[pda_forced_refinery_constant]` | `PDA` | 1.00e-08 | 1.78e-15 | 3.77e-16 | pass |
+| pda_forcing | `test_first_order_limits_are_r_limvals_with_the_sign_flipped[pda_forced_refinery_two_forcings]` | `PDA` | 1.00e-08 | 1.24e-09 | 1.53e-11 | pass |
+| pda_forcing | `test_limits_match_r_limvals[pda_forced_refinery_constant]` | `PDAStability` | 1.00e-08 | 9.42e+00 | 2.00e+00 | xfail |
+| pda_forcing | `test_limits_match_r_limvals[pda_forced_refinery_two_forcings]` | `PDAStability` | 1.00e-08 | 1.62e+02 | 2.00e+00 | xfail |
+| pda_forcing | `test_limits_match_r_limvals[pda_forced_order2_constant]` | `PDAStability` | 1.00e-08 | 5.01e-01 | 1.00e+00 | xfail |
+| pda_forcing | `test_limits_match_r_limvals[pda_forced_system_order1]` | `PDAStability` | 1.00e-08 | 1.00e+00 | 2.00e+00 | xfail |
+| pda_forcing | `test_every_golden_case_is_covered` | `PDA` | — | — | — | pass |
+| pda_forcing | `test_lip_weights_and_residuals` | `PDA` | 1.00e-08 | 2.63e-10 | 4.05e-13 | pass |
+| profiling | `test_data_quadrature_is_the_default_rule` | `profile_ode` | 1.00e-12 | 0 | 0 | pass |
+| profiling | `quadset_n5_3breaks` | `profile_ode` | 1.00e-08 | 0 | 0 | pass |
+| profiling | `quadset_n7_3breaks` | `profile_ode` | 1.00e-08 | 1.11e-16 | 1.78e-16 | pass |
+| profiling | `quadset_n5_49breaks` | `profile_ode` | 1.00e-08 | 0 | 0 | pass |
+| profiling | `cstr2in_all_cool_step` | `profile_ode` | — | — | — | pass |
+| profiling | `cstr2in_all_hot_step` | `profile_ode` | — | — | — | pass |
+| profiling | `cstr2in_Tc_hot_step` | `profile_ode` | — | — | — | pass |
+| profiling | `cstr2in_Tc_cool_step` | `profile_ode` | — | — | — | pass |
+| profiling | `cstr2_default` | `profile_ode` | 1.00e-08 | 4.55e-13 | 2.06e-15 | pass |
+| profiling | `cstr2_hot_other_theta` | `profile_ode` | 1.00e-08 | 4.55e-13 | 1.10e-15 | pass |
+| profiling | `cstr2_tc_step_constants` | `profile_ode` | 1.00e-08 | 1.14e-13 | 5.08e-16 | pass |
+| profiling | `cstr_fitls_fit11_truth` | `profile_ode` | 1.00e-08 | 7.11e-13 | 1.16e-13 | pass |
+| profiling | `cstr_fitls_fit01_other` | `profile_ode` | 1.00e-08 | 1.67e-13 | 7.19e-14 | pass |
+| profiling | `cstr_fitls_fit10_other` | `profile_ode` | 1.00e-08 | 6.56e-14 | 3.41e-14 | pass |
+| profiling | `test_cstr_fn_fails_in_r` | `profile_ode` | — | — | — | pass |
+| profiling | `cstr_inner_fit11_truth` | `profile_ode` | 1.00e-08 | 5.25e-11 | 4.06e-14 | pass |
+| profiling | `cstr_inner_fit01_other` | `profile_ode` | 1.00e-08 | 1.77e-11 | 2.55e-14 | pass |
+| profiling | `cstr_inner_fit11_small_lambda` | `profile_ode` | 1.00e-08 | 5.63e-12 | 2.15e-14 | pass |
+| profiling | `cstr_profile_fit11_kref_EoverR` | `profile_ode` | 1.00e-05 | 2.04e-06 | 1.39e-06 | pass |
+| profiling | `cstr_profile_fit01_kref_EoverR` | `profile_ode` | 1.00e-05 | 1.47e-07 | 6.25e-08 | pass |
+| profiling | `cstr_profile_fit11_kref_EoverR_a` | `profile_ode` | 1.00e-05 | 6.74e-07 | 2.31e-07 | pass |
 | registration | `test_registration_matches_r[landmarkreg_growth_hgtf_pubertal_spurt-regfd_coefs]` | `landmark_register` | 1.00e-05 | 3.28e+03 | 9.77e-01 | xfail |
 | registration | `test_registration_matches_r[landmarkreg_growth_hgtf_pubertal_spurt-warpfd_coefs]` | `landmark_register` | 1.00e-05 | 7.61e-05 | 4.23e-06 | xfail |
 | registration | `test_registration_matches_r[landmarkreg_growth_hgtf_pubertal_spurt-warpinvfd_coefs]` | `landmark_register` | 1.00e-05 | 1.78e+00 | 9.89e-02 | xfail |
@@ -622,6 +904,45 @@ demonstrably the less accurate side) are listed with their measured reason below
 | registration | `test_decompose_matches_ampphasedecomp[MS.pha]` | `register` | 1.00e-05 | 1.22e-04 | 1.94e-07 | pass |
 | registration | `test_decompose_matches_ampphasedecomp[RSQR]` | `register` | 1.00e-05 | 6.76e-08 | 1.15e-07 | pass |
 | registration | `test_decompose_matches_ampphasedecomp[C]` | `register` | 1.00e-05 | 2.34e-10 | 2.34e-10 | pass |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_crit2-regfd_coefs]` | `register` | 1.00e-05 | 2.70e+00 | 1.80e-02 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_crit2-warpfd_coefs]` | `register` | 1.00e-05 | 8.48e-01 | 4.17e-02 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_crit2-Wfd_coefs]` | `register` | 1.00e-05 | 2.01e+00 | 4.03e-01 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_crit2-shift]` | `register` | 1.00e-05 | 0 | 0 | pass |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-regfd_coefs]` | `register` | 1.00e-05 | 1.86e+01 | 1.17e-01 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-warpfd_coefs]` | `register` | 1.00e-05 | 3.95e+00 | 1.79e-01 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-Wfd_coefs]` | `register` | 1.00e-05 | 7.65e+00 | 1.22e+00 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_gait_hip_knee_periodic_crit1-shift]` | `register` | 1.00e-05 | 2.32e+00 | 9.17e-01 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_handwriting_xy_crit2-regfd_coefs]` | `register` | 1.00e-05 | 2.61e-01 | 2.68e-03 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_handwriting_xy_crit2-warpfd_coefs]` | `register` | 1.00e-05 | 3.64e-01 | 1.58e-04 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_handwriting_xy_crit2-Wfd_coefs]` | `register` | 1.00e-05 | 7.26e-03 | 9.86e-02 | xfail |
+| registration_multivariate | `test_register_matches_r[register_fd_handwriting_xy_crit2-shift]` | `register` | 1.00e-05 | 0 | 0 | pass |
+| registration_multivariate | `test_r_fits_multivariate_warps_to_the_first_variable[register_fd_gait_hip_knee_crit2]` | `register` | 1.00e-08 | 5.36e-10 | 1.07e-10 | pass |
+| registration_multivariate | `test_r_fits_multivariate_warps_to_the_first_variable[register_fd_gait_hip_knee_periodic_crit1]` | `register` | 1.00e-08 | 2.60e-12 | 4.16e-13 | pass |
+| registration_multivariate | `test_r_fits_multivariate_warps_to_the_first_variable[register_fd_handwriting_xy_crit2]` | `register` | 1.00e-08 | 2.31e-13 | 3.14e-12 | pass |
+| registration_multivariate | `test_first_variable_weights_are_the_univariate_registration[register_fd_gait_hip_knee_crit2]` | `register` | 0 | 7.90e-14 | 1.61e-15 | pass |
+| registration_multivariate | `test_first_variable_weights_are_the_univariate_registration[register_fd_gait_hip_knee_periodic_crit1]` | `register` | 0 | 1.85e-13 | 4.03e-15 | pass |
+| registration_multivariate | `test_first_variable_weights_are_the_univariate_registration[register_fd_handwriting_xy_crit2]` | `register` | 0 | 4.50e-13 | 4.31e-14 | pass |
+| registration_multivariate | `test_fabel_optimum_is_below_r_point[register_fd_gait_hip_knee_crit2]` | `register` | — | — | — | pass |
+| registration_multivariate | `test_fabel_optimum_is_below_r_point[register_fd_gait_hip_knee_periodic_crit1]` | `register` | — | — | — | pass |
+| registration_multivariate | `test_fabel_optimum_is_below_r_point[register_fd_handwriting_xy_crit2]` | `register` | — | — | — | pass |
+| registration_multivariate | `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_crit2-warpfd_coefs]` | `register` | 1.00e-05 | 1.62e-04 | 7.96e-06 | xfail |
+| registration_multivariate | `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_crit2-regfd_coefs]` | `register` | 1.00e-05 | 6.98e-01 | 4.66e-03 | xfail |
+| registration_multivariate | `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_periodic_crit1-warpfd_coefs]` | `register` | 1.00e-05 | 5.07e-05 | 2.30e-06 | xfail |
+| registration_multivariate | `test_warps_from_r_latent_match_r[register_fd_gait_hip_knee_periodic_crit1-regfd_coefs]` | `register` | 1.00e-05 | 6.35e-01 | 3.99e-03 | xfail |
+| registration_multivariate | `test_warps_from_r_latent_match_r[register_fd_handwriting_xy_crit2-warpfd_coefs]` | `register` | 1.00e-05 | 1.14e-04 | 4.95e-08 | xfail |
+| registration_multivariate | `test_warps_from_r_latent_match_r[register_fd_handwriting_xy_crit2-regfd_coefs]` | `register` | 1.00e-05 | 9.94e-03 | 1.02e-04 | xfail |
+| registration_multivariate | `test_from_r_latent_keeps_r_latent_and_shift` | `register` | 1.00e-14 | 0 | 0 | pass |
+| registration_multivariate | `test_apply_matches_register_newfd[register_fd_gait_hip_knee_crit2]` | `register` | 1.00e-05 | 2.20e-03 | 1.47e-05 | xfail |
+| registration_multivariate | `test_apply_matches_register_newfd[register_fd_gait_hip_knee_periodic_crit1]` | `register` | 1.00e-05 | 7.02e-04 | 5.02e-06 | xfail |
+| registration_multivariate | `test_apply_matches_register_newfd[register_fd_handwriting_xy_crit2]` | `register` | 1.00e-05 | 5.39e-05 | 5.53e-07 | xfail |
+| registration_multivariate | `test_r_warps_use_a_trapezoid_rule[register_fd_gait_hip_knee_crit2]` | `register` | 1.00e-12 | 4.55e-13 | 4.81e-15 | pass |
+| registration_multivariate | `test_r_warps_use_a_trapezoid_rule[register_fd_gait_hip_knee_periodic_crit1]` | `register` | 1.00e-12 | 5.97e-13 | 8.22e-15 | pass |
+| registration_multivariate | `test_r_warps_use_a_trapezoid_rule[register_fd_handwriting_xy_crit2]` | `register` | 1.00e-12 | 9.32e-12 | 2.37e-14 | pass |
+| registration_multivariate | `test_landmark_latent_matches_r[Wfd_coefs_hip]` | `register` | 1.00e-05 | 3.35e-06 | 1.93e-05 | xfail |
+| registration_multivariate | `test_landmark_latent_matches_r[Wfd_coefs_knee]` | `register` | 1.00e-05 | 3.35e-06 | 1.93e-05 | xfail |
+| registration_multivariate | `test_r_landmark_warps_do_not_depend_on_the_variable` | `register` | 1.00e-14 | 0 | 0 | pass |
+| registration_multivariate | `test_fabel_landmark_warps_meet_the_landmarks` | `register` | 0 | 3.35e-06 | 1.93e-05 | pass |
+| registration_multivariate | `test_multivariate_landmarks_register_every_variable` | `register` | 0 | 5.68e-14 | 3.65e-16 | pass |
 | regression | `test_golden_field[fregress_scalar_precip_on_temp-df]` | `fregress` | 1.00e-08 | 2.66e-15 | 4.44e-16 | pass |
 | regression | `test_golden_field[fregress_scalar_precip_on_temp-yhatfdobj]` | `fregress` | 1.00e-08 | 8.86e-09 | 2.79e-09 | pass |
 | regression | `test_golden_field[fregress_scalar_precip_on_temp-gcv]` | `fregress` | 1.00e-08 | 2.93e-18 | 4.39e-15 | pass |

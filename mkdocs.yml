@@ -78,6 +78,9 @@ nav:
       - Registration: api/registration.md
       - Dynamics: api/dynamics.md
       - Statistics: api/stats.md
+      - Sparse data (PACE): api/sparse.md
+      - Density and intensity: api/density.md
+      - Profiling (ODE parameters): api/profiling.md
       - PyTorch layers: api/nn.md
       - Datasets: api/datasets.md
       - Input and output: api/io.md

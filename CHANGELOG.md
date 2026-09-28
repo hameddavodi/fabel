@@ -71,6 +71,44 @@ golden-file parity (`rtol = 1e-8`, `1e-5` for iterative fits).
   (autodiff Newton path; the optimal warps are held fixed).
 - Build: the Makefile uses the `.venv` Python and has new `sync` and `gate5`
   targets.
+- Sparse / longitudinal FPCA (`fabel.sparse`, PACE): `sparse_mean`
+  (R `smooth.sparse.mean`), `sparse_cov` / `SparseCov` (R `covPACE`, with the
+  measurement-error variance `sigma2`), and the `PACE` estimator (R `pcaPACE`)
+  with conditional-expectation (BLUP) scores in `transform` (replaces R's
+  defective `scoresPACE`) and `inverse_transform`.
+- Density and intensity estimation (`fabel.density`): `fit_density` (R
+  `density.fd`, no longer shipped in fda 6.3.0) and `fit_intensity` (R
+  `intensity.fd`), damped Newton with the exact Hessian and exact integrals;
+  `DensityResult`, `IntensityResult`.
+- Generalized profiling for ODE parameters (`fabel.profiling`, replaces the R
+  CSTR family): `ODEModel` (analytic, finite-difference or torch-autodiff
+  derivatives), `ProfiledODE`, `profile_ode`, `ProfileResult`, built-in
+  `cstr_model` / `cstr_inputs` and `fitzhugh_nagumo_model`, and `simpson_rule`
+  (R `quadset`). Unobserved states are allowed.
+- Regression: `linmod()` / `LinmodResult` for a functional response on a
+  functional covariate with a bivariate coefficient beta(s, t) (R `linmod`),
+  with weights and a `predict()` method. `fregress` now computes in the input's
+  array namespace: torch tensors in give torch results, with gradients to the
+  response, covariates and weights.
+- Registration: `register()` accepts multivariate curves (one warp per curve,
+  new `var_weights=` keyword; `var_weights=[1, 0, ...]` reproduces R, which uses
+  the first variable only); landmark registration and `decompose()` accept
+  multivariate curves; new `RegistrationResult.apply(fd)` (R `register.newfd`).
+- Dynamics: `PDA` forcing functions (`forcing_basis=`, `forcing_lam=`,
+  `fit(X, forcing=u)`, `forcing_weights_`; R `pda.fd` `awtlist` / `ufdlist`) and
+  `PDA.stability()` returning `PDAStability` (R `eigen.pda`, with the true
+  equilibrium limits).
+- Smoothing: monotone, positive and morph `SmoothResult`s evaluate exact
+  derivatives of any order (Faà di Bruno / complete Bell polynomials; R
+  `eval.monfd`, `eval.posfd`, `predict.monfd`).
+- Statistics: pointwise `confidence_band()` / `ConfidenceBand` for a smooth
+  (via `y2c_map`) or an `fregress` result (via `stderr`), and the plots
+  `plot_beta` (R `plotbeta`), `cycleplot` (R `cycleplot.fd`) and `plot_scores`
+  (R `plotscores`).
+- Top-level exports added: `PACE`, `SparseCov`, `sparse_mean`, `sparse_cov`,
+  `fit_density`, `fit_intensity`, `DensityResult`, `IntensityResult`,
+  `ODEModel`, `ProfiledODE`, `profile_ode`, `linmod`, `LinmodResult`,
+  `PDAStability`, and the `sparse`, `density` and `profiling` modules.
 
 ### Fixed
 - `register(lam=0, criterion='eigen')` no longer raises `LinAlgError`: it warns
