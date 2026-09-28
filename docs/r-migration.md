@@ -19,7 +19,8 @@ In the tables below, `fb` is `import fabel as fb`.
 | R `fda` | Fabel |
 |---|---|
 | `fd(coef, basisobj)` | `fb.FData(coefs, basis)` |
-| `eval.fd`, `eval.monfd`, `eval.posfd` | `fd(t, deriv=0)` |
+| `eval.fd` | `fd(t, deriv=0)` |
+| `eval.monfd`, `eval.posfd`, `predict.monfd` (any derivative) | `result(t, deriv=n)` on a monotone or positive `SmoothResult` (exact, any order) |
 | `eval.fd(t, fdobj, Lfdobj)` | `fd(t, operator)` with an `LDO` |
 | `deriv.fd` | `fd.derivative(n=1)` |
 | `mean.fd`, `sd.fd`, `stddev.fd`, `center.fd` | `fd.mean()`, `fd.std()`, `fd.center()` |
@@ -94,6 +95,9 @@ In the tables below, `fb` is `import fabel as fb`.
 | `fRegress.CV` | `model.cv()` |
 | `Fperm.fd` | `fb.stats.f_test(model, n_perm=1000)` |
 | (none) | `fb.FRegress`: scikit-learn estimator |
+| `linmod` (with `bifdPar` for the surface penalties) | `fb.linmod(y, x, s_basis=, t_basis=, lam_alpha=, lam_s=, lam_t=)` → `LinmodResult` (`.alpha`, `.beta`, `.fitted`, `.predict`) |
+| pointwise limits from `fRegress.stderr` | `fb.stats.confidence_band(model)` (one band per term) |
+| `plotbeta` | `fb.stats.plot_beta(model)` |
 
 ## Registration (`register.fd`, `landmarkreg` → `register()`)
 
@@ -103,6 +107,9 @@ In the tables below, `fb` is `import fabel as fb`.
 | `landmarkreg` | `fb.register(fd, landmarks=lm)`, `fb.landmark_register(fd, landmarks)` |
 | `$regfd`, `$warpfd` | `result.registered`, `result.warp` |
 | `AmpPhaseDecomp` | `result.decompose()` → amplitude MSE, phase MSE, R² |
+| `register.fd` on multivariate curves | `fb.register(fd, var_weights=...)` (one warp per curve; `var_weights=[1, 0, ...]` reproduces R, which uses the first variable only) |
+| `landmarkreg` on multivariate curves | `fb.landmark_register(fd, landmarks)` (R rejects multivariate curves) |
+| `register.newfd` | `result.apply(new_fd)` |
 | (none) | `fb.Registrator`: scikit-learn transformer |
 
 ## Dynamics (`pda.fd` → `PDA`)
@@ -112,6 +119,8 @@ In the tables below, `fb` is `import fabel as fb`.
 | `pda.fd` | `fb.PDA(order=2).fit(fd)` |
 | `pda.overlay` | `pda.plot_overlay()` |
 | `phaseplanePlot` | `fb.phase_plane(fd)` |
+| `pda.fd(..., awtlist, ufdlist)` (forcing functions) | `fb.PDA(forcing_basis=, forcing_lam=).fit(fd, forcing=u)`, `pda.forcing_weights_` |
+| `eigen.pda` | `pda.stability()` → `PDAStability` (`.eigenvalues`, `.limits`, `.plot()`) |
 
 ## Statistics (`fabel.stats`)
 
@@ -123,6 +132,38 @@ In the tables below, `fb` is `import fabel as fb`.
 | `fbplot`, `boxplot.fd` | `fb.stats.boxplot(fd)` |
 | `Fperm.fd` | `fb.stats.f_test(model, n_perm=)` |
 | `tperm.fd` | `fb.stats.t_test(fd1, fd2, n_perm=)` |
+| pointwise variance from `smooth.basis()$y2cMap` | `fb.stats.confidence_band(smooth_result, t, sigma_e=)` |
+| `cycleplot.fd` | `fb.stats.cycleplot(fd)` |
+| `plotscores` | `fb.stats.plot_scores(pca, (0, 1))` |
+| `zerofind` | (private; used by `plot_beta`) |
+
+## Sparse longitudinal data (PACE → `fabel.sparse`)
+
+| R `fda` | Fabel |
+|---|---|
+| `smooth.sparse.mean` | `fb.sparse_mean(y, t, basis, lam=)` |
+| `covPACE` | `fb.sparse_cov(y, t, mean=, basis=, lam=)` → `SparseCov` (`.cov`, `.sigma2`, `.variance`) |
+| `pcaPACE` | `fb.PACE(n=3, ...).fit(y, t=t)`: `.harmonics`, `.values`, `.varprop` |
+| `scoresPACE` | `pace.transform(y, t)` (conditional expectation; R's `scoresPACE` is defective in 6.3.0) |
+
+## Density and intensity (`fabel.density`)
+
+| R `fda` | Fabel |
+|---|---|
+| `density.fd` (no longer shipped in fda 6.3.0) | `fb.fit_density(x, basis=, lam=, penalty=)` → `DensityResult` |
+| `intensity.fd` | `fb.fit_intensity(times, basis=, lam=, penalty=)` → `IntensityResult` |
+
+## ODE parameters by profiling (CSTR family → `fabel.profiling`)
+
+| R `fda` | Fabel |
+|---|---|
+| `CSTR2` | `fb.profiling.cstr_model(condition, estimate=...)` or any `fb.ODEModel` |
+| `CSTR2in` | `fb.profiling.cstr_inputs(t, condition)` (the 4 step scenarios) |
+| `CSTRfitLS` | `fb.ProfiledODE(...).residuals(coefs, theta)` |
+| `CSTRfn` | `problem.fit_states(theta)` |
+| `CSTRres`, `CSTRsse` (+ `nls` / `optim`) | `fb.profile_ode(model, t, y, basis, lam=, theta0=)` / `problem.fit(theta0)` |
+| `quadset` | `fb.profiling.simpson_rule(breaks, n_quad)` |
+| `lsoda(y, times, CSTR2, parms)` | `model.simulate(...)` |
 
 ## Datasets (`data(...)` → `fabel.datasets`)
 
@@ -169,6 +210,8 @@ checksum, and cached in `~/.cache/fabel` (override with `FABEL_DATA_DIR`).
 | Topic | R `fda` 6.3.0 | Fabel |
 |---|---|---|
 | Weights in `fRegress` | `fRegress(y, xfdlist, betalist, wt = w)` fits by weighted least squares, scalar and functional response alike. The argument is `wt`: `wtvec = w` falls into `...` and is ignored without a warning, so R returns the unweighted fit. | `fb.fregress(y, x, weights=w)` fits by weighted least squares and agrees with R's `wt = w` to the accuracy of R's integration. Drop `weights` when porting a script that passed `wtvec` to `fRegress`. |
+| Weights in `linmod` | `linmod(..., wtvec = w)` errors in 6.3.0. | `fb.linmod(y, x, weights=w)` fits by weighted least squares. |
+| `eigen.pda` limits | `limvals` has a wrong sign (order 1), wrong entries (order 2) or loses forcing (systems). | `PDAStability.limits` is the true equilibrium −A(t)⁻¹f(t). |
 | Weights in `Fperm.fd` | `Fperm.fd(..., wt = w)` accepts weights but ignores them: `Fobs` and the null distribution are the same as with no weights. | `fb.stats.f_test(model)` refits a weighted model with its weights under every permutation, so the statistic changes with the weights. Test a model fitted without `weights` to reproduce R. The raw form `f_test(y, x)` takes no weights. |
 
 With a roughness penalty, only the relative size of the weights and `lam`

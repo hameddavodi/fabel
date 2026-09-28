@@ -99,6 +99,22 @@ pytest --nbmake notebooks/book_figures.ipynb
 
 ---
 
+## Enhancement round (2026-09-28) — API extension beyond the v1 SPEC
+
+Seven parallel builders, merged on `integration/enh`. SPEC.md was extended on purpose (§2, §4.1, §4.3-§4.9).
+
+- [x] `sparse.py`: PACE for sparse longitudinal data (`sparse_mean`, `sparse_cov`, `SparseCov`, `PACE`) — golden `pace.json`
+- [x] `density.py`: `fit_density`, `fit_intensity` — golden `density.json`
+- [x] `regression.py`: `linmod` / `LinmodResult`; torch pass-through for `fregress` — golden `linmod.json`
+- [x] `registration.py`: multivariate `register` (`var_weights`), `RegistrationResult.apply` — golden `registration_multivariate.json`
+- [x] `dynamics.py` / `smoothing.py`: PDA forcing, `PDA.stability` / `PDAStability`; exact monotone/positive derivatives of any order — golden `pda_forcing.json`, `monotone_derivs.json`
+- [x] `stats.py`: `confidence_band` / `ConfidenceBand`, `plot_beta`, `cycleplot`, `plot_scores` — golden `bands.json`
+- [x] `profiling.py`: generalized profiling for ODE parameters (CSTR family) — golden `profiling.json`
+- [x] Integration: SPEC, `__init__` exports, API pages + nav, R migration rows, `tools/parity_report.py` rules, `PARITY_REPORT.md`, CHANGELOG, full gate green
+- [ ] Cleanup wave: owner references (after the user names the new owner), independent review, re-run GATE 5, move the local `v1.0.0` tag
+
+---
+
 ## Recovery rules
 
 - Context lost / new session → read `PROGRESS.md`, find first unchecked box above, continue.

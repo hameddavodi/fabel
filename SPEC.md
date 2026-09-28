@@ -28,8 +28,11 @@ fabel/
 ├── decomposition.py # FPCA, FCCA
 ├── regression.py    # fregress(), FRegress
 ├── registration.py  # register(), landmark_register()
-├── dynamics.py      # PDA, phase_plane()
-├── stats.py         # cov, cor, depth, boxplot, f_test, t_test
+├── dynamics.py      # PDA, PDAStability, phase_plane()
+├── stats.py         # cov, cor, depth, boxplot, f_test, t_test, confidence_band, plot_beta, cycleplot, plot_scores
+├── sparse.py        # PACE, sparse_mean, sparse_cov, SparseCov (sparse / longitudinal FPCA)
+├── density.py       # fit_density, fit_intensity, DensityResult, IntensityResult
+├── profiling.py     # ODEModel, ProfiledODE, profile_ode, cstr_model, ... (ODE parameters)
 ├── datasets.py      # load_*() — all 15+ book datasets
 ├── nn.py            # PyTorch: BasisLayer, FDataDataset
 ├── _backend.py      # array-api dispatch (private)
@@ -109,6 +112,8 @@ fd = fb.smooth(y, t, lam="gcv", penalty=fb.LDO(2))
 
 Returns `SmoothResult`: `.fd`, `.df`, `.gcv`, `.sse`, `.penalty_matrix` — everything R scatters across list elements.
 
+`SmoothResult.__call__(t, deriv)` accepts any `deriv >= 0` for `constraint` in {positive, monotone, morph}. The derivatives are exact, by Faà di Bruno's formula / complete Bell polynomials (this replaces `eval.posfd`, `eval.monfd` and `predict.monfd` for any `Lfdobj`).
+
 ### 4.2 Decomposition
 
 ```python
@@ -130,6 +135,26 @@ m.cv()                                     # ← fRegress.CV
 fb.stats.f_test(m, n_perm=1000)            # ← Fperm.fd
 ```
 
+`fregress` and `linmod` follow §1.5: torch tensors in give torch tensors out, and gradients flow to response, covariates and weights.
+
+**Functional response on a functional covariate with a surface coefficient** (`linmod`):
+
+```python
+m = fb.linmod(y_fd, x_fd, s_basis=bs, t_basis=bt,          # ← linmod
+              lam_alpha=1e2, lam_s=1e4, lam_t=1e4)
+m.alpha      # FData, intercept alpha(t)                   ← beta0estfd
+m.beta       # BiFData, surface beta(s, t)                 ← beta1estbifd
+m.fitted     # FData in the response basis                 ← yhatfdobj
+m.predict(x_new)                                           # (new: R has no predict for linmod)
+```
+
+| Python | Replaces (R) |
+|---|---|
+| `linmod(y, x, alpha_basis=, s_basis=, t_basis=, lam_alpha=, lam_s=, lam_t=, penalty_alpha=, penalty_s=, penalty_t=, weights=)` | `linmod(xfdobj, yfdobj, list(fdPar(...), bifdPar(bifd, Lfds, Lfdt, lambdas, lambdat)))` |
+| `LinmodResult` | the list `linmod` returns |
+
+Model: y_i(t) = alpha(t) + ∫ x_i(s) beta(s,t) ds + e_i(t). s and t may lie on different intervals. Default bases: alpha and t take the response basis, s takes the covariate basis. Default penalties are D², default lambdas are 0. `weights` gives weighted least squares (R's `wtvec` errors in fda 6.3.0).
+
 ### 4.4 Registration — replaces 5 functions
 
 ```python
@@ -137,7 +162,12 @@ res = fb.register(fd)                      # ← register.fd (to mean)
 res = fb.register(fd, landmarks=lm)        # ← landmarkreg
 res.registered, res.warp                   # warped curves + warping fns
 res.decompose()                            # ← AmpPhaseDecomp → (amp_mse, phase_mse, R²)
+res.apply(new_fd)                          # ← register.newfd
 ```
+
+**Multivariate curves.** `fd` may be multivariate (coefs `(n_basis, n_curves, n_vars)`). Each curve gets one warp h_i, shared by all its variables. The continuous criterion is Σ_v w_v F(x0_v, x_v ∘ h) + λ cᵀRc, with the new keyword `var_weights` (shape `(n_vars,)`, non-negative, finite, at least one positive, default all ones; ignored for landmark registration). R fda 6.3.0 `register.fd` fits multivariate warps to the first variable only; `var_weights=[1, 0, ...]` reproduces it. Landmark registration and `decompose()` accept multivariate curves (R's `landmarkreg` and `AmpPhaseDecomp` do not); `decompose()` uses squared Euclidean norms over the variables. `Registrator` (sklearn) stays univariate.
+
+`RegistrationResult.apply(fd) -> FData` warps new curves (univariate or multivariate, any basis, e.g. derivatives) with the stored warps and shifts: curve i becomes x_i(h_i(t) + δ_i), wrapped periodically when any shift is non-zero, then least-squares fitted in `fd`'s basis on a grid of max(201, 10K+1) points. Torch coefficients give a differentiable tensor result.
 
 ### 4.5 Dynamics
 
@@ -145,7 +175,101 @@ res.decompose()                            # ← AmpPhaseDecomp → (amp_mse, ph
 pda = fb.PDA(order=2).fit(fd)              # ← pda.fd
 pda.plot_overlay()                          # ← pda.overlay
 fb.phase_plane(fd)                          # ← phaseplanePlot
+pda = fb.PDA(order=1, forcing_basis=b).fit(fd, forcing=u)  # ← pda.fd awtlist / ufdlist
+st = pda.stability()                        # ← eigen.pda → PDAStability(t, eigenvalues, limits)
+st.plot()
 ```
+
+`PDA(order=2, *, weight_basis=None, lam=0.0, penalty=2, n_grid=501, forcing_basis=None, forcing_lam=0.0)` fits D^m x = −Σ_j b_j D^j x + Σ_k a_k u_k. `forcing` is an FData or a list of FData for one equation; for a system it is a list with one entry per equation (each None, an FData or a list of FData). Each u has 1 variable and either 1 curve (shared by all curves) or n_curves curves. The fitted forcing weights are in `forcing_weights_` (a tuple a_k for one equation, tuple[i][k] for a system; empty without forcing). `transform`, `fit_transform` and `solve(t, initial, *, forcing=None)` take the same structure; `solve` without forcing integrates the homogeneous equation.
+
+`PDA.stability(t=None, *, n_points=501, forcing=None) -> PDAStability`: a frozen dataclass `(t, eigenvalues, limits)` with `.plot(ax=None, **kw)`. `eigenvalues` has shape `(n_t, n_vars*order)`, complex: the eigenvalues of the companion matrix A(t), sorted by decreasing modulus. `limits` holds the equilibrium states −A(t)⁻¹ f(t): zero when unforced, NaN where A is singular.
+
+### 4.6 Sparse / longitudinal FPCA (PACE) — replaces 4 R functions
+
+```python
+from fabel.sparse import PACE, sparse_mean, sparse_cov
+mu  = sparse_mean(y, t, basis, lam=0.0)          # ← smooth.sparse.mean
+est = sparse_cov(y, t, mean=mu, basis=b, lam=1)  # ← covPACE  (.cov BiFData, .mean, .sigma2, .variance)
+pace = PACE(n=3, basis=b, mean_basis=mb, harmonic_basis=hb,
+            lam_mean=0.0, lam_cov=0.0, lam=0.0).fit(y, t=t)   # ← pcaPACE
+pace.harmonics, pace.values, pace.varprop, pace.sigma2_
+scores = pace.transform(y_new, t_new)            # ← scoresPACE (conditional expectation / BLUP)
+curves = pace.inverse_transform(scores, grid)    # mean + sum_k score_k * harmonic_k on a grid
+```
+
+Input is the irregular per-curve form of `smooth()`: `y` and `t` are sequences with one 1-D array per curve. With `t=None`, `y` may instead be R's list form: one `(n_i, 2)` array of (time, value) rows per curve. The covariance surface is fitted to the within-curve cross-products of different points only (the diagonal is left out). The measurement-error variance `sigma2` comes from the smoothed diagonal (Yao, Müller & Wang 2005). Harmonics follow R's `pcaPACE` sign rule. Scores are the PACE conditional expectation, not R's defective `scoresPACE` output. `PACE` follows the estimator API (params, clone, pickle). Its input is ragged, so the generic `check_estimator` checks do not apply.
+
+| Python | Replaces (R) |
+|---|---|
+| `sparse_mean` | `smooth.sparse.mean` |
+| `sparse_cov` / `SparseCov` | `covPACE` |
+| `PACE` (fit / values / harmonics / varprop) | `pcaPACE` |
+| `PACE.transform` / `PACE.scores` | `scoresPACE` |
+
+### 4.7 Density and intensity estimation — replaces `density.fd`, `intensity.fd`
+
+```python
+res = fb.fit_density(x, basis=b, lam=1e-2, penalty=2)   # ← density.fd (dropped from fda 6.3.0)
+res(t)                 # density p(t) = C exp W(t)
+res.log_density(t)     # log p(t)
+res.fd, res.normaliser # W (FData) and C = 1/∫exp W
+ev = fb.fit_intensity(times, basis=b, lam=10, penalty=1)  # ← intensity.fd
+ev(t)                  # intensity mu(t) = exp W(t);  ev.expected_count = ∫ mu
+```
+
+| Python | Replaces (R) |
+|---|---|
+| `fit_density(x, basis=, domain=, lam=, penalty=, start=, tol=, max_iter=)` → `DensityResult` | `density.fd` |
+| `fit_intensity(x, basis=, domain=, lam=, penalty=, start=, tol=, max_iter=)` → `IntensityResult` | `intensity.fd` |
+
+Criteria: density `-Σ W(x_i) + n log ∫e^W + λ cᵀRc`; intensity `-Σ W(x_i) + ∫e^W + λ cᵀRc` (the same as R's `Flist$f`). Damped Newton with the exact Hessian. Exact Gauss-Legendre integrals. Stops once a full Newton step moves no coefficient by more than `tol·(1+max|c|)` (default `tol=1e-10`, `max_iter=100`, `RuntimeWarning` if not converged). Parity is iterative: rtol 1e-5. Defaults: `basis` is cubic B-splines with `min(max(4, n//10), 20)` functions. The domain is `(min x, max x)` for a density and `(0, max x)` for an intensity. `lam=0`, `penalty=2`. If W is only defined up to a constant (the basis spans constants and L annihilates them), the returned W has `∫W = 0`.
+
+### 4.8 Profiling (ODE parameter estimation) — replaces the CSTR family
+
+```python
+from fabel.profiling import ODEModel, cstr_model, fitzhugh_nagumo_model
+model = ODEModel(rhs, n_states=2, n_params=3, jac_x=..., jac_theta=...)  # f(x, t, theta), (n,d) in/out
+model = ODEModel.from_torch(torch_rhs, 2, 3)          # exact autodiff derivatives (fabel[torch])
+fit = fb.profile_ode(model, t, y, basis, lam=1e3, theta0=[...])   # y: (n,d), NaN = unobserved
+fit.theta, fit.cov, fit.stderr, fit.states, fit(t), fit.theta_path, fit.inner.df
+problem = fb.ProfiledODE(model, t, y, bases, lam, state_weights=[1/var_C, 1/var_T])
+problem.residuals(coefs, theta)   # ← CSTRfitLS (residuals + Jacobians)
+problem.fit_states(theta)         # ← CSTRfn (inner state fit)
+problem.fit(theta0)               # ← CSTRres + nls / CSTRsse + optim (outer fit)
+```
+
+| Python | Replaces (R) |
+|---|---|
+| `ODEModel`, `cstr_model(condition, estimate=...)` | `CSTR2` |
+| `cstr_inputs(t, condition)` | `CSTR2in` (step scenarios) |
+| `ProfiledODE.residuals` | `CSTRfitLS` |
+| `ProfiledODE.fit_states` | `CSTRfn` |
+| `profile_ode` / `ProfiledODE.fit` | `CSTRres`, `CSTRsse` (+ `nls`/`optim`) |
+| `simpson_rule(breaks, n_quad)` | `quadset` |
+| `ODEModel.simulate` | `lsoda(y, times, CSTR2, parms)` |
+
+Inner criterion: J(c|θ) = Σ_i w_i [ Σ_j (y_ij − x_i(t_ij))² + λ_i ∫ (Dx_i − f_i(x,t,θ))² ], minimised by damped Gauss-Newton. The integral uses composite Simpson on the B-spline breaks. Outer criterion: the profiled data SSE, minimised by Gauss-Newton with dc/dθ from the implicit function theorem (exact inner Hessian). Covariance = σ² (AᵀA)⁻¹. NumPy results; torch right-hand sides via `ODEModel.from_torch`. Top-level exports: `profile_ode`, `ODEModel`, `ProfiledODE` (the rest stay in `fabel.profiling`).
+
+### 4.9 Statistics: confidence bands and plots
+
+```python
+band  = fb.stats.confidence_band(smooth_result, t, sigma_e=None, level=0.95, deriv=0)  # ← smooth.basis y2cMap variance (book 5.5)
+bands = fb.stats.confidence_band(fregress_result, t, sigma_e=None, y2c_map=None)      # ← fRegress.stderr pointwise limits (book 9.4)
+band.lower, band.upper, band.stderr, band.plot()
+fb.stats.plot_beta(fregress_result)        # ← plotbeta
+fb.stats.cycleplot(fd_bivariate)           # ← cycleplot.fd
+fb.stats.plot_scores(fpca, (0, 1))         # ← plotscores
+```
+
+| Python | Replaces (R) |
+|---|---|
+| `stats.confidence_band` / `stats.ConfidenceBand` | pointwise SE via `smooth.basis()$y2cMap`, `fRegress.stderr` |
+| `stats.plot_beta` | `plotbeta` |
+| `stats.cycleplot` | `cycleplot.fd` |
+| `stats.plot_scores` | `plotscores` |
+| (private `fabel._plot.zerofind`) | `zerofind` |
+
+Smooth: Var x(t) = φ(t)ᵀ S Σ Sᵀ φ(t), with S the `y2c_map`. `sigma_e` is a number, a length-n_obs vector or an (n_obs, n_obs) matrix; the default is SSE/(N(n_obs−df)) I. Constrained or irregular smooths raise ValueError. Regression: Var β_j(t) = θ_j(t)ᵀ V_jj θ_j(t), with V from `FRegressResult.stderr`; one band per term. Bands are pointwise, using the normal quantile z = Φ⁻¹((1+level)/2). Torch in gives torch out.
 
 ---
 
