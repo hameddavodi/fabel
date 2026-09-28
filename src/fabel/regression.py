@@ -34,6 +34,14 @@ exactly (Gauss-Legendre on the break points of the bases involved), whereas R
 approximates them -- see ``tests/parity/test_regression.py`` for the measured
 consequences.
 
+:func:`linmod` fits the fully functional model with a bivariate coefficient
+(R's ``linmod``), ``y_i(t) = alpha(t) + ∫ x_i(s) β(s, t) ds + ε_i(t)``, where a
+response value depends on the whole covariate curve.
+
+Both entry points compute in the array namespace of their inputs: PyTorch
+coefficients, covariates or weights give PyTorch results, and gradients flow
+back to the inputs.
+
 Examples
 --------
 >>> import numpy as np
@@ -59,10 +67,17 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils import check_array
 from sklearn.utils.validation import check_is_fitted, column_or_1d, validate_data
 
-from fabel._backend import array_namespace, asarray, default_namespace
+from fabel import _linalg
+from fabel._backend import (
+    array_namespace,
+    asarray,
+    default_namespace,
+    result_namespace,
+    to_numpy,
+)
 from fabel._operator import LDO
 from fabel.basis import Basis, Constant, _same_domain
-from fabel.core import FData, _project, _quadrature, inprod
+from fabel.core import BiFData, FData, _cross_gram, _project, _quadrature, inprod
 from fabel.smoothing import SmoothResult
 
 __all__ = [
@@ -70,7 +85,9 @@ __all__ = [
     "FRegressCV",
     "FRegressResult",
     "FRegressStderr",
+    "LinmodResult",
     "fregress",
+    "linmod",
 ]
 
 Array = Any
@@ -115,6 +132,11 @@ def _as_operator(penalty: int | LDO) -> LDO:
 def _is_number(value: Any) -> bool:
     """Return whether ``value`` is a plain real number (not an array)."""
     return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _real(value: Any) -> float:
+    """Return an array scalar as a Python float, detached from any autograd graph."""
+    return float(to_numpy(value))
 
 
 def _scalar_vector(value: Any, n: int, xp: ModuleType, name: str) -> Array:
@@ -454,9 +476,10 @@ class FRegressResult:
         if x is None:
             return self.fitted
         values = self._new_covariates(x)
+        xp = _namespace_of(self.cmat, *values)
         if self.functional_response:
-            return _functional_fit(self.y.basis, self.terms, values, self.beta)
-        return _scalar_design(self.terms, values) @ self.coefficients
+            return _functional_fit(self.y.basis, self.terms, values, self.beta, xp)
+        return _scalar_design(self.terms, values, xp) @ asarray(self.coefficients, xp)
 
     def stderr(self, sigma_e: Any = None, y2c_map: Any = None) -> FRegressStderr:
         """Return the standard errors of the coefficients (R's ``fRegress.stderr``).
@@ -552,28 +575,30 @@ class FRegressResult:
         if len(sizes) > 1:
             raise ValueError(f"new covariates disagree on the number of observations: {sizes}")
         n = sizes.pop() if sizes else 1
-        xp = default_namespace()
+        xp = _namespace_of(self.cmat, *items)
         out: list[Any] = []
         for term, value in zip(self.terms, items, strict=True):
             if term.functional != isinstance(value, FData):
                 kind = "a curve" if term.functional else "a number per observation"
                 raise ValueError(f"covariate {term.name!r} must be {kind}")
             out.append(
-                value if isinstance(value, FData) else _scalar_vector(value, n, xp, term.name)
+                FData(asarray(value.coefs, xp), value.basis)
+                if isinstance(value, FData)
+                else _scalar_vector(value, n, xp, term.name)
             )
         return out
 
     def _scalar_stderr(self, sigma_e: Any, y2c_map: Any) -> FRegressStderr:
         xp = array_namespace(self.cmat)
         values = [term.values for term in self.terms]
-        design = _scalar_design(self.terms, values)
+        design = _scalar_design(self.terms, values, xp)
         n = int(design.shape[0])
         cinv = xp.linalg.inv(self.cmat)
         c2b = cinv @ (xp.matrix_transpose(design) * self.weights[None, :])
         if sigma_e is None:
             resid = self.y - self.fitted
             assert self.df is not None
-            sigma_e = float(xp.sum(self.weights * resid**2)) / (n - self.df)
+            sigma_e = _real(xp.sum(self.weights * resid**2)) / (n - self.df)
         sigma = _covariance(sigma_e, n, xp)
         smap = xp.eye(n, dtype=xp.float64) if y2c_map is None else asarray(y2c_map, xp)
         if tuple(smap.shape) != (n, n):
@@ -612,7 +637,7 @@ class FRegressResult:
     def _scalar_cv(self) -> FRegressCV:
         xp = array_namespace(self.cmat)
         values = [term.values for term in self.terms]
-        design = _scalar_design(self.terms, values)
+        design = _scalar_design(self.terms, values, xp)
         y = self.y
         errors = []
         for i in range(int(design.shape[0])):
@@ -623,7 +648,7 @@ class FRegressResult:
             coef = xp.linalg.solve(cmat, dmat[:, None])[:, 0]
             errors.append(y[i] - xp.sum(row * coef))
         errs = xp.stack(errors)
-        return FRegressCV(sse=float(xp.sum(errs**2)), errors=errs)
+        return FRegressCV(sse=_real(xp.sum(errs**2)), errors=errs)
 
     def _functional_cv(self) -> FRegressCV:
         xp = array_namespace(self.cmat)
@@ -641,7 +666,7 @@ class FRegressResult:
             columns.append(ycoefs[:, i] - fit[:, 0])
         err = xp.stack(columns, axis=1)
         gram = asarray(basis.gram(), xp)
-        sse = float(xp.sum(err * (gram @ err)))
+        sse = _real(xp.sum(err * (gram @ err)))
         return FRegressCV(sse=sse, errors=FData(err, basis))
 
 
@@ -689,9 +714,8 @@ def _beta_stderr(terms: Sequence[_Term], cov: Array) -> tuple[FData, ...]:
 # --------------------------------------------------------------------------- #
 
 
-def _scalar_design(terms: Sequence[_Term], values: Sequence[Any]) -> Array:
+def _scalar_design(terms: Sequence[_Term], values: Sequence[Any], xp: ModuleType) -> Array:
     """Return ``Z`` with ``Z_i = (∫ x_ij θ_j)_j`` (``z_ij`` for a scalar term)."""
-    xp = default_namespace()
     blocks = []
     for term, value in zip(terms, values, strict=True):
         if isinstance(value, FData):
@@ -716,11 +740,10 @@ def _penalty_blocks(terms: Sequence[_Term], xp: ModuleType) -> Array:
 
 
 def _fit_scalar(
-    y: Array, terms: tuple[_Term, ...], weights: Array
+    y: Array, terms: tuple[_Term, ...], weights: Array, xp: ModuleType
 ) -> tuple[list[Array], Array, Array, Array, float, float, float]:
     """Solve the scalar-response normal equations and return the fit summaries."""
-    xp = default_namespace()
-    design = _scalar_design(terms, [term.values for term in terms])
+    design = _scalar_design(terms, [term.values for term in terms], xp)
     n = int(design.shape[0])
     weighted = xp.matrix_transpose(design) * weights[None, :]
     cmat = weighted @ design + _penalty_blocks(terms, xp)
@@ -729,11 +752,11 @@ def _fit_scalar(
     coef = cinv @ dmat
     fitted = design @ coef
     hat_diag = xp.sum((design @ cinv) * xp.matrix_transpose(weighted), axis=1)
-    df = float(xp.sum(hat_diag))
+    df = _real(xp.sum(hat_diag))
     resid = y - fitted
-    sse = float(xp.sum(weights * resid**2))
+    sse = _real(xp.sum(weights * resid**2))
     gcv = sse / (n - df) ** 2 if n > df else float("inf")
-    ocv = float(xp.sum((resid / (1.0 - hat_diag)) ** 2))
+    ocv = _real(xp.sum((resid / (1.0 - hat_diag)) ** 2))
     return _split(terms, coef, xp), fitted, cmat, dmat, df, gcv, ocv
 
 
@@ -862,12 +885,15 @@ class _Quadrature:
 
 
 def _functional_fit(
-    basis: Basis, terms: tuple[_Term, ...], values: Sequence[Any], betas: Sequence[FData]
+    basis: Basis,
+    terms: tuple[_Term, ...],
+    values: Sequence[Any],
+    betas: Sequence[FData],
+    xp: ModuleType,
 ) -> FData:
     """Return ``Σ_j x_j β_j`` for new covariates, in the response basis."""
-    xp = default_namespace()
     quad = _Quadrature(basis, terms, xp, values)
-    return FData(quad.fitted_coefs(values, [beta.coefs for beta in betas]), basis)
+    return FData(quad.fitted_coefs(values, [asarray(beta.coefs, xp) for beta in betas]), basis)
 
 
 # --------------------------------------------------------------------------- #
@@ -875,9 +901,24 @@ def _functional_fit(
 # --------------------------------------------------------------------------- #
 
 
-def _normalise_response(y: Any) -> tuple[Any, Array | None, int]:
+def _namespace_of(*values: Any) -> ModuleType:
+    """Return the namespace a fit over ``values`` computes in.
+
+    Curves contribute their coefficients and a :class:`SmoothResult` its curves;
+    plain numbers and lists do not count.  NumPy is the default, and a PyTorch
+    tensor anywhere makes the whole computation PyTorch, so gradients reach the
+    inputs.
+    """
+    arrays = []
+    for value in values:
+        if isinstance(value, SmoothResult):
+            value = value.fd
+        arrays.append(value.coefs if isinstance(value, FData) else value)
+    return result_namespace(*arrays)
+
+
+def _normalise_response(y: Any, xp: ModuleType) -> tuple[Any, Array | None, int]:
     """Return the response, the smooth's ``y2c_map`` (if any) and the sample size."""
-    xp = default_namespace()
     y2c = None
     if isinstance(y, SmoothResult):
         if y.constraint is not None:
@@ -903,9 +944,9 @@ def _build_terms(
     beta: Any,
     lam: float,
     penalty: int | LDO,
+    xp: ModuleType,
 ) -> tuple[_Term, ...]:
     """Validate the covariates and attach a coefficient basis to each."""
-    xp = default_namespace()
     functional_y = isinstance(response, FData)
     curves = [value for _, _, value in items if isinstance(value, FData)]
     if functional_y:
@@ -1056,14 +1097,14 @@ def fregress(
         items = [(name, name, value) for name, value in _covariate_items(x)]
     if not items:
         raise ValueError("fregress needs at least one covariate")
-    response, y2c, n = _normalise_response(response_raw)
-    xp = default_namespace()
+    xp = _namespace_of(response_raw, weights, *(value for _, _, value in items))
+    response, y2c, n = _normalise_response(response_raw, xp)
     obs_weights = (
         xp.ones((n,), dtype=xp.float64) if weights is None else _scalar_vector(weights, n, xp, "w")
     )
     if bool(xp.any(obs_weights <= 0.0)):
         raise ValueError("weights must be positive")
-    terms = _build_terms(items, response, n, beta, lam, penalty)
+    terms = _build_terms(items, response, n, beta, lam, penalty, xp)
     names = tuple(term.name for term in terms)
     if len(set(names)) != len(names):
         raise ValueError(f"term names must be unique, got {names}")
@@ -1077,7 +1118,7 @@ def fregress(
         fitted: Any = FData(quad.fitted_coefs(values, blocks), response.basis)
         df = gcv = ocv = None
     else:
-        blocks, fitted, cmat, dmat, df, gcv, ocv = _fit_scalar(response, terms, obs_weights)
+        blocks, fitted, cmat, dmat, df, gcv, ocv = _fit_scalar(response, terms, obs_weights, xp)
     beta_fds = tuple(
         FData(block[:, None], term.basis) for term, block in zip(terms, blocks, strict=True)
     )
@@ -1094,6 +1135,445 @@ def fregress(
         gcv=gcv,
         ocv=ocv,
         y2c_map=y2c,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# fully functional model with a bivariate coefficient (R's linmod)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True)
+class _LinmodIntegrals:
+    """Inner products and penalties that define the :func:`linmod` normal equations.
+
+    ``gaa``, ``gtt`` and ``gss`` are the Gram matrices of the intercept, ``t``
+    and ``s`` bases; ``gat`` crosses the intercept basis with the ``t`` basis;
+    ``gay`` and ``gty`` cross the intercept and ``t`` bases with the response
+    basis; ``ra``, ``rs`` and ``rt`` are the three roughness penalties.
+    """
+
+    gaa: Array
+    gat: Array
+    gtt: Array
+    gss: Array
+    gay: Array
+    gty: Array
+    ra: Array
+    rs: Array
+    rt: Array
+
+    @classmethod
+    def exact(
+        cls,
+        response: Basis,
+        alpha: Basis,
+        sbasis: Basis,
+        tbasis: Basis,
+        penalties: tuple[LDO, LDO, LDO],
+        xp: ModuleType,
+    ) -> _LinmodIntegrals:
+        """Compute every matrix exactly (Gauss-Legendre on the break points)."""
+        zero = LDO(0)
+
+        def cross(left: Basis, right: Basis) -> Array:
+            return asarray(_cross_gram(left, right, zero, zero), xp)
+
+        return cls(
+            gaa=asarray(alpha.gram(), xp),
+            gat=cross(alpha, tbasis),
+            gtt=asarray(tbasis.gram(), xp),
+            gss=asarray(sbasis.gram(), xp),
+            gay=cross(alpha, response),
+            gty=cross(tbasis, response),
+            ra=asarray(alpha.penalty(penalties[0]), xp),
+            rs=asarray(sbasis.penalty(penalties[1]), xp),
+            rt=asarray(tbasis.penalty(penalties[2]), xp),
+        )
+
+
+def _kron(left: Array, right: Array, xp: ModuleType) -> Array:
+    """Return the Kronecker product ``left ⊗ right`` of two matrices."""
+    rows = int(left.shape[0]) * int(right.shape[0])
+    cols = int(left.shape[1]) * int(right.shape[1])
+    return xp.reshape(left[:, None, :, None] * right[None, :, None, :], (rows, cols))
+
+
+def _linmod_normal_equations(
+    z: Array,
+    ycoefs: Array,
+    weights: Array,
+    integrals: _LinmodIntegrals,
+    lams: tuple[float, float, float],
+    xp: ModuleType,
+) -> tuple[Array, Array]:
+    r"""Return ``C`` and ``D`` of the penalised least-squares problem of :func:`linmod`.
+
+    The unknowns are the intercept coefficients ``a`` followed by the surface
+    coefficients ``B`` read row by row (``B[k, l]`` at ``K_a + k K_t + l``).
+    With ``z_i = ∫ x_i θ_s`` (row ``i`` of ``z``) and ``c_i`` the response
+    coefficients, the fitted curve is ``φ_aᵀ a + z_iᵀ B θ_t``, and setting the
+    gradient of the criterion to zero gives
+
+    .. math::
+
+        C = \begin{pmatrix}
+              W G_{aa} + λ_a R_a & (\bar z^{T} ⊗ G_{at}) \\
+              \cdot & Z^{T} \mathrm{diag}(w) Z ⊗ G_{tt} + λ_s R_s ⊗ G_{tt}
+                      + λ_t G_{ss} ⊗ R_t
+            \end{pmatrix},
+        \qquad
+        D = \begin{pmatrix}
+              G_{ay} \sum_i w_i c_i \\
+              \mathrm{vec}(Z^{T} \mathrm{diag}(w) C_y^{T} G_{ty}^{T})
+            \end{pmatrix}
+
+    with ``W = Σ w_i`` and ``z̄ = Σ w_i z_i``.
+    """
+    lam_alpha, lam_s, lam_t = lams
+    weighted = xp.matrix_transpose(z) * weights[None, :]
+    zbar = xp.sum(weighted, axis=1)
+    corner = xp.sum(weights) * integrals.gaa + lam_alpha * integrals.ra
+    cross = _kron(zbar[None, :], integrals.gat, xp)
+    surface = (
+        _kron(weighted @ z, integrals.gtt, xp)
+        + lam_s * _kron(integrals.rs, integrals.gtt, xp)
+        + lam_t * _kron(integrals.gss, integrals.rt, xp)
+    )
+    cmat = xp.concat(
+        [
+            xp.concat([corner, cross], axis=1),
+            xp.concat([xp.matrix_transpose(cross), surface], axis=1),
+        ],
+        axis=0,
+    )
+    d_alpha = integrals.gay @ (ycoefs @ weights)
+    d_surface = weighted @ xp.matrix_transpose(ycoefs) @ xp.matrix_transpose(integrals.gty)
+    dmat = xp.concat([d_alpha, xp.reshape(d_surface, (-1,))])
+    return cmat, dmat
+
+
+def _linmod_solve(
+    cmat: Array, dmat: Array, n_alpha: int, shape: tuple[int, int], xp: ModuleType
+) -> tuple[Array, Array]:
+    """Solve ``C b = D`` and split ``b`` into the intercept and the surface coefficients."""
+    solution = xp.linalg.solve(cmat, dmat[:, None])[:, 0]
+    return solution[:n_alpha], xp.reshape(solution[n_alpha:], shape)
+
+
+def _linmod_fitted(response: Basis, alpha: FData, beta: BiFData, z: Array, xp: ModuleType) -> FData:
+    """Return ``alpha(t) + ∫ x_i(s) β(s, t) ds`` projected (in L2) onto ``response``.
+
+    ``z`` holds ``∫ x_i θ_s`` row by row.  The projection is exact: the
+    right-hand side needs only the cross-Gram matrices of the response basis
+    with the intercept and ``t`` bases.
+    """
+    zero = LDO(0)
+    cross_alpha = asarray(_cross_gram(response, alpha.basis, zero, zero), xp)
+    cross_t = asarray(_cross_gram(response, beta.tbasis, zero, zero), xp)
+    surface = asarray(beta.coefs, xp)
+    rhs = cross_alpha @ asarray(alpha.coefs, xp) + cross_t @ (
+        xp.matrix_transpose(surface) @ xp.matrix_transpose(z)
+    )
+    coefs = _linalg.solve_spd(asarray(response.gram(), xp), rhs)
+    return FData(coefs, response)
+
+
+def _univariate_curves(value: Any, name: str) -> FData:
+    """Return ``value`` (an :class:`FData` or a smooth of one) as univariate curves."""
+    curves = value.fd if isinstance(value, SmoothResult) else value
+    if not isinstance(curves, FData):
+        raise TypeError(f"{name} must be an FData or a SmoothResult, got {type(value).__name__}")
+    if len(curves.coefs.shape) != 2:
+        raise ValueError(f"{name} must not carry a variable axis")
+    return curves
+
+
+@dataclass(frozen=True, eq=False)
+class LinmodResult:
+    r"""A fitted fully functional linear model, as returned by :func:`linmod`.
+
+    Replaces the list R's ``linmod`` returns.
+
+    Attributes
+    ----------
+    alpha : FData
+        The intercept function ``alpha(t)``, one curve (R's ``beta0estfd``).
+    beta : BiFData
+        The regression surface ``β(s, t)`` on the tensor basis ``θ_s ⊗ θ_t``
+        (R's ``beta1estbifd``).
+    fitted : FData
+        Fitted curves ``ŷ_i(t) = alpha(t) + ∫ x_i(s) β(s, t) ds``, projected onto
+        the response basis (R's ``yhatfdobj``).
+    y : FData
+        The response curves.
+    x : FData
+        The covariate curves.
+    weights : array
+        Observation weights.
+    lam : tuple of float
+        Smoothing parameters ``(λ_alpha, λ_s, λ_t)``.
+    penalty : tuple of LDO
+        Roughness operators ``(L_alpha, L_s, L_t)``.
+    cmat, dmat : array
+        The normal equations ``C b = D``; ``b`` stacks the intercept
+        coefficients and the surface coefficients row by row.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import fabel as fb
+    >>> from fabel.regression import linmod
+    >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=6)
+    >>> rng = np.random.default_rng(0)
+    >>> x = fb.FData(rng.standard_normal((6, 20)), basis)
+    >>> y = fb.FData(rng.standard_normal((6, 20)), basis)
+    >>> model = linmod(y, x, lam_s=1e-4, lam_t=1e-4)
+    >>> model.beta.coefs.shape
+    (6, 6)
+    >>> model.residuals.n_curves
+    20
+    """
+
+    alpha: FData
+    beta: BiFData
+    fitted: FData
+    y: FData
+    x: FData
+    weights: Array
+    lam: tuple[float, float, float]
+    penalty: tuple[LDO, LDO, LDO]
+    cmat: Array
+    dmat: Array
+
+    @property
+    def residuals(self) -> FData:
+        """The residual curves ``y_i - ŷ_i`` in the response basis.
+
+        Returns
+        -------
+        FData
+            One residual curve per observation.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import fabel as fb
+        >>> from fabel.regression import linmod
+        >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
+        >>> rng = np.random.default_rng(2)
+        >>> x = fb.FData(rng.standard_normal((5, 15)), basis)
+        >>> y = fb.FData(rng.standard_normal((5, 15)), basis)
+        >>> model = linmod(y, x, lam_s=1e-3, lam_t=1e-3)
+        >>> bool(np.allclose((model.fitted + model.residuals).coefs, y.coefs))
+        True
+        """
+        xp = result_namespace(self.y.coefs, self.fitted.coefs)
+        return FData(asarray(self.y.coefs, xp) - asarray(self.fitted.coefs, xp), self.y.basis)
+
+    def predict(self, x: Any = None) -> FData:
+        """Predict response curves for new covariate curves.
+
+        R has no predict method for ``linmod``; this evaluates the fitted model
+        ``alpha(t) + ∫ x(s) β(s, t) ds`` for the new curves.
+
+        Parameters
+        ----------
+        x : FData or SmoothResult, optional
+            New covariate curves on the domain of ``s``, in any basis.  ``None``
+            returns the fitted values.
+
+        Returns
+        -------
+        FData
+            Predicted curves in the response basis, one per new curve.
+
+        Raises
+        ------
+        TypeError
+            If ``x`` is not a set of curves.
+        ValueError
+            If ``x`` lives on another domain or carries a variable axis.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import fabel as fb
+        >>> from fabel.regression import linmod
+        >>> basis = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
+        >>> rng = np.random.default_rng(1)
+        >>> x = fb.FData(rng.standard_normal((5, 25)), basis)
+        >>> y = fb.FData(rng.standard_normal((5, 25)), basis)
+        >>> model = linmod(y, x, lam_s=1e-3, lam_t=1e-3)
+        >>> model.predict(x[:3]).n_curves
+        3
+        """
+        if x is None:
+            return self.fitted
+        curves = _univariate_curves(x, "x")
+        sbasis = self.beta.sbasis
+        if not _same_domain(curves.domain, sbasis.domain):
+            raise ValueError(f"x lives on {curves.domain}, but s lives on {sbasis.domain}")
+        xp = result_namespace(curves.coefs, self.alpha.coefs, self.beta.coefs)
+        z = asarray(inprod(curves, sbasis), xp)
+        return _linmod_fitted(self.y.basis, self.alpha, self.beta, z, xp)
+
+
+def linmod(
+    y: Any,
+    x: Any,
+    *,
+    alpha_basis: Basis | None = None,
+    s_basis: Basis | None = None,
+    t_basis: Basis | None = None,
+    lam_alpha: float = 0.0,
+    lam_s: float = 0.0,
+    lam_t: float = 0.0,
+    penalty_alpha: int | LDO = 2,
+    penalty_s: int | LDO = 2,
+    penalty_t: int | LDO = 2,
+    weights: Any = None,
+) -> LinmodResult:
+    r"""Fit the fully functional linear model with a bivariate coefficient.
+
+    Replaces R's ``linmod``.  Each response curve is explained by a whole
+    covariate curve:
+
+    .. math:: y_i(t) = \alpha(t) + \int x_i(s)\,\beta(s, t)\,ds + e_i(t) ,
+
+    where ``s`` and ``t`` may live on different intervals.  The intercept is
+    ``alpha = φ_alphaᵀ a`` and the surface is ``β(s, t) = θ_s(s)ᵀ B θ_t(t)``; ``a`` and
+    ``B`` minimise
+
+    .. math::
+
+        \sum_i w_i \int (y_i - \hat y_i)^2\,dt
+        + \lambda_\alpha \int (L_\alpha \alpha)^2\,dt
+        + \lambda_s \iint (L_s \beta)^2\,ds\,dt
+        + \lambda_t \iint (L_t \beta)^2\,ds\,dt ,
+
+    ``L_s`` acting on ``s`` and ``L_t`` on ``t``.  This is R's ``linmod`` with
+    ``betaList = list(fdPar(alpha_basis, penalty_alpha, lam_alpha),
+    bifdPar(bifd(0, s_basis, t_basis), penalty_s, penalty_t, lam_s, lam_t))``.
+
+    Parameters
+    ----------
+    y : FData or SmoothResult
+        The ``n`` response curves.
+    x : FData or SmoothResult
+        The ``n`` covariate curves.
+    alpha_basis : Basis, optional
+        Basis of the intercept ``alpha(t)``.  Defaults to the response basis.
+    s_basis : Basis, optional
+        Basis of ``β`` in ``s`` (the covariate's argument).  Defaults to the
+        covariate basis.
+    t_basis : Basis, optional
+        Basis of ``β`` in ``t`` (the response's argument).  Defaults to the
+        response basis.
+    lam_alpha, lam_s, lam_t : float, optional
+        Smoothing parameters of the intercept and of the surface in ``s`` and in
+        ``t`` (R's ``lambda``, ``lambdas`` and ``lambdat``).  Default ``0``.
+    penalty_alpha, penalty_s, penalty_t : int or LDO, optional
+        Roughness operators matching the three smoothing parameters; an integer
+        means ``D^penalty``.  Default ``2``.
+    weights : array, optional
+        Positive observation weights, one per curve.  Default: all ``1``.
+
+    Returns
+    -------
+    LinmodResult
+        The intercept, the surface, the fitted curves and the normal equations,
+        with :meth:`~LinmodResult.predict`.
+
+    Raises
+    ------
+    TypeError
+        If ``x`` or ``y`` is not a set of curves.
+    ValueError
+        If ``x`` and ``y`` hold different numbers of curves, a basis lives on
+        the wrong domain, a smoothing parameter is negative or not finite, or a
+        weight is not positive.
+
+    Notes
+    -----
+    Every integral is exact (Gauss-Legendre on the break points of the bases
+    involved) and the fitted curves are the exact L2 projection onto the
+    response basis.  R's ``linmod`` integrates numerically and fits ``ŷ`` by
+    least squares on 201 points, so the two agree to the accuracy of R's
+    quadrature: to rounding when R's integrals are exact (polynomial bases),
+    about ``1e-6`` on the weather data, ``1e-4`` on cubic B-splines.  R's
+    ``linmod(..., wtvec = w)`` stops with an error in fda 6.3.0; Fabel's
+    ``weights`` give the weighted least-squares fit.
+
+    PyTorch coefficients (in ``x``, ``y`` or ``weights``) make the whole fit run
+    in PyTorch, so gradients flow back to the inputs.
+
+    Examples
+    --------
+    A surface that the data determine exactly is recovered:
+
+    >>> import numpy as np
+    >>> import fabel as fb
+    >>> from fabel.regression import linmod
+    >>> sbasis = fb.BSpline(domain=(0.0, 1.0), n_basis=5)
+    >>> tbasis = fb.BSpline(domain=(0.0, 2.0), n_basis=4)
+    >>> rng = np.random.default_rng(3)
+    >>> x = fb.FData(rng.standard_normal((5, 30)), sbasis)
+    >>> surface = rng.standard_normal((5, 4))
+    >>> z = np.asarray(fb.inprod(x, sbasis))
+    >>> y = fb.FData(1.0 + surface.T @ z.T, tbasis)
+    >>> model = linmod(y, x)
+    >>> bool(np.allclose(model.beta.coefs, surface))
+    True
+    >>> np.round(model.alpha(np.array([0.5, 1.5]))[:, 0], 8).tolist()
+    [1.0, 1.0]
+    """
+    ycurves = _univariate_curves(y, "y")
+    xcurves = _univariate_curves(x, "x")
+    n = ycurves.n_curves
+    if xcurves.n_curves != n:
+        raise ValueError(f"x has {xcurves.n_curves} curves but y has {n}")
+    alpha = ycurves.basis if alpha_basis is None else alpha_basis
+    sbasis = xcurves.basis if s_basis is None else s_basis
+    tbasis = ycurves.basis if t_basis is None else t_basis
+    for label, basis, domain in (
+        ("alpha_basis", alpha, ycurves.domain),
+        ("t_basis", tbasis, ycurves.domain),
+        ("s_basis", sbasis, xcurves.domain),
+    ):
+        if not _same_domain(basis.domain, domain):
+            raise ValueError(f"{label} lives on {basis.domain}, not {domain}")
+    lams = (float(lam_alpha), float(lam_s), float(lam_t))
+    for label, value in zip(("lam_alpha", "lam_s", "lam_t"), lams, strict=True):
+        if value < 0.0 or not isfinite(value):
+            raise ValueError(f"{label} must be finite and non-negative, got {value}")
+    operators = (_as_operator(penalty_alpha), _as_operator(penalty_s), _as_operator(penalty_t))
+    xp = _namespace_of(ycurves, xcurves, weights)
+    obs_weights = (
+        xp.ones((n,), dtype=xp.float64)
+        if weights is None
+        else _scalar_vector(weights, n, xp, "weights")
+    )
+    if bool(xp.any(obs_weights <= 0.0)):
+        raise ValueError("weights must be positive")
+    ycoefs = asarray(ycurves.coefs, xp)
+    z = asarray(inprod(FData(asarray(xcurves.coefs, xp), xcurves.basis), sbasis), xp)
+    integrals = _LinmodIntegrals.exact(ycurves.basis, alpha, sbasis, tbasis, operators, xp)
+    cmat, dmat = _linmod_normal_equations(z, ycoefs, obs_weights, integrals, lams, xp)
+    a, surface = _linmod_solve(cmat, dmat, alpha.n_basis, (sbasis.n_basis, tbasis.n_basis), xp)
+    alpha_fd = FData(a, alpha)
+    beta = BiFData(surface, sbasis, tbasis)
+    return LinmodResult(
+        alpha=alpha_fd,
+        beta=beta,
+        fitted=_linmod_fitted(ycurves.basis, alpha_fd, beta, z, xp),
+        y=FData(ycoefs, ycurves.basis),
+        x=FData(asarray(xcurves.coefs, xp), xcurves.basis),
+        weights=obs_weights,
+        lam=lams,
+        penalty=operators,
+        cmat=cmat,
+        dmat=dmat,
     )
 
 
