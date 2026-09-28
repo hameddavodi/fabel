@@ -1,5 +1,5 @@
 # PROGRESS
-## Status: 2026-09-28 release 1.1.0, the first under the name fdatools (renamed from fabel). Public at github.com/hameddavodi/fdatools, docs at hameddavodi.github.io/fdatools, CI green. Open: PyPI upload (needs the user's PyPI token), book notebook at 70 of 76 figures.
+## Status: 2026-09-28 fdatools 1.1.0 is on PyPI (`uv add fdatools`) and GitHub; docs at hameddavodi.github.io/fdatools; CI green. Open: book notebook at 70 of 76 figures.
 ## Release 1.0.0 (2026-09-27)
 - GATE 5 (WORKFLOW.md) run on main with `.venv/bin/*` and `FABEL_DATA_DIR=data_release`, all steps green: `pytest` 1654 passed, 5 skipped, 154 strict xfail; `pytest tests/parity` 525 passed, 154 strict xfail; `mypy --strict src/fabel` clean (18 files); `ruff check .` and `ruff format --check .` clean; `mkdocs build --strict` clean; `python -m build` gives `fabel-1.0.0.tar.gz` + `fabel-1.0.0-py3-none-any.whl`, `twine check dist/*` PASSED; `pytest --nbmake notebooks/book_figures.ipynb` 1 passed.
 - `PARITY_REPORT.md` regenerated with `tools/parity_report.py`: no change (679 checks, 525 pass, 154 strict xfail, 0 fail).
@@ -66,7 +66,7 @@ Run from the repo root on the tagged commit (`git checkout v1.0.0`).
 ## Release 1.1.0 (2026-09-28)
 - First release named `fdatools`. GATE 5 green (`make gate5`, now also runs the tour notebook): 2126 passed, 5 skipped, 211 strict xfail; parity 724 passed; mypy, ruff, mkdocs clean; `twine check` PASSED. CI 16/16 green on 95b693a.
 - Annotated tag `v1.1.0` on 95b693a; GitHub release "fdatools 1.1.0" (latest) with `fdatools-1.1.0-py3-none-any.whl` (sha256 97a2f77e...) and `fdatools-1.1.0.tar.gz` (sha256 0db3ad4f...), the same files as `dist/`. The v1.0.0 release notes now start with a pointer to v1.1.0; data-v1 retitled "fdatools dataset assets v1". Installing the wheel from the release URL and downloading a dataset works in a fresh venv.
-- PyPI: not uploaded yet (needs the user's PyPI credentials or a trusted publisher).
+- PyPI: fdatools 1.1.0 published 2026-09-28 by `.github/workflows/release.yml` (trusted publishing, `uv publish`; environment `pypi`; the user registered the pending publisher). It uploads the GitHub release's own files: same sha256 as above. `uv add fdatools` from PyPI works in a fresh project. Next release: publish a GitHub release with the wheel + sdist attached and the workflow uploads them.
 
 ## Remaining work
 - **Cleanup wave (next):**
