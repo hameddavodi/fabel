@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any
 
 import numpy as np
@@ -11,7 +12,7 @@ from hypothesis import strategies as st
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 
-from fabel import LDO, BSpline, FData, Fourier
+from fabel import LDO, BSpline, FData, Fourier, Monomial
 from fabel import smoothing as sm
 from fabel.smoothing import (
     Smoother,
@@ -369,8 +370,9 @@ def test_monotone_fit_is_increasing() -> None:
     assert np.all(np.diff(values, axis=0) >= -1e-12)
     assert np.asarray(result.beta).shape == (2, 2)
     assert np.all(np.asarray(result(fine, 1)) > 0.0)
-    with pytest.raises(ValueError, match="deriv 0 or 1"):
-        result(fine, 2)
+    assert np.asarray(result(fine, 2)).shape == (201, 2)
+    with pytest.raises(ValueError, match="non-negative"):
+        result(fine, -1)
 
 
 def test_monotone_derivative_matches_finite_differences() -> None:
@@ -380,6 +382,101 @@ def test_monotone_derivative_matches_finite_differences() -> None:
     points = np.array([0.25, 0.5, 0.75])
     numeric = (np.asarray(result(points + h)) - np.asarray(result(points - h))) / (2 * h)
     np.testing.assert_allclose(result(points, 1), numeric, rtol=1e-5)
+
+
+def latent_result(latent: FData, constraint: str) -> SmoothResult:
+    """A constrained result around a given latent ``W`` (monotone with ``β = (0, 1)``)."""
+    n_curves = 1 if np.ndim(latent.coefs) == 1 else int(np.shape(latent.coefs)[1])
+    beta = np.vstack([np.zeros(n_curves), np.ones(n_curves)])
+    return SmoothResult(
+        fd=latent,
+        df=0.0,
+        gcv=np.zeros(n_curves),
+        sse=0.0,
+        penalty_matrix=np.zeros((latent.basis.n_basis,) * 2),
+        lam=0.0,
+        y2c_map=None,
+        beta=beta if constraint == "monotone" else None,
+        constraint=constraint,
+    )
+
+
+def test_positive_derivatives_of_exp_t_squared_are_exact() -> None:
+    # W = t², exp W and its derivatives in closed form (Hermite-type polynomials)
+    latent = FData(np.array([[0.0], [0.0], [1.0]]), Monomial(domain=DOMAIN, n_basis=3))
+    result = latent_result(latent, "positive")
+    t = np.linspace(0.0, 1.0, 11)
+    e = np.exp(t**2)
+    closed = [
+        e,
+        2 * t * e,
+        (2 + 4 * t**2) * e,
+        (12 * t + 8 * t**3) * e,
+        (12 + 48 * t**2 + 16 * t**4) * e,
+    ]
+    for order, expected in enumerate(closed):
+        np.testing.assert_allclose(np.asarray(result(t, order))[:, 0], expected, rtol=1e-13)
+
+
+def test_monotone_derivatives_of_a_linear_latent_are_exact() -> None:
+    # W = 2t: x = (e^{2t} - 1) / 2 and Dⁿ x = 2^{n-1} e^{2t}
+    latent = FData(np.array([[0.0], [2.0]]), Monomial(domain=DOMAIN, n_basis=2))
+    result = latent_result(latent, "monotone")
+    t = np.linspace(0.0, 1.0, 11)
+    np.testing.assert_allclose(
+        np.asarray(result(t))[:, 0], (np.exp(2 * t) - 1) / 2, rtol=1e-13, atol=1e-15
+    )
+    for order in range(1, 7):
+        np.testing.assert_allclose(
+            np.asarray(result(t, order))[:, 0], 2.0 ** (order - 1) * np.exp(2 * t), rtol=1e-13
+        )
+
+
+@settings(max_examples=25, deadline=None)
+@given(
+    seed=st.integers(min_value=0, max_value=10_000),
+    order=st.integers(min_value=1, max_value=4),
+    constraint=st.sampled_from(["positive", "monotone"]),
+)
+def test_constrained_derivatives_match_finite_differences(
+    seed: int, order: int, constraint: str
+) -> None:
+    rng = np.random.default_rng(seed)
+    latent = FData(0.5 * rng.standard_normal((9, 2)), BSpline(domain=DOMAIN, n_basis=9, order=7))
+    result = latent_result(latent, constraint)
+    points = np.array([0.23, 0.51, 0.77])
+    h = 1e-5
+    numeric = (
+        np.asarray(result(points + h, order - 1)) - np.asarray(result(points - h, order - 1))
+    ) / (2 * h)
+    exact = np.asarray(result(points, order))
+    np.testing.assert_allclose(exact, numeric, rtol=1e-5, atol=1e-5 * np.max(np.abs(exact)))
+
+
+def test_monotone_second_derivative_of_a_fit_matches_finite_differences() -> None:
+    y = np.log1p(5 * T)
+    result = smooth(y, T, basis=spline(8), lam=1e-6, constraint="monotone")
+    h = 1e-5
+    points = np.array([0.25, 0.5, 0.75])
+    numeric = (np.asarray(result(points + h, 1)) - np.asarray(result(points - h, 1))) / (2 * h)
+    np.testing.assert_allclose(result(points, 2), numeric, rtol=1e-6)
+
+
+def test_constrained_derivatives_keep_torch_tensors() -> None:
+    torch = pytest.importorskip("torch")
+    latent = FData(
+        torch.tensor([[0.1], [0.4], [-0.2], [0.3], [0.2]], dtype=torch.float64),
+        BSpline(domain=DOMAIN, n_basis=5),
+    )
+    points = torch.linspace(0.0, 1.0, 5, dtype=torch.float64)
+    for constraint in ("positive", "monotone"):
+        result = latent_result(latent, constraint)
+        if result.beta is not None:
+            result = replace(result, beta=torch.from_numpy(result.beta))
+        value = result(points, 3)
+        assert isinstance(value, torch.Tensor)
+        reference = latent_result(FData(latent.coefs.numpy(), latent.basis), constraint)
+        np.testing.assert_allclose(value.numpy(), reference(points.numpy(), 3), rtol=1e-12)
 
 
 def test_single_monotone_curve_evaluates_one_dimensional_points() -> None:
