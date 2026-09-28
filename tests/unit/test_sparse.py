@@ -237,6 +237,23 @@ def test_sparse_cov_warns_and_floors_a_non_positive_sigma2() -> None:
     assert 0.0 < est.sigma2 < 1e-3
 
 
+def test_pace_given_sigma2_does_not_warn_about_the_estimate() -> None:
+    # Four points per curve and little noise: the sigma2 estimate comes out
+    # negative. With sigma2 given the estimate is not used for the scores, so
+    # PACE must stay silent; without it the warning stays.
+    rng = np.random.default_rng(1)
+    times = [np.sort(rng.uniform(0.0, 1.0, 4)) for _ in range(200)]
+    values = [1.0 + rng.normal() * np.cos(np.pi * ti) + 0.05 * rng.normal(size=4) for ti in times]
+    basis = BSpline(domain=UNIT, n_basis=5)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        model = PACE(n=2, basis=basis, sigma2=0.05**2).fit(values, t=times)
+    assert model.sigma2_ == 0.05**2
+    assert model.cov_estimate_.sigma2 > 0.0
+    with pytest.warns(RuntimeWarning, match="not positive"):
+        PACE(n=2, basis=basis).fit(values, t=times)
+
+
 def test_sparse_cov_rejects_an_undetermined_surface() -> None:
     times, values, _ = _simulate(n_curves=5, n_points=2)
     basis = BSpline(domain=UNIT, n_basis=8)

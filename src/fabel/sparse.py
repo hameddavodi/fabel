@@ -421,11 +421,14 @@ def _middle_half_quadrature(basis: Basis) -> tuple[Array, Array]:
     return asarray(nodes, xp), asarray(weights, xp)
 
 
-def _estimate_sigma2(cov: Array, variance: Array, basis: Basis, residuals: list[Array]) -> float:
+def _estimate_sigma2(
+    cov: Array, variance: Array, basis: Basis, residuals: list[Array], *, warn: bool = True
+) -> float:
     """Return ``σ²`` from the gap between ``V(t)`` and ``G(t, t)``.
 
     A non-positive estimate (possible when the data carry almost no noise) is
-    replaced by a small positive floor with a :class:`RuntimeWarning`.
+    replaced by a small positive floor, with a :class:`RuntimeWarning` when
+    ``warn`` is true (the caller uses the estimate).
     """
     xp = _xp()
     nodes, weights = _middle_half_quadrature(basis)
@@ -438,6 +441,8 @@ def _estimate_sigma2(cov: Array, variance: Array, basis: Basis, residuals: list[
         return sigma2
     pooled = xp.concat(residuals)
     floor = max(_SIGMA2_FLOOR * float(xp.mean(pooled * pooled)), 1e-12)
+    if not warn:
+        return floor
     warnings.warn(
         f"the estimated measurement-error variance is not positive ({sigma2:.3g}); "
         f"using {floor:.3g} instead",
@@ -459,6 +464,8 @@ def _cov_estimate(
     basis: Basis,
     lam: float,
     op: LDO,
+    *,
+    warn: bool = True,
 ) -> SparseCov:
     """Return the full covariance estimate for validated input."""
     if mean.n_curves != 1:
@@ -466,7 +473,7 @@ def _cov_estimate(
     residuals = _residuals(times, values, mean)
     coefs = _fit_cov(times, residuals, basis, lam, op)
     variance = _diagonal_variance(times, residuals, basis, lam, op)
-    sigma2 = _estimate_sigma2(coefs, variance, basis, residuals)
+    sigma2 = _estimate_sigma2(coefs, variance, basis, residuals, warn=warn)
     return SparseCov(
         cov=BiFData(coefs, basis, basis),
         mean=mean,
@@ -690,6 +697,8 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     then floored (with a :class:`RuntimeWarning`) and the scores approach the
     least-squares fit of the harmonics to each curve.  Pass ``sigma2`` when
     the measurement error is known, or use more curves or smoother surfaces.
+    With ``sigma2`` given, the estimate is still kept in ``cov_estimate_`` but
+    is not used, so no warning is raised.
 
     Examples
     --------
@@ -781,7 +790,10 @@ class PACE(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         )
         harm_basis = self.harmonic_basis if self.harmonic_basis is not None else cov_basis
         mean = _fit_mean(times, values, mean_basis, lam_mean, op)
-        estimate = _cov_estimate(times, values, mean, cov_basis, lam_cov, op)
+        # A given sigma2 replaces the estimate, so a floored estimate is not worth a warning.
+        estimate = _cov_estimate(
+            times, values, mean, cov_basis, lam_cov, op, warn=self.sigma2 is None
+        )
         eigenvalues, coefs = _harmonics(estimate.cov.coefs, cov_basis, harm_basis, lam, op, n_keep)
         xp = _xp()
         total = float(xp.sum(eigenvalues))
