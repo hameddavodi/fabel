@@ -3,6 +3,19 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [Unreleased]
+
+### Fixed
+- `PACE(sigma2=...)` no longer raises a `RuntimeWarning` about a non-positive
+  measurement-error estimate: with `sigma2` given, the estimate is kept in
+  `cov_estimate_` but not used, so it is not worth a warning.
+
+### Added
+- `notebooks/tour.ipynb`: a full tour that uses every public module on the
+  bundled data sets, records 131 checks, and compares key results live with R
+  `fda` (through `Rscript`). Built from `notebooks/tour.py` by
+  `tools/build_tour_notebook.py`.
+
 ## [1.0.0] - 2026-09-27
 
 First public release: a clean-room Python rewrite of R `fda` 6.3.0 with

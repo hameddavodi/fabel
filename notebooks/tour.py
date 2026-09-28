@@ -1389,7 +1389,7 @@ else:
 #
 # The library is tested against saved R output, but here we run **R itself** and
 # compare the numbers directly. R runs in its own process (`Rscript`) and sends
-# its results back as JSON with full precision. (Running R *inside* this kernel
+# its results back as JSON with 17 significant digits. (Running R *inside* this kernel
 # with `rpy2` would crash here: PyTorch and R each load their own copy of the
 # OpenMP library.) This part needs R with the `fda` and `jsonlite` packages; it
 # is skipped otherwise.
@@ -1419,7 +1419,7 @@ out <- list(
   df_at_our_lambda = lambda2df(growth$age, hb, Lfdobj = 3, lambda = {lam_py!r}),
   lam_r = lamR, df_at_r_lambda = lambda2df(growth$age, hb, Lfdobj = 3, lambda = lamR),
   varprop = pc$varprop, values = pc$values[1:4], scores = pc$scores, exact_scores = exact_scores)
-cat(toJSON(lapply(out, unclass), digits = NA))
+cat(toJSON(lapply(out, unclass), digits = 17))
 """
 
 HAVE_R = shutil.which("Rscript") is not None
