@@ -16,6 +16,8 @@ First release under the name **fdatools** (the first one on PyPI).
   `FDATOOLS_RUN_NETWORK_TESTS`, and the dataset cache moves to
   `~/.cache/fdatools`. The 1.0.0 entry below describes the release published
   under the old name.
+- `rpy2` moved from the `dev` extra to a new `golden` extra (only
+  `tools/make_golden.py` uses it), so the development install no longer needs R.
 
 ### Fixed
 - `PACE(sigma2=...)` no longer raises a `RuntimeWarning` about a non-positive
@@ -23,8 +25,6 @@ First release under the name **fdatools** (the first one on PyPI).
   `cov_estimate_` but not used, so it is not worth a warning.
 - `FPCA`, `FCCA` and `PACE` reject a NumPy bool for `n` on every NumPy version
   (NumPy 2.2 only warned in `operator.index`).
-- `rpy2` moved from the `dev` extra to a new `golden` extra (only
-  `tools/make_golden.py` uses it), so the development install no longer needs R.
 
 ### Added
 - `notebooks/tour.ipynb`: a full tour that uses every public module on the
