@@ -531,10 +531,10 @@ def test_register_rejects_non_finite_input() -> None:
 def test_register_rejects_bad_arguments() -> None:
     fd = bumps([0.45, 0.55])
     wide = FData(np.zeros((20, 2, 2)), BSpline(domain=DOMAIN, n_basis=20))
-    with pytest.raises(ValueError, match="univariate"):
-        register(wide)
-    with pytest.raises(ValueError, match="univariate"):
+    with pytest.raises(ValueError, match="variables per curve"):
         register(fd, wide)
+    with pytest.raises(ValueError, match="variables per curve"):
+        register(wide, fd)
     with pytest.raises(ValueError, match="target must hold"):
         register(fd, bumps([0.4, 0.5, 0.6]))
     with pytest.raises(ValueError, match="criterion"):
@@ -604,3 +604,352 @@ def test_registrator_errors() -> None:
         est.transform(FData(np.zeros((5, 1)), BSpline(domain=DOMAIN, n_basis=5)))
     with pytest.raises(ValueError, match="columns"):
         Registrator(basis=BSpline(domain=DOMAIN, n_basis=5)).fit(np.zeros((2, 8)))
+
+
+# --------------------------------------------------------------------------- #
+# multivariate curves
+# --------------------------------------------------------------------------- #
+
+
+def two_variable_bumps(centres: list[float], n_basis: int = 20) -> FData:
+    """Curves with two variables that share their phase: a bump and a wave."""
+    first = np.stack([np.exp(-(((GRID - c) / 0.1) ** 2)) for c in centres], axis=1)
+    second = np.stack(
+        [np.sin(2 * np.pi * (GRID - c)) * first[:, i] for i, c in enumerate(centres)], axis=1
+    )
+    basis = BSpline(domain=DOMAIN, n_basis=n_basis)
+    stacked = np.stack([first, second], axis=2).reshape(GRID.size, -1)
+    coefs = np.linalg.lstsq(basis(GRID), stacked, rcond=None)[0]
+    return FData(coefs.reshape(n_basis, len(centres), 2), basis)
+
+
+def _multi_problem(
+    criterion: str, periodic: bool, weights: tuple[float, ...]
+) -> tuple[_CurveProblem, np.ndarray]:
+    problem, params = _problem(criterion, periodic)
+    curve = problem.curve
+    coefs = np.stack([curve.coefs, 0.5 * curve.coefs + 0.2], axis=2)
+    target = np.stack([problem.target, 0.8 * problem.target - 0.1], axis=1)
+    multi = _CurveProblem(
+        curve=FData(coefs, curve.basis),
+        target=target,
+        quadrature=problem.quadrature,
+        penalty=problem.penalty,
+        lam=problem.lam,
+        criterion=criterion,
+        periodic=periodic,
+        has_curvature=True,
+        weights=weights,
+    )
+    return multi, params
+
+
+@pytest.mark.parametrize("criterion", ["eigen", "least_squares"])
+@pytest.mark.parametrize("periodic", [False, True])
+def test_multivariate_gradient_and_hessian_match_finite_differences(
+    criterion: str, periodic: bool
+) -> None:
+    problem, params = _multi_problem(criterion, periodic, (1.0, 0.7))
+    value, grad, hess = problem.evaluate(params)
+    step = 1e-6
+    num_grad = np.zeros_like(params)
+    num_hess = np.zeros((params.size, params.size))
+    for k in range(params.size):
+        shift = np.zeros_like(params)
+        shift[k] = step
+        up = problem.evaluate(params + shift)
+        down = problem.evaluate(params - shift)
+        num_grad[k] = (up[0] - down[0]) / (2 * step)
+        num_hess[:, k] = (up[1] - down[1]) / (2 * step)
+    np.testing.assert_allclose(grad, num_grad, rtol=1e-5, atol=1e-8)
+    np.testing.assert_allclose(hess, num_hess, rtol=1e-4, atol=1e-6)
+    assert np.isfinite(value)
+
+
+@settings(max_examples=25, deadline=None)
+@given(
+    st.floats(min_value=0.0, max_value=3.0),
+    st.floats(min_value=0.01, max_value=3.0),
+    st.sampled_from(["eigen", "least_squares"]),
+)
+def test_multivariate_criterion_is_the_weighted_sum(w1: float, w2: float, criterion: str) -> None:
+    problem, params = _multi_problem(criterion, False, (w1, w2))
+    total = problem.evaluate(params)
+    parts = []
+    for var in range(2):
+        single = _CurveProblem(
+            curve=FData(problem.curve.coefs[:, :, var], problem.curve.basis),
+            target=problem.target[:, var],
+            quadrature=problem.quadrature,
+            penalty=problem.penalty,
+            lam=0.0,
+            criterion=criterion,
+            periodic=False,
+            has_curvature=True,
+        )
+        parts.append(single.evaluate(params))
+    pen = problem.penalty[1:, 1:]
+    rough = problem.lam * float(params @ pen @ params)
+    expected = w1 * parts[0][0] + w2 * parts[1][0] + rough
+    assert total[0] == pytest.approx(expected, rel=1e-12, abs=1e-14)
+    np.testing.assert_allclose(
+        total[1] - 2 * problem.lam * pen @ params,
+        w1 * parts[0][1] + w2 * parts[1][1],
+        rtol=1e-10,
+        atol=1e-12,
+    )
+
+
+@pytest.mark.parametrize("criterion", ["eigen", "least_squares"])
+def test_multivariate_registration_aligns_every_variable(criterion: str) -> None:
+    centres = [0.44, 0.5, 0.56]
+    fd = two_variable_bumps(centres)
+    res = register(fd, criterion=criterion, warp_basis=BSpline(domain=DOMAIN, n_basis=5), lam=1e-4)
+    assert res.registered.coefs.shape == fd.coefs.shape
+    assert res.latent.coefs.shape == (5, 3)
+    assert res.warp.n_curves == 3
+    assert res.target is not None
+    assert res.target.n_vars == 2
+    first = FData(res.registered.coefs[:, :, 0], fd.basis)
+    assert np.ptp(peak_times(first)) < 0.3 * np.ptp(centres)
+    before = FData(fd.coefs[:, :, 1], fd.basis)
+    after = FData(res.registered.coefs[:, :, 1], fd.basis)
+    spread_before = float(np.mean(np.var(np.asarray(before(GRID)), axis=1)))
+    spread_after = float(np.mean(np.var(np.asarray(after(GRID)), axis=1)))
+    assert spread_after < 0.3 * spread_before
+
+
+def test_var_weights_choose_the_variables_that_drive_the_warp() -> None:
+    fd = two_variable_bumps([0.45, 0.55])
+    zeros = np.zeros_like(fd.coefs[:, :, 0])
+    flat = FData(np.stack([zeros, fd.coefs[:, :, 1]], axis=2), fd.basis)
+    wbasis = BSpline(domain=DOMAIN, n_basis=4)
+    ignored = register(flat, criterion="least_squares", warp_basis=wbasis, var_weights=[1, 0])
+    np.testing.assert_allclose(ignored.latent.coefs, 0.0, atol=1e-14)
+    np.testing.assert_allclose(ignored.registered.coefs, flat.coefs, atol=1e-10)
+    driven = register(flat, criterion="least_squares", warp_basis=wbasis, lam=1e-4)
+    assert float(np.max(np.abs(driven.latent.coefs))) > 0.1
+    alone = register(
+        FData(flat.coefs[:, :, 1], fd.basis),
+        criterion="least_squares",
+        warp_basis=wbasis,
+        lam=1e-4,
+    )
+    np.testing.assert_allclose(driven.latent.coefs, alone.latent.coefs, atol=1e-8)
+
+
+def test_var_weights_scale_the_criterion() -> None:
+    fd = two_variable_bumps([0.46, 0.54])
+    options: dict[str, Any] = {
+        "criterion": "least_squares",
+        "warp_basis": BSpline(domain=DOMAIN, n_basis=4),
+    }
+    once = register(fd, **options)
+    twice = register(fd, var_weights=[2.0, 2.0], **options)
+    np.testing.assert_allclose(twice.latent.coefs, once.latent.coefs, atol=1e-7)
+    assert once.criterion is not None
+    assert twice.criterion is not None
+    np.testing.assert_allclose(twice.criterion, 2.0 * np.asarray(once.criterion), rtol=1e-8)
+
+
+def test_single_variable_axis_matches_univariate() -> None:
+    fd = bumps([0.45, 0.5, 0.55])
+    column = FData(fd.coefs[:, :, None], fd.basis)
+    options: dict[str, Any] = {"warp_basis": BSpline(domain=DOMAIN, n_basis=4), "lam": 1e-3}
+    plain = register(fd, **options)
+    stacked = register(column, **options)
+    np.testing.assert_array_equal(stacked.latent.coefs, plain.latent.coefs)
+    np.testing.assert_array_equal(stacked.registered.coefs[:, :, 0], plain.registered.coefs)
+
+
+def test_multivariate_per_curve_targets_and_periodic_shifts() -> None:
+    basis = Fourier(domain=DOMAIN, n_basis=7)
+    shifts = [-0.06, 0.0, 0.06]
+    first = np.stack([np.sin(2 * np.pi * (GRID - s)) for s in shifts], axis=1)
+    second = np.stack([np.cos(4 * np.pi * (GRID - s)) for s in shifts], axis=1)
+    both = np.concatenate([first, second], axis=1)
+    coefs = np.linalg.lstsq(basis(GRID), both, rcond=None)[0]
+    fd = FData(np.stack([coefs[:, :3], coefs[:, 3:]], axis=2), basis)
+    target = FData(np.repeat(fd.coefs[:, 1:2, :], 3, axis=1), basis)
+    res = register(
+        fd,
+        target,
+        criterion="least_squares",
+        periodic=True,
+        warp_basis=BSpline(domain=DOMAIN, n_basis=3, order=3),
+        lam=1e-2,
+    )
+    np.testing.assert_allclose(res.shift, shifts, atol=1e-3)
+    np.testing.assert_allclose(res.apply(fd).coefs, res.registered.coefs, atol=1e-12)
+
+
+def test_var_weights_are_validated() -> None:
+    fd = two_variable_bumps([0.45, 0.55])
+    with pytest.raises(ValueError, match="2 entries"):
+        register(fd, var_weights=[1.0])
+    with pytest.raises(ValueError, match="non-negative"):
+        register(fd, var_weights=[1.0, -1.0])
+    with pytest.raises(ValueError, match="positive"):
+        register(fd, var_weights=[0.0, 0.0])
+    with pytest.raises(ValueError, match="finite"):
+        register(fd, var_weights=[1.0, np.nan])
+    # Landmark registration ignores the weights.
+    register(fd, landmarks=[0.45, 0.55], var_weights=[1.0])
+
+
+def test_multivariate_landmarks_share_one_warp() -> None:
+    fd = two_variable_bumps([0.45, 0.5, 0.55])
+    marks = [[0.45], [0.5], [0.55]]
+    res = register(fd, landmarks=marks)
+    assert res.registered.coefs.shape == fd.coefs.shape
+    assert res.warp_inverse is not None
+    assert res.warp_inverse.n_curves == 3
+    for var in range(2):
+        single = register(FData(fd.coefs[:, :, var], fd.basis), landmarks=marks)
+        np.testing.assert_array_equal(res.latent.coefs, single.latent.coefs)
+        np.testing.assert_allclose(
+            res.registered.coefs[:, :, var], single.registered.coefs, atol=1e-13
+        )
+
+
+def test_decompose_multivariate_sums_over_variables() -> None:
+    fd = bumps([0.45, 0.5, 0.55])
+    res = register(fd, landmarks=[0.45, 0.5, 0.55])
+    uni = res.decompose()
+    doubled = RegistrationResult(
+        registered=FData(np.stack([res.registered.coefs] * 2, axis=2), fd.basis),
+        warp=res.warp,
+        unregistered=FData(np.stack([fd.coefs] * 2, axis=2), fd.basis),
+        latent=res.latent,
+        shift=res.shift,
+    )
+    multi = doubled.decompose()
+    assert multi.amp_mse == pytest.approx(2.0 * uni.amp_mse, rel=1e-12)
+    assert multi.phase_mse == pytest.approx(2.0 * uni.phase_mse, rel=1e-10)
+    assert multi.rsq == pytest.approx(uni.rsq, rel=1e-10)
+    assert multi.c == pytest.approx(uni.c, rel=1e-12)
+
+
+def test_registrator_rejects_multivariate_curves() -> None:
+    with pytest.raises(ValueError, match="univariate"):
+        Registrator().fit(two_variable_bumps([0.45, 0.55]))
+
+
+# --------------------------------------------------------------------------- #
+# applying warps to new curves (register.newfd)
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize("criterion", ["eigen", "least_squares"])
+def test_apply_reproduces_the_registered_curves(criterion: str) -> None:
+    fd = bumps([0.45, 0.5, 0.55])
+    res = register(fd, criterion=criterion, warp_basis=BSpline(domain=DOMAIN, n_basis=4), lam=1e-3)
+    np.testing.assert_array_equal(res.apply(fd).coefs, res.registered.coefs)
+    multi = two_variable_bumps([0.45, 0.55])
+    mres = register(multi, landmarks=[0.45, 0.55])
+    np.testing.assert_array_equal(mres.apply(multi).coefs, mres.registered.coefs)
+
+
+def test_apply_warps_derivatives_and_other_bases() -> None:
+    fd = bumps([0.45, 0.5, 0.55])
+    res = register(fd, landmarks=[0.45, 0.5, 0.55])
+    slope = fd.derivative()
+    velocity = res.apply(slope)
+    assert velocity.basis == slope.basis
+    # By definition: x_i'(h_i(t)) on the registration grid, fitted in the basis.
+    grid = _fine_grid(DOMAIN, slope.basis.n_basis)
+    h = np.asarray(res.warp_values(grid))
+    values = np.stack([np.asarray(slope[i](h[:, i]))[:, 0] for i in range(3)], axis=1)
+    expected = np.linalg.lstsq(slope.basis(grid), values, rcond=None)[0]
+    np.testing.assert_allclose(velocity.coefs, expected, rtol=1e-10, atol=1e-10)
+    other = fit_curves(np.asarray(fd(GRID)), BSpline(domain=DOMAIN, n_basis=30))
+    assert res.apply(other).basis.n_basis == 30
+
+
+def test_apply_periodic_shift_wraps_around() -> None:
+    basis = Fourier(domain=DOMAIN, n_basis=5)
+    shifts = [-0.05, 0.05]
+    values = np.stack([np.sin(2 * np.pi * (GRID - s)) for s in shifts], axis=1)
+    fd = fit_curves(values, basis)
+    res = register(
+        fd,
+        criterion="least_squares",
+        periodic=True,
+        warp_basis=BSpline(domain=DOMAIN, n_basis=2, order=2),
+    )
+    np.testing.assert_allclose(res.apply(fd).coefs, res.registered.coefs, atol=1e-12)
+    waves = np.stack([np.cos(2 * np.pi * (GRID - s)) for s in shifts], axis=1)
+    aligned = np.asarray(res.apply(fit_curves(waves, basis))(GRID))
+    np.testing.assert_allclose(aligned[:, 0], aligned[:, 1], atol=1e-6)
+
+
+def test_apply_rejects_bad_curves() -> None:
+    fd = bumps([0.45, 0.55])
+    res = register(fd, landmarks=[0.45, 0.55])
+    with pytest.raises(ValueError, match="one per warp"):
+        res.apply(bumps([0.45, 0.5, 0.55]))
+    with pytest.raises(ValueError, match="domain"):
+        res.apply(FData(np.ones((4, 2)), BSpline(domain=(0.0, 2.0), n_basis=4)))
+    with pytest.raises(ValueError, match="finite"):
+        res.apply(FData(np.full((20, 2), np.nan), fd.basis))
+
+
+# --------------------------------------------------------------------------- #
+# multivariate PyTorch input
+# --------------------------------------------------------------------------- #
+
+
+def test_multivariate_torch_matches_numpy() -> None:
+    torch = pytest.importorskip("torch")
+    fd = two_variable_bumps([0.46, 0.54])
+    coefs = torch.tensor(np.asarray(fd.coefs), dtype=torch.float64, requires_grad=True)
+    options: dict[str, Any] = {"warp_basis": BSpline(domain=DOMAIN, n_basis=4), "lam": 1e-3}
+    plain = register(fd, **options)
+    tensor = register(FData(coefs, fd.basis), **options)
+    assert isinstance(tensor.registered.coefs, torch.Tensor)
+    assert tuple(tensor.registered.coefs.shape) == fd.coefs.shape
+    np.testing.assert_allclose(
+        tensor.latent.coefs.detach().numpy(), plain.latent.coefs, rtol=1e-7, atol=1e-9
+    )
+    np.testing.assert_allclose(
+        tensor.registered.coefs.detach().numpy(), plain.registered.coefs, rtol=1e-6, atol=1e-8
+    )
+    tensor.registered(GRID).sum().backward()
+    assert coefs.grad is not None
+    assert tuple(coefs.grad.shape) == fd.coefs.shape
+    marks = register(FData(coefs.detach(), fd.basis), landmarks=[0.46, 0.54])
+    np.testing.assert_allclose(
+        marks.registered.coefs.numpy(),
+        register(fd, landmarks=[0.46, 0.54]).registered.coefs,
+        atol=1e-12,
+    )
+
+
+def test_multivariate_autograd_objective_matches_analytic() -> None:
+    pytest.importorskip("torch")
+    from fabel._internal.registration_torch import AutogradObjective
+
+    for criterion in ("eigen", "least_squares"):
+        problem, params = _multi_problem(criterion, True, (0.6, 1.3))
+        auto = AutogradObjective(problem)(params)
+        exact = problem.evaluate(params)
+        assert auto[0] == pytest.approx(exact[0], rel=1e-12)
+        np.testing.assert_allclose(auto[1], exact[1], rtol=1e-9, atol=1e-11)
+        np.testing.assert_allclose(auto[2], exact[2], rtol=1e-8, atol=1e-9)
+
+
+def test_apply_to_tensor_curves_is_differentiable() -> None:
+    torch = pytest.importorskip("torch")
+    fd = two_variable_bumps([0.45, 0.55])
+    res = register(fd, landmarks=[0.45, 0.55])
+    coefs = torch.tensor(np.asarray(fd.coefs), dtype=torch.float64, requires_grad=True)
+    out = res.apply(FData(coefs, fd.basis))
+    assert isinstance(out.coefs, torch.Tensor)
+    np.testing.assert_allclose(out.coefs.detach().numpy(), res.registered.coefs, atol=1e-12)
+    out(GRID).sum().backward()
+    assert coefs.grad is not None
+    assert bool(torch.all(torch.isfinite(coefs.grad)))
+    uni = bumps([0.45, 0.55])
+    ures = register(uni, landmarks=[0.45, 0.55])
+    tensor = ures.apply(FData(torch.tensor(np.asarray(uni.coefs)), uni.basis))
+    assert tuple(tensor.coefs.shape) == uni.coefs.shape

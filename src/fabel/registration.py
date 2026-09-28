@@ -34,7 +34,16 @@ or the minimum-eigenvalue criterion of Ramsay & Silverman (2005, §7.6),
 
 where the bar is the grid mean, plus the roughness penalty ``λ cᵀRc``.  These are
 the discretisations R ``fda`` 6.3.0 uses, so ``lam`` means the same thing in
-both.  The first coefficient is pinned to zero, which removes the one exactly
+both.
+
+Multivariate curves (``n_vars > 1``, such as the hip and knee angles of the
+gait data, or the ``x`` and ``y`` coordinates of handwriting) get one warp per
+curve, shared by all variables: the fitting criterion is the weighted sum
+``Σ_v w_v F(x_{0v}, x_v∘h)`` of the criteria of the variables (Ramsay &
+Silverman 2005, §7.6), with equal weights by default.  R ``fda`` 6.3.0's
+``register.fd`` accepts multivariate curves but fits their warps to the first
+variable alone (measured, black box); ``var_weights=[1, 0, ...]`` reproduces
+that.  The first coefficient is pinned to zero, which removes the one exactly
 flat direction (``W -> W + s`` leaves ``h`` unchanged).  The minimisation is a
 safeguarded Newton iteration with the exact Hessian: the first and second
 derivatives of ``h`` with respect to ``c`` are cumulative integrals of
@@ -193,6 +202,13 @@ class RegistrationResult:
     n_iter : array or None
         Newton iterations used per curve (continuous only).
 
+    Notes
+    -----
+    For multivariate curves ``registered``, ``unregistered`` and ``target``
+    keep their variables (coefficients ``(n_basis, n_curves, n_vars)``), while
+    ``warp``, ``latent``, ``shift`` and ``warp_inverse`` hold one warp per
+    curve, shared by its variables.
+
     Examples
     --------
     >>> import numpy as np
@@ -254,6 +270,75 @@ class RegistrationResult:
 
         return as_tensor_like(values, like)
 
+    def apply(self, fd: FData) -> FData:
+        """Warp new curves with the warps of this registration.
+
+        Replaces R's ``register.newfd``: curve ``i`` of ``fd`` becomes
+        ``x_i(h_i(t) + δ_i)`` with the exact warp ``h_i`` and shift ``δ_i``
+        estimated here (warped times wrap around the domain when the shifts of
+        a periodic registration are not all zero).  The result is the
+        least-squares fit of those values, on the registration grid of ``fd``'s
+        basis, in ``fd``'s basis -- the same projection :func:`register` uses,
+        so ``res.apply(res.unregistered)`` reproduces ``res.registered``.  A
+        typical use is carrying warps estimated on one set of curves over to
+        derived or companion curves (derivatives, other variables).
+
+        Parameters
+        ----------
+        fd : FData
+            Curves to warp, univariate or multivariate, with one curve per warp
+            and on the domain of the warps.
+
+        Returns
+        -------
+        FData
+            The warped curves in ``fd``'s basis, with ``fd``'s variables.  With
+            :class:`torch.Tensor` coefficients the result holds a tensor of the
+            same dtype and device, differentiable with respect to
+            ``fd.coefs`` (the warps are constants).
+
+        Raises
+        ------
+        ValueError
+            If ``fd`` has a different number of curves than there are warps,
+            lies on another domain, or has NaN or infinite coefficients.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from fabel import BSpline, FData
+        >>> from fabel.registration import register
+        >>> basis = BSpline(domain=(0.0, 1.0), n_basis=8)
+        >>> fd = FData(np.random.default_rng(5).standard_normal((8, 3)), basis)
+        >>> res = register(fd, landmarks=[[0.4], [0.5], [0.6]])
+        >>> bool(np.allclose(res.apply(fd).coefs, res.registered.coefs))
+        True
+        >>> res.apply(fd.derivative()).n_curves
+        3
+        """
+        n_curves = self.latent.n_curves
+        if fd.n_curves != n_curves:
+            raise ValueError(f"fd must hold {n_curves} curves, one per warp, got {fd.n_curves}")
+        if fd.domain != self.latent.domain:
+            raise ValueError(
+                f"fd domain {fd.domain} differs from the warp domain {self.latent.domain}"
+            )
+        data = _as_numpy_fdata(fd)
+        _check_finite(data.coefs, "fd")
+        xp = default_namespace()
+        grid = _fine_grid(fd.domain, fd.basis.n_basis)
+        coefs = asarray(to_numpy(self.latent.coefs), xp)
+        shift = xp.reshape(asarray(to_numpy(self.shift), xp), (-1,))
+        warps = _warp_values(self.latent.basis, coefs, grid) + shift[None, :]
+        if bool(xp.any(shift != 0.0)):
+            lower, upper = fd.domain
+            warps = lower + xp.remainder(warps - lower, upper - lower)
+        if not is_torch(fd.coefs):
+            return _warp_curves(data, grid, warps)
+        from fabel._internal.registration_torch import warp_curves_torch
+
+        return warp_curves_torch(fd, grid, warps, fd.coefs)
+
     def decompose(self, domain: tuple[float, float] | None = None) -> AmpPhaseDecomposition:
         r"""Split the variation of the curves into amplitude and phase parts.
 
@@ -271,7 +356,10 @@ class RegistrationResult:
 
         and ``rsq = phase / (amp + phase)``.  The integrals use the trapezoidal
         rule on ``max(201, 10 K + 1)`` equally spaced points, ``K`` being the size
-        of the basis of the unregistered curves, which is the rule R uses.
+        of the basis of the unregistered curves, which is the rule R uses.  For
+        multivariate curves the squares are squared Euclidean norms over the
+        variables (every integral is summed over the variables); R's
+        ``AmpPhaseDecomp`` rejects multivariate curves.
 
         Parameters
         ----------
@@ -321,10 +409,24 @@ def _as_numpy_fdata(fd: FData) -> FData:
     return FData(asarray(to_numpy(fd.coefs), xp), fd.basis)
 
 
-def _check_univariate(fd: FData, name: str) -> None:
-    """Reject multivariate curves, which registration does not handle."""
-    if fd.n_vars != 1:
-        raise ValueError(f"{name} must be univariate, got {fd.n_vars} variables per curve")
+def _variable_weights(weights: Any, n_vars: int) -> tuple[float, ...]:
+    """Validate the per-variable criterion weights (all ones by default)."""
+    if weights is None:
+        return (1.0,) * n_vars
+    xp = default_namespace()
+    values = xp.reshape(asarray(to_numpy(weights), xp), (-1,))
+    if values.shape[0] != n_vars:
+        raise ValueError(f"var_weights must have {n_vars} entries, got {values.shape[0]}")
+    _check_finite(values, "var_weights")
+    if bool(xp.any(values < 0.0)) or not bool(xp.any(values > 0.0)):
+        raise ValueError("var_weights must be non-negative with at least one positive entry")
+    return tuple(float(value) for value in values)
+
+
+def _by_variable(values: Array) -> Array:
+    """Reshape one curve's values ``(n, 1)`` or ``(n, 1, n_vars)`` to ``(n, n_vars)``."""
+    xp = default_namespace()
+    return xp.reshape(values, (values.shape[0], -1))
 
 
 def _relative_cumulative(basis: Basis, coefs: Array, t: Array) -> tuple[Array, Array, Array]:
@@ -386,8 +488,25 @@ def _warp_slopes(basis: Basis, coefs: Array, t: Array) -> Array:
 
 
 def _project(basis: Basis, grid: Array, values: Array) -> FData:
-    """Least-squares fit of ``values`` sampled on ``grid`` in ``basis``."""
+    """Least-squares fit of ``values`` sampled on ``grid`` in ``basis``.
+
+    ``values`` is ``(n_grid, n_curves)`` or ``(n_grid, n_curves, n_vars)``.
+    """
+    xp = default_namespace()
+    if values.ndim == 3:
+        n_grid, n_curves, n_vars = values.shape
+        flat = _linalg.lstsq(basis(grid), xp.reshape(values, (n_grid, n_curves * n_vars)))
+        return FData(xp.reshape(flat, (basis.n_basis, n_curves, n_vars)), basis)
     return FData(_linalg.lstsq(basis(grid), values), basis)
+
+
+def _warp_curves(fd: FData, grid: Array, where: Array) -> FData:
+    """Fit ``x_i(where[:, i])`` on ``grid`` in ``fd``'s basis, keeping the variables."""
+    xp = default_namespace()
+    warped = xp.stack([_by_variable(fd[i](where[:, i])) for i in range(fd.n_curves)], axis=1)
+    if len(fd.coefs.shape) == 2:
+        warped = warped[:, :, 0]
+    return _project(fd.basis, grid, warped)
 
 
 def _penalty_matrix(basis: Basis, penalty: int | LDO, lam: float) -> Array:
@@ -491,6 +610,7 @@ class _CurveProblem:
     criterion: str
     periodic: bool
     has_curvature: bool
+    weights: tuple[float, ...] = (1.0,)
 
     @property
     def n_coefs(self) -> int:
@@ -514,7 +634,11 @@ class _CurveProblem:
         return xp.clip(values, lower, upper)
 
     def evaluate(self, params: Array) -> tuple[float, Array, Array]:
-        """Return the criterion, its gradient and its Hessian at ``params``."""
+        """Return the criterion, its gradient and its Hessian at ``params``.
+
+        For multivariate curves the criterion is the ``weights``-weighted sum
+        of the criteria of the variables, all warped by the same ``h``.
+        """
         xp = default_namespace()
         coefs, shift = self.split(params)
         h, h_c, h_cc = self.quadrature.warp(coefs)
@@ -528,17 +652,28 @@ class _CurveProblem:
             padded[:, : width - 1, : width - 1] = hess_h
             hess_h = padded
         where = self._position(h + shift)
-        value = self.curve(where)[:, 0]
-        slope = self.curve(where, 1)[:, 0]
-        jac = slope[:, None] * jac_h
-        hess = slope[:, None, None] * hess_h
-        if self.has_curvature:
-            curvature = self.curve(where, 2)[:, 0]
-            hess = hess + curvature[:, None, None] * jac_h[:, :, None] * jac_h[:, None, :]
-        if self.criterion == "least_squares":
-            fit, grad, second = _least_squares(self.target, value, jac, hess)
-        else:
-            fit, grad, second = _min_eigenvalue(self.target, value, jac, hess)
+        values = _by_variable(self.curve(where))
+        slopes = _by_variable(self.curve(where, 1))
+        curvatures = _by_variable(self.curve(where, 2)) if self.has_curvature else None
+        target = xp.reshape(self.target, (n_points, -1))
+        part = _least_squares if self.criterion == "least_squares" else _min_eigenvalue
+        size = jac_h.shape[1]
+        fit = 0.0
+        grad = xp.zeros(size, dtype=xp.float64)
+        second = xp.zeros((size, size), dtype=xp.float64)
+        for var, weight in enumerate(self.weights):
+            if weight == 0.0:
+                continue
+            slope = slopes[:, var]
+            jac = slope[:, None] * jac_h
+            hess = slope[:, None, None] * hess_h
+            if curvatures is not None:
+                curvature = curvatures[:, var]
+                hess = hess + curvature[:, None, None] * jac_h[:, :, None] * jac_h[:, None, :]
+            var_fit, var_grad, var_second = part(target[:, var], values[:, var], jac, hess)
+            fit = fit + weight * var_fit
+            grad = grad + weight * var_grad
+            second = second + weight * var_second
         free = self.n_coefs - 1
         pen = self.penalty[1:, 1:]
         rough = xp.matmul(pen, params[:free])
@@ -737,6 +872,7 @@ def _continuous(
     max_iter: int,
     tol: float,
     objective: ObjectiveFactory | None = None,
+    weights: tuple[float, ...] = (1.0,),
 ) -> RegistrationResult:
     """Continuous registration of every curve of ``fd`` to ``target``.
 
@@ -751,7 +887,8 @@ def _continuous(
         raise ValueError(f"max_iter must be non-negative, got {max_iter}")
     n_curves = fd.n_curves
     goal = fd.mean() if target is None else _as_numpy_fdata(target)
-    _check_univariate(goal, "target")
+    if goal.n_vars != fd.n_vars:
+        raise ValueError(f"target must have {fd.n_vars} variables per curve, got {goal.n_vars}")
     _check_finite(goal.coefs, "target")
     if goal.n_curves not in (1, n_curves):
         raise ValueError(f"target must hold 1 or {n_curves} curves, got {goal.n_curves}")
@@ -770,7 +907,7 @@ def _continuous(
     )
     _check_finite(shifts, "init_shift")
     grid = _fine_grid(fd.domain, fd.basis.n_basis)
-    goal_values = goal(grid)
+    goal_values = xp.reshape(goal(grid), (grid.shape[0], goal.n_curves, fd.n_vars))
     quadrature = _WarpQuadrature(basis, grid)
     pen = _penalty_matrix(basis, penalty, lam)
     curvature = not (isinstance(fd.basis, BSpline) and fd.basis.order < 3)
@@ -782,13 +919,14 @@ def _continuous(
     for i in range(n_curves):
         problem = _CurveProblem(
             curve=fd[i],
-            target=goal_values[:, 0 if goal.n_curves == 1 else i],
+            target=goal_values[:, 0 if goal.n_curves == 1 else i, :],
             quadrature=quadrature,
             penalty=pen,
             lam=lam,
             criterion=criterion,
             periodic=periodic,
             has_curvature=curvature,
+            weights=weights,
         )
         start = coefs[1:, i]
         if periodic:
@@ -813,9 +951,8 @@ def _continuous(
     lower, upper = fd.domain
     warps = _warp_values(basis, latent, grid) + shift_array[None, :]
     where = lower + xp.remainder(warps - lower, upper - lower) if periodic else warps
-    warped = xp.stack([fd[i](where[:, i])[:, 0] for i in range(n_curves)], axis=1)
     return RegistrationResult(
-        registered=_project(fd.basis, grid, warped),
+        registered=_warp_curves(fd, grid, where),
         warp=_project(basis, grid, warps),
         unregistered=fd,
         latent=FData(latent, basis),
@@ -927,9 +1064,8 @@ def _landmark(
     grid = _fine_grid(fd.domain, fd.basis.n_basis)
     warps = _warp_values(basis, latent, grid)
     inverse = _inverse_warp(basis, latent, grid)
-    warped = xp.stack([fd[i](warps[:, i])[:, 0] for i in range(n_curves)], axis=1)
     return RegistrationResult(
-        registered=_project(fd.basis, grid, warped),
+        registered=_warp_curves(fd, grid, warps),
         warp=_project(fd.basis, grid, warps),
         unregistered=fd,
         latent=FData(latent, basis),
@@ -963,20 +1099,25 @@ def _amp_phase(
     step = (span[1] - span[0]) / (count - 1)
     weights = xp.full(count, step, dtype=xp.float64)
     weights[0] = weights[-1] = 0.5 * step
-    x = asarray(to_numpy(unregistered(grid)), xp)
-    y = asarray(to_numpy(registered(grid)), xp)
+    # Curves as (n_grid, n_curves, n_vars); every square is a squared norm
+    # over the variables, which is the plain square for univariate curves.
+    shape = (count, n_curves, unregistered.n_vars)
+    x = xp.reshape(asarray(to_numpy(unregistered(grid)), xp), shape)
+    y = xp.reshape(asarray(to_numpy(registered(grid)), xp), shape)
     slope = asarray(to_numpy(warp(grid, 1)), xp)
     x_mean = xp.mean(x, axis=1)
     y_mean = xp.mean(y, axis=1)
-    y_sq = y * y
+    y_sq = xp.sum(y * y, axis=2)
     slope_dev = slope - xp.mean(slope, axis=1, keepdims=True)
     y_sq_dev = y_sq - xp.mean(y_sq, axis=1, keepdims=True)
     covariance = float(xp.sum(weights[:, None] * slope_dev * y_sq_dev)) / (n_curves - 1)
     power = float(xp.sum(weights[:, None] * y_sq)) / n_curves
     const = 1.0 + covariance / power
-    spread = float(xp.sum(weights[:, None] * (y - y_mean[:, None]) ** 2)) / n_curves
+    spread = float(xp.sum(weights[:, None, None] * (y - y_mean[:, None, :]) ** 2)) / n_curves
     amp = const * spread
-    phase = const * float(xp.sum(weights * y_mean**2)) - float(xp.sum(weights * x_mean**2))
+    y_norm = xp.sum(y_mean**2, axis=1)
+    x_norm = xp.sum(x_mean**2, axis=1)
+    phase = const * float(xp.sum(weights * y_norm)) - float(xp.sum(weights * x_norm))
     return AmpPhaseDecomposition(amp, phase, phase / (amp + phase), const)
 
 
@@ -1000,6 +1141,7 @@ def register(
     init_shift: Any = None,
     max_iter: int = 100,
     tol: float = 1e-10,
+    var_weights: Any = None,
 ) -> RegistrationResult:
     r"""Register curves by warping their time axis.
 
@@ -1009,13 +1151,17 @@ def register(
     ``landmarkreg``): each curve is warped so that its landmark times move to
     ``target_landmarks`` (the mean landmark times by default).
 
+    Multivariate curves get one warp per curve, shared by all their
+    variables; the continuous criterion is then the sum over the variables,
+    weighted by ``var_weights``.
+
     Parameters
     ----------
     fd : FData
-        The univariate curves to register.
+        The curves to register, univariate or multivariate.
     target : FData, optional
-        One target curve, or one per curve.  Defaults to ``fd.mean()``.  Ignored
-        for landmark registration.
+        One target curve, or one per curve, with the variables of ``fd``.
+        Defaults to ``fd.mean()``.  Ignored for landmark registration.
     landmarks : array, optional
         Landmark times, shape ``(n_curves, n_landmarks)`` (or ``(n_curves,)``
         for one landmark), strictly inside the domain and increasing per curve.
@@ -1050,6 +1196,13 @@ def register(
     tol : float, optional
         Convergence tolerance on the largest gradient component, relative to
         ``max(1, criterion)``.  Default ``1e-10``.
+    var_weights : array, optional
+        Non-negative weight of each variable in the continuous criterion of
+        multivariate curves, shape ``(n_vars,)``, at least one positive.
+        Defaults to ones: the criteria of the variables are summed.  R
+        ``fda`` 6.3.0's ``register.fd`` fits multivariate warps to the first
+        variable only, which ``var_weights=[1, 0, ...]`` reproduces.  Ignored
+        for landmark registration.
 
     Returns
     -------
@@ -1061,9 +1214,10 @@ def register(
     Raises
     ------
     ValueError
-        On multivariate curves, a non-B-spline warp basis, badly shaped
-        landmarks or targets, an unknown criterion, a negative ``lam``, or NaN
-        or infinite values in ``fd``, ``target``, ``init`` or ``init_shift``.
+        On a non-B-spline warp basis, badly shaped landmarks or targets, a
+        target whose number of variables differs from ``fd``'s, invalid
+        ``var_weights``, an unknown criterion, a negative ``lam``, or NaN or
+        infinite values in ``fd``, ``target``, ``init`` or ``init_shift``.
 
     Warns
     -----
@@ -1096,8 +1250,8 @@ def register(
     its warps depend only on the landmarks, so the gradient of ``registered``
     with respect to the coefficients is exact.  ``warp``, ``latent``,
     ``warp_inverse``, ``shift``, ``criterion`` and ``n_iter`` are constant
-    tensors.  ``import fabel`` never imports torch; this path imports it on
-    first use.
+    tensors.  Multivariate tensor curves work the same way.  ``import
+    fabel`` never imports torch; this path imports it on first use.
 
     Examples
     --------
@@ -1112,8 +1266,15 @@ def register(
     >>> res = register(fd, landmarks=peaks)
     >>> bool(np.allclose(res.warp_values(np.full(1, peaks.mean())), peaks, atol=1e-3))
     True
+
+    Multivariate curves (here two variables that share their phase) get one
+    warp per curve:
+
+    >>> both = FData(np.stack([fd.coefs, 2.0 * fd.coefs], axis=2), basis)
+    >>> multi = register(both, criterion="least_squares", warp_basis=BSpline(n_basis=4))
+    >>> multi.registered.coefs.shape, multi.latent.coefs.shape
+    ((12, 3, 2), (4, 3))
     """
-    _check_univariate(fd, "fd")
     data = _as_numpy_fdata(fd)
     _check_finite(data.coefs, "fd")
     like = _torch_reference(fd, None if landmarks is not None else target)
@@ -1123,6 +1284,7 @@ def register(
             raise ValueError(f"lam must be non-negative, got {weight}")
         result = _landmark(data, landmarks, target_landmarks, warp_basis, weight, penalty)
     else:
+        weights = _variable_weights(var_weights, data.n_vars)
         objective: ObjectiveFactory | None = None
         if like is not None:
             from fabel._internal.registration_torch import AutogradObjective
@@ -1141,6 +1303,7 @@ def register(
             max_iter,
             tol,
             objective,
+            weights,
         )
     if like is None:
         return result
@@ -1174,7 +1337,8 @@ def landmark_register(
     Parameters
     ----------
     fd : FData
-        The univariate curves to register.
+        The curves to register, univariate or multivariate (one warp per
+        curve, shared by its variables).
     landmarks : array
         Landmark times, shape ``(n_curves, n_landmarks)`` or ``(n_curves,)``.
     target_landmarks : array, optional
@@ -1232,6 +1396,11 @@ class Registrator(TransformerMixin, BaseEstimator):  # type: ignore[misc]
         ``None`` builds a cubic B-spline on ``(0, 1)`` with one function per
         column.
 
+    Notes
+    -----
+    Being a scikit-learn transformer it works on univariate curves (one row
+    of coefficients per curve); multivariate FData raise ``ValueError``.
+
     Attributes
     ----------
     target_ : FData
@@ -1285,6 +1454,11 @@ class Registrator(TransformerMixin, BaseEstimator):  # type: ignore[misc]
     def _as_fdata(self, X: Any, *, reset: bool) -> FData:  # noqa: N803
         """Interpret ``X`` as functional data, validating a plain array."""
         if isinstance(X, FData):
+            if X.n_vars != 1:
+                raise ValueError(
+                    "Registrator handles univariate curves; register multivariate "
+                    "curves with fabel.registration.register"
+                )
             if reset:
                 self.n_features_in_ = X.basis.n_basis
             elif X.basis.n_basis != self.n_features_in_:

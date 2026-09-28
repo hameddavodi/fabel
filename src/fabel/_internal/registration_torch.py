@@ -12,12 +12,16 @@ pieces are provided:
 - :func:`to_torch_result` turns the finished registration into tensors in the
   input's dtype and device, with the registered curves differentiable with
   respect to the input coefficients.
+- :func:`warp_curves_torch` warps tensor curves with fixed warps; it builds
+  the registered curves of :func:`to_torch_result` and serves
+  :meth:`fabel.registration.RegistrationResult.apply`.
 
 The criterion is the one of :mod:`fabel.registration`: for the warp
 parameters ``p`` (the free latent coefficients, plus the shift of a periodic
 registration) it is the grid mean of ``(x_0 - x∘h)^2`` (least squares) or
 twice the smaller eigenvalue of the grid-mean cross-product matrix of
-``(x_0, x∘h)`` (eigen), plus ``λ cᵀRc``.  The smaller eigenvalue is computed
+``(x_0, x∘h)`` (eigen), plus ``λ cᵀRc``; for multivariate curves the fit is
+the weighted sum of the fits of the variables.  The smaller eigenvalue is computed
 as the mean square of ``v_1 x_0 + v_2 x∘h`` with ``v`` the unit eigenvector
 given by the rotation angle ``½ atan2(2b, a - d)``.  That expression is exact
 for every ``p`` and free of the cancellation in ``(a + d)/2 - gap``, and
@@ -65,7 +69,7 @@ from fabel.core import FData
 if TYPE_CHECKING:
     from fabel.registration import RegistrationResult, _CurveProblem
 
-__all__ = ["AutogradObjective", "as_tensor_like", "to_torch_result"]
+__all__ = ["AutogradObjective", "as_tensor_like", "to_torch_result", "warp_curves_torch"]
 
 Array = Any
 
@@ -159,7 +163,9 @@ class AutogradObjective:
         self._n_panels = quadrature.n_panels
         self._lower, self._upper = quadrature.span
         self._curve = FData(_tensor(problem.curve.coefs), problem.curve.basis)
-        self._target = _tensor(problem.target)
+        target = _tensor(problem.target)
+        self._target = torch.reshape(target, (int(target.shape[0]), -1))
+        self._var_weights = tuple(float(weight) for weight in problem.weights)
         self._penalty = _tensor(to_numpy(problem.penalty)[1:, 1:])
         self._lam = float(problem.lam)
         self._eigen = problem.criterion == "eigen"
@@ -195,19 +201,33 @@ class AutogradObjective:
             where = lower + torch.remainder(warp + params[free] - lower, upper - lower)
         else:
             where = warp
-        values = self._curve(where)[:, 0]
-        fit = self._eigen_fit(values) if self._eigen else self._least_squares_fit(values)
+        values = self._curve(where)
+        values = torch.reshape(values, (int(values.shape[0]), -1))
+        fit: torch.Tensor | None = None
+        for var, weight in enumerate(self._var_weights):
+            if weight == 0.0:
+                continue
+            target, curve = self._target[:, var], values[:, var]
+            part = (
+                self._eigen_fit(target, curve)
+                if self._eigen
+                else self._least_squares_fit(target, curve)
+            )
+            fit = weight * part if fit is None else fit + weight * part
+        if fit is None:
+            raise ValueError("var_weights must have at least one positive entry")
         rough = params[:free]
         return fit + self._lam * torch.dot(rough, torch.matmul(self._penalty, rough))
 
-    def _least_squares_fit(self, values: torch.Tensor) -> torch.Tensor:
+    @staticmethod
+    def _least_squares_fit(target: torch.Tensor, values: torch.Tensor) -> torch.Tensor:
         """Grid mean of the squared distance to the target."""
-        resid = self._target - values
+        resid = target - values
         return torch.mean(resid * resid)
 
-    def _eigen_fit(self, values: torch.Tensor) -> torch.Tensor:
+    @staticmethod
+    def _eigen_fit(target: torch.Tensor, values: torch.Tensor) -> torch.Tensor:
         """Twice the smaller eigenvalue of the grid-mean cross-product matrix."""
-        target = self._target
         aa = torch.mean(target * target)
         bb = torch.mean(target * values)
         dd = torch.mean(values * values)
@@ -319,23 +339,13 @@ def to_torch_result(
     def constant_fd(values: FData) -> FData:
         return FData(constant(values.coefs), values.basis)
 
-    basis = fd.basis
     lower, upper = fd.domain
-    grid = _fine_grid(fd.domain, basis.n_basis)
+    grid = _fine_grid(fd.domain, fd.basis.n_basis)
     where = to_numpy(result.warp_values(grid))
     if periodic:
         where = lower + xp.remainder(where - lower, upper - lower)
-    n_curves = fd.n_curves
-    design = xp.stack([basis(where[:, i]) for i in range(n_curves)])
-    projection = _linalg.lstsq(basis(grid), xp.eye(int(grid.shape[0])))
-    if is_torch(fd.coefs):
-        curves = fd
-        coefs = torch.reshape(fd.coefs, (basis.n_basis, n_curves)).to(dtype=dtype)
-    else:
-        curves = constant_fd(fd)
-        coefs = constant(xp.reshape(fd.coefs, (basis.n_basis, n_curves)))
-    values = torch.einsum("igk,ki->gi", constant(design), coefs)
-    registered = FData(torch.matmul(constant(projection), values), basis)
+    curves = fd if is_torch(fd.coefs) else constant_fd(fd)
+    registered = warp_curves_torch(fd, grid, where, like)
 
     goal: FData | None = None
     if result.target is not None:
@@ -360,3 +370,61 @@ def to_torch_result(
             else torch.from_numpy(to_numpy(result.n_iter).astype("int64")).to(device=device)
         ),
     )
+
+
+def warp_curves_torch(fd: FData, grid: Any, where: Any, like: Any) -> FData:
+    """Warp the curves of ``fd`` at fixed times, differentiably in ``fd.coefs``.
+
+    Curve ``i`` is evaluated at ``where[:, i]`` and the values are fitted by
+    least squares on ``grid`` in ``fd``'s basis -- the projection
+    :func:`fabel.registration.register` uses.  The basis matrices are
+    constants, so the result is linear in the coefficients of ``fd`` and a
+    loss on it back-propagates to ``fd.coefs`` when they are a tensor.
+
+    Parameters
+    ----------
+    fd : FData
+        Curves to warp, univariate or multivariate, NumPy or tensor.
+    grid : numpy.ndarray
+        The registration grid, shape ``(n_grid,)``.
+    where : numpy.ndarray
+        Warped times, shape ``(n_grid, n_curves)``, inside the domain.
+    like : torch.Tensor
+        Tensor whose dtype and device the result takes.
+
+    Returns
+    -------
+    FData
+        The warped curves in ``fd``'s basis with tensor coefficients of shape
+        ``(n_basis, n_curves)`` or ``(n_basis, n_curves, n_vars)``.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import torch
+    >>> from fabel import BSpline, FData
+    >>> from fabel._internal.registration_torch import warp_curves_torch
+    >>> coefs = torch.ones((6, 2, 2), dtype=torch.float64, requires_grad=True)
+    >>> grid = np.linspace(0.0, 1.0, 11)
+    >>> where = np.stack([grid, grid**2], axis=1)
+    >>> out = warp_curves_torch(FData(coefs, BSpline(n_basis=6)), grid, where, coefs)
+    >>> out.coefs.shape, bool(torch.allclose(out.coefs, torch.ones(6, 2, 2, dtype=torch.float64)))
+    (torch.Size([6, 2, 2]), True)
+    """
+    xp = default_namespace()
+    basis = fd.basis
+    n_curves, n_vars = fd.n_curves, fd.n_vars
+    dtype, device = like.dtype, like.device
+    points = to_numpy(where)
+    design = xp.stack([basis(points[:, i]) for i in range(n_curves)])
+    projection = _linalg.lstsq(basis(grid), xp.eye(int(grid.shape[0])))
+    if is_torch(fd.coefs):
+        coefs = torch.reshape(fd.coefs, (basis.n_basis, n_curves, n_vars)).to(dtype=dtype)
+    else:
+        raw = xp.reshape(to_numpy(fd.coefs), (basis.n_basis, n_curves, n_vars))
+        coefs = _tensor(raw, dtype, device)
+    values = torch.einsum("igk,kiv->giv", _tensor(design, dtype, device), coefs)
+    fitted = torch.einsum("kg,giv->kiv", _tensor(projection, dtype, device), values)
+    if len(fd.coefs.shape) == 2:
+        fitted = fitted[:, :, 0]
+    return FData(fitted, basis)
