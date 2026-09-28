@@ -1,0 +1,1609 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Functional data analysis for Python — a clean-room rewrite of R's fda.">
+      
+      
+      
+        <link rel="canonical" href="https://hameddavodi.github.io/fabel/tutorials/smoothing/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../fpca/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Smoothing - Fabel</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#smoothing-from-raw-numbers-to-curves" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fabel" class="md-header__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabel
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Smoothing
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fabel" class="md-nav__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabel
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../r-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-growth-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The growth data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-one-call-everything-automatic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. One call, everything automatic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-is-inside-a-smoothresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. What is inside a SmoothResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-choosing-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Choosing λ yourself
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-heights-never-go-down-the-monotone-constraint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Heights never go down: the monotone constraint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-temperature-a-fourier-basis-and-the-harmonic-accelerator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Temperature: a Fourier basis and the harmonic accelerator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r-equivalent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R equivalent
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA and CCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/decomposition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decomposition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sparse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse data (PACE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/density/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density and intensity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling (ODE parameters)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/nn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyTorch layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input and output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-growth-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The growth data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-one-call-everything-automatic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. One call, everything automatic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-is-inside-a-smoothresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. What is inside a SmoothResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-choosing-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Choosing λ yourself
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-heights-never-go-down-the-monotone-constraint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Heights never go down: the monotone constraint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-temperature-a-fourier-basis-and-the-harmonic-accelerator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Temperature: a Fourier basis and the harmonic accelerator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r-equivalent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R equivalent
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="smoothing-from-raw-numbers-to-curves">Smoothing: from raw numbers to curves<a class="headerlink" href="#smoothing-from-raw-numbers-to-curves" title="Permanent link">&para;</a></h1>
+<p>Functional data analysis starts with a step called <em>smoothing</em>. You have noisy
+numbers measured at a few time points. You want a smooth curve that follows
+them, and that you can evaluate and differentiate anywhere.</p>
+<p>This tutorial uses two datasets:</p>
+<ul>
+<li>the <strong>Berkeley growth study</strong>: the height of 54 girls, measured 31 times
+  between age 1 and 18 (ships inside Fabel);</li>
+<li>the <strong>Canadian weather</strong> data: the average temperature of every day of the
+  year at 35 weather stations (downloaded once, then cached).</li>
+</ul>
+<p>You will learn how <code>fb.smooth()</code> picks a basis and a smoothing level for you,
+how to control both, and how to force a curve to only go up.</p>
+<h2 id="1-the-growth-data">1. The growth data<a class="headerlink" href="#1-the-growth-data" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+
+<span class="n">growth</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_growth</span><span class="p">()</span>
+<span class="n">age</span> <span class="o">=</span> <span class="n">growth</span><span class="o">.</span><span class="n">age</span>            <span class="c1"># 31 ages, not equally spaced</span>
+<span class="n">heights</span> <span class="o">=</span> <span class="n">growth</span><span class="o">.</span><span class="n">hgtf</span>       <span class="c1"># shape (31, 54): one column per girl</span>
+<span class="n">age</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">heights</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
+<p>Each column of <code>heights</code> is one girl. In Fabel, observations always have the
+time axis first: <code>y</code> has shape <code>(n_points, n_curves)</code>.</p>
+<h2 id="2-one-call-everything-automatic">2. One call, everything automatic<a class="headerlink" href="#2-one-call-everything-automatic" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="n">fit</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">heights</span><span class="p">,</span> <span class="n">age</span><span class="p">)</span>
+
+<span class="n">fit</span><span class="o">.</span><span class="n">fd</span><span class="o">.</span><span class="n">basis</span>                <span class="c1"># the basis chosen for you</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">lam</span>                     <span class="c1"># the smoothing parameter chosen by GCV</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">df</span>                      <span class="c1"># the equivalent degrees of freedom</span>
+</code></pre></div>
+<p>Without arguments <code>smooth()</code> does three things for you:</p>
+<ol>
+<li><strong>Basis.</strong> A <em>basis</em> is a fixed set of simple functions; each curve is a
+   weighted sum of them. The default is a cubic <em>B-spline</em> (piecewise
+   polynomials joined smoothly) with <code>min(n_points, 40) + 2</code> functions. Here
+   that is 33 functions for 31 ages.</li>
+<li><strong>Penalty.</strong> With that many functions the curve could pass through every
+   point, noise included. So the fit adds a <em>roughness penalty</em>: λ (lambda)
+   times the integral of the squared second derivative. A large λ gives a
+   stiff, smooth curve; a small λ follows the data closely.</li>
+<li><strong>λ by GCV.</strong> <em>Generalised cross-validation</em> (GCV) estimates how well the
+   fit would predict new data. <code>smooth()</code> tries λ from 10⁻⁸ to 10⁸ and keeps
+   the one with the lowest mean GCV score.</li>
+</ol>
+<p>The <em>degrees of freedom</em> <code>fit.df</code> tell you how flexible the chosen fit is:
+roughly, how many free parameters it really uses. For the growth data GCV
+picks a very small λ and about 30 degrees of freedom for 31 points: the
+heights were measured with little error, so the curve may follow them closely.</p>
+<h2 id="3-what-is-inside-a-smoothresult">3. What is inside a <code>SmoothResult</code><a class="headerlink" href="#3-what-is-inside-a-smoothresult" title="Permanent link">&para;</a></h2>
+<p><code>smooth()</code> returns a <code>SmoothResult</code>. It holds everything R's <code>smooth.basis</code>
+scatters over a list:</p>
+<div class="highlight"><pre><span></span><code><span class="n">fit</span><span class="o">.</span><span class="n">fd</span>                      <span class="c1"># FData: the 54 fitted curves</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">gcv</span><span class="o">.</span><span class="n">shape</span>               <span class="c1"># one GCV score per girl: (54,)</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">sse</span>                     <span class="c1"># residual sum of squares over all points and girls</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">penalty_matrix</span><span class="o">.</span><span class="n">shape</span>    <span class="c1"># the roughness matrix R, (33, 33)</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">y2c_map</span><span class="o">.</span><span class="n">shape</span>           <span class="c1"># the linear map from data to coefficients, (33, 31)</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">constraint</span> <span class="ow">is</span> <span class="kc">None</span>      <span class="c1"># True: no shape constraint</span>
+</code></pre></div>
+<p><code>y2c_map</code> is the matrix that turns raw data into coefficients. You need it
+later for standard errors in <a href="../regression/">regression</a>.</p>
+<p>The curves are callable. Evaluate them, or their derivatives, at any point:</p>
+<div class="highlight"><pre><span></span><code><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">18.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">height</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">fd</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>                 <span class="c1"># (200, 54)</span>
+<span class="n">velocity</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">fd</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>      <span class="c1"># growth speed, cm per year</span>
+<span class="n">acceleration</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">fd</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># change in growth speed</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">age</span><span class="p">,</span> <span class="n">heights</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">height</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"age (years)"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"height (cm)"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Five girls"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">velocity</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"age (years)"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"cm / year"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Growth speed"</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="4-choosing-yourself">4. Choosing λ yourself<a class="headerlink" href="#4-choosing-yourself" title="Permanent link">&para;</a></h2>
+<p>Three ways to set the smoothing level:</p>
+<div class="highlight"><pre><span></span><code><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">18.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="n">by_value</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">heights</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">by_df</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">heights</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">by_gcv</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">heights</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="s2">"gcv"</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="nb">round</span><span class="p">(</span><span class="n">by_df</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">by_df</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">by_gcv</span><span class="o">.</span><span class="n">lam</span>
+</code></pre></div>
+<ul>
+<li><code>lam=1e-1</code> uses that number directly.</li>
+<li><code>df=8.0</code> (or <code>lam="df=8"</code>) finds the λ that gives 8 degrees of freedom.</li>
+<li><code>lam="gcv"</code> is the default.</li>
+</ul>
+<p>We used an order-6 B-spline (piecewise polynomials of degree 5) and
+<code>penalty=3</code>, the third derivative. A penalty on <code>D³</code> keeps the <em>second</em>
+derivative smooth, which matters when you study acceleration.</p>
+<p><code>gcv_curve</code> shows the whole GCV curve, and <code>lambda_to_df</code> / <code>df_to_lambda</code>
+convert between the two scales:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.smoothing</span><span class="w"> </span><span class="kn">import</span> <span class="n">df_to_lambda</span><span class="p">,</span> <span class="n">gcv_curve</span><span class="p">,</span> <span class="n">lambda_to_df</span>
+
+<span class="n">lambdas</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">gcv_curve</span><span class="p">(</span><span class="n">heights</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>   <span class="c1"># (n_lambda, 54)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">lambdas</span><span class="p">,</span> <span class="n">scores</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"lambda"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"mean GCV"</span><span class="p">)</span>
+
+<span class="n">lam_8</span> <span class="o">=</span> <span class="n">df_to_lambda</span><span class="p">(</span><span class="n">age</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">round</span><span class="p">(</span><span class="n">lambda_to_df</span><span class="p">(</span><span class="n">age</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">lam_8</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>          <span class="c1"># 8.0</span>
+</code></pre></div>
+<h2 id="5-heights-never-go-down-the-monotone-constraint">5. Heights never go down: the monotone constraint<a class="headerlink" href="#5-heights-never-go-down-the-monotone-constraint" title="Permanent link">&para;</a></h2>
+<p>A plain smooth can wiggle down a little between two measurements. Height
+cannot. <code>constraint="monotone"</code> fits curves of the form</p>
+<p>x(t) = β₀ + β₁ ∫ exp W(u) du,</p>
+<p>where <code>W</code> is an unconstrained curve. Because <code>exp W</code> is always positive, x(t)
+can only increase.</p>
+<div class="highlight"><pre><span></span><code><span class="n">girls</span> <span class="o">=</span> <span class="n">heights</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">monotone</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
+    <span class="n">girls</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">18.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">15</span><span class="p">),</span> <span class="n">lam</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span>
+    <span class="n">constraint</span><span class="o">=</span><span class="s2">"monotone"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">monotone</span><span class="o">.</span><span class="n">constraint</span><span class="p">,</span> <span class="n">monotone</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">shape</span>      <span class="c1"># "monotone", (2, 4)</span>
+
+<span class="n">speed</span> <span class="o">=</span> <span class="n">monotone</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">deriv</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>                  <span class="c1"># call the result, not .fd</span>
+<span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">speed</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>                       <span class="c1"># True: growth speed is always positive</span>
+</code></pre></div>
+<p>For a constrained fit, <code>monotone.fd</code> holds the latent curve <code>W</code>. Call the
+result itself, <code>monotone(t)</code>, to get heights. <code>constraint="positive"</code> works
+the same way and fits <code>x = exp W</code>, a curve that stays above zero.</p>
+<h2 id="6-temperature-a-fourier-basis-and-the-harmonic-accelerator">6. Temperature: a Fourier basis and the harmonic accelerator<a class="headerlink" href="#6-temperature-a-fourier-basis-and-the-harmonic-accelerator" title="Permanent link">&para;</a></h2>
+<p>Weather repeats every year, so a <em>Fourier</em> basis (sines and cosines) is the
+natural choice. We use 65 functions over the 365 days.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># requires-data: canadian_weather</span>
+<span class="n">weather</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_canadian_weather</span><span class="p">()</span>
+<span class="n">day</span> <span class="o">=</span> <span class="n">weather</span><span class="o">.</span><span class="n">t</span>                               <span class="c1"># 1, 2, ..., 365</span>
+<span class="n">fourier</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">365.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">65</span><span class="p">)</span>
+<span class="n">weather</span><span class="o">.</span><span class="n">temp</span><span class="o">.</span><span class="n">shape</span>                            <span class="c1"># (365, 35)</span>
+</code></pre></div>
+<p>Now the penalty. The second derivative <code>D²</code> punishes every curve that bends.
+But a pure yearly cycle <code>a + b sin(ωt) + c cos(ωt)</code> is exactly what we
+expect, and we do not want to punish it. The <em>harmonic accelerator</em></p>
+<p>L = ω² D + D³, with ω = 2π / 365,</p>
+<p>gives exactly zero on those curves. A <em>linear differential operator</em> (LDO) is
+a weighted sum of derivatives like this one; <code>fb.LDO.harmonic</code> builds it.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># requires-data: canadian_weather</span>
+<span class="n">harmonic</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">LDO</span><span class="o">.</span><span class="n">harmonic</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="mf">365.0</span><span class="p">)</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">weather</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">fourier</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="n">harmonic</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="s2">"gcv"</span><span class="p">)</span>
+<span class="n">temp</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">stations</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Montreal"</span><span class="p">,</span> <span class="s2">"Edmonton"</span><span class="p">,</span> <span class="s2">"Pr. Rupert"</span><span class="p">,</span> <span class="s2">"Resolute"</span><span class="p">]</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">weather</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">weather</span><span class="o">.</span><span class="n">temp</span><span class="p">[:,</span> <span class="n">columns</span><span class="p">],</span> <span class="s2">"."</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_prop_cycle</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">temp</span><span class="o">.</span><span class="n">fd</span><span class="p">(</span><span class="n">day</span><span class="p">)[:,</span> <span class="n">columns</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">stations</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"day of year"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"deg C"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Temperature, smoothed"</span><span class="p">)</span>
+</code></pre></div>
+<p>Check the claim: the harmonic accelerator kills a pure yearly cycle.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># requires-data: canadian_weather</span>
+<span class="n">omega</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">365.0</span>
+<span class="n">cycle</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">fourier</span><span class="p">(</span><span class="n">day</span><span class="p">),</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">day</span><span class="p">),</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fourier</span><span class="p">)</span>
+<span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cycle</span><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">harmonic</span><span class="p">))))</span>   <span class="c1"># about 0</span>
+</code></pre></div>
+<h2 id="r-equivalent">R equivalent<a class="headerlink" href="#r-equivalent" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">fda</span><span class="p">)</span>
+<span class="c1"># growth, automatic GCV is a loop in R: smooth.basis at each lambda + gcv</span>
+<span class="n">hgtbasis</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">create.bspline.basis</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="w"> </span><span class="m">18</span><span class="p">),</span><span class="w"> </span><span class="m">20</span><span class="p">,</span><span class="w"> </span><span class="n">norder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">6</span><span class="p">)</span>
+<span class="n">hgtPar</span><span class="w">   </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">fdPar</span><span class="p">(</span><span class="n">hgtbasis</span><span class="p">,</span><span class="w"> </span><span class="n">Lfdobj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1e-1</span><span class="p">)</span>
+<span class="n">hgtfit</span><span class="w">   </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">smooth.basis</span><span class="p">(</span><span class="n">growth</span><span class="o">$</span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">growth</span><span class="o">$</span><span class="n">hgtf</span><span class="p">,</span><span class="w"> </span><span class="n">hgtPar</span><span class="p">)</span>
+<span class="n">hgtfit</span><span class="o">$</span><span class="n">df</span><span class="p">;</span><span class="w"> </span><span class="n">hgtfit</span><span class="o">$</span><span class="n">gcv</span><span class="p">;</span><span class="w"> </span><span class="n">hgtfit</span><span class="o">$</span><span class="n">SSE</span><span class="p">;</span><span class="w"> </span><span class="n">hgtfit</span><span class="o">$</span><span class="n">y2cMap</span>
+<span class="n">lambda</span><span class="w">   </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">df2lambda</span><span class="p">(</span><span class="n">growth</span><span class="o">$</span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">hgtbasis</span><span class="p">,</span><span class="w"> </span><span class="n">Lfdobj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span><span class="p">,</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="p">)</span>
+
+<span class="c1"># monotone</span>
+<span class="n">Wfd</span><span class="w">  </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">fdPar</span><span class="p">(</span><span class="nf">create.bspline.basis</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="w"> </span><span class="m">18</span><span class="p">),</span><span class="w"> </span><span class="m">15</span><span class="p">),</span><span class="w"> </span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="m">1e-1</span><span class="p">)</span>
+<span class="n">mono</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">smooth.monotone</span><span class="p">(</span><span class="n">growth</span><span class="o">$</span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">growth</span><span class="o">$</span><span class="n">hgtf</span><span class="p">[,</span><span class="w"> </span><span class="m">1</span><span class="p">],</span><span class="w"> </span><span class="n">Wfd</span><span class="p">)</span>
+
+<span class="c1"># weather, harmonic accelerator</span>
+<span class="n">daybasis</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">create.fourier.basis</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="m">365</span><span class="p">),</span><span class="w"> </span><span class="m">65</span><span class="p">)</span>
+<span class="n">harmLfd</span><span class="w">  </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">vec2Lfd</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="m">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kc">pi</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="m">365</span><span class="p">)</span><span class="o">^</span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="m">0</span><span class="p">),</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="m">365</span><span class="p">))</span>
+<span class="n">tempfit</span><span class="w">  </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">smooth.basis</span><span class="p">(</span><span class="n">day.5</span><span class="p">,</span><span class="w"> </span><span class="n">CanadianWeather</span><span class="o">$</span><span class="n">dailyAv</span><span class="p">[,</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="s">"Temperature.C"</span><span class="p">],</span>
+<span class="w">                         </span><span class="nf">fdPar</span><span class="p">(</span><span class="n">daybasis</span><span class="p">,</span><span class="w"> </span><span class="n">harmLfd</span><span class="p">,</span><span class="w"> </span><span class="m">1e2</span><span class="p">))</span>
+</code></pre></div>
+<p>Differences to know:</p>
+<ul>
+<li><code>fb.smooth()</code> picks the basis and λ for you; R needs both.</li>
+<li><code>fit.gcv</code> is a score per curve, like R. When the fit interpolates the data
+  (df equal to the number of points), GCV is 0/0: Fabel returns <code>inf</code>, R
+  returns <code>NULL</code>.</li>
+<li>One <code>smooth()</code> call with <code>constraint=</code> replaces <code>smooth.monotone</code>,
+  <code>smooth.pos</code> and <code>smooth.morph</code>, and it smooths all curves at once.</li>
+<li>R's day grid is <code>day.5</code> (0.5, 1.5, ...); <code>load_canadian_weather().t</code> is
+  1, ..., 365. Both lie inside the domain (0, 365).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2295 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Functional data analysis for Python — a clean-room rewrite of R's fda.">
+      
+      
+      
+        <link rel="canonical" href="https://hameddavodi.github.io/fabel/r-migration/">
+      
+      
+        <link rel="prev" href="../quickstart/">
+      
+      
+        <link rel="next" href="../tutorials/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Migrating from R fda - Fabel</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#migrating-from-r-fda" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Fabel" class="md-header__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabel
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Migrating from R fda
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Fabel" class="md-nav__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabel
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#functional-data-objects-fd-fdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functional data objects (fd → FData)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basis-systems-createbasis-basis-subclasses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basis systems (create.*.basis → Basis subclasses)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linear-differential-operators-lfd-ldo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linear differential operators (Lfd → LDO)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smoothing-smooth-smooth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smoothing (smooth.* → smooth())
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decomposition-pcafd-ccafd-fpca-fcca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decomposition (pca.fd, cca.fd → FPCA, FCCA)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regression-fregress-family-fregress-fregress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regression (fRegress family → fregress() / FRegress)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registration-registerfd-landmarkreg-register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration (register.fd, landmarkreg → register())
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamics-pdafd-pda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamics (pda.fd → PDA)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statistics-fabelstats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistics (fabel.stats)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sparse-longitudinal-data-pace-fabelsparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sparse longitudinal data (PACE → fabel.sparse)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#density-and-intensity-fabeldensity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Density and intensity (fabel.density)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ode-parameters-by-profiling-cstr-family-fabelprofiling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODE parameters by profiling (CSTR family → fabel.profiling)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datasets-data-fabeldatasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datasets (data(...) → fabel.datasets)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ecosystem-io-and-deep-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ecosystem I/O and deep learning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not-carried-over" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Not carried over
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour-differences-from-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour differences from R
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-fabel-and-r-disagree-on-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Fabel and R disagree on purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA and CCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/decomposition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decomposition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/sparse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse data (PACE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/density/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density and intensity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling (ODE parameters)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/nn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyTorch layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input and output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#functional-data-objects-fd-fdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functional data objects (fd → FData)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basis-systems-createbasis-basis-subclasses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basis systems (create.*.basis → Basis subclasses)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linear-differential-operators-lfd-ldo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linear differential operators (Lfd → LDO)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smoothing-smooth-smooth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smoothing (smooth.* → smooth())
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decomposition-pcafd-ccafd-fpca-fcca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decomposition (pca.fd, cca.fd → FPCA, FCCA)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regression-fregress-family-fregress-fregress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regression (fRegress family → fregress() / FRegress)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registration-registerfd-landmarkreg-register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration (register.fd, landmarkreg → register())
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamics-pdafd-pda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamics (pda.fd → PDA)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statistics-fabelstats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistics (fabel.stats)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sparse-longitudinal-data-pace-fabelsparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sparse longitudinal data (PACE → fabel.sparse)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#density-and-intensity-fabeldensity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Density and intensity (fabel.density)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ode-parameters-by-profiling-cstr-family-fabelprofiling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODE parameters by profiling (CSTR family → fabel.profiling)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datasets-data-fabeldatasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datasets (data(...) → fabel.datasets)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ecosystem-io-and-deep-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ecosystem I/O and deep learning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not-carried-over" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Not carried over
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour-differences-from-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour differences from R
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-fabel-and-r-disagree-on-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Fabel and R disagree on purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="migrating-from-r-fda">Migrating from R <code>fda</code><a class="headerlink" href="#migrating-from-r-fda" title="Permanent link">&para;</a></h1>
+<p>Fabel replaces the 515 functions of R's <code>fda</code> 6.3.0 with about 40 Python
+symbols. The ideas stay the same: a curve is a set of basis coefficients, a
+roughness penalty is a linear differential operator, and every estimator works
+on those coefficients. What changes is the surface:</p>
+<ul>
+<li><strong>Objects are callable.</strong> <code>fd(t)</code> evaluates a curve. There is no <code>eval.*</code> family.</li>
+<li><strong>Operators are math.</strong> <code>fd1 + fd2</code>, <code>fd * 2</code>, <code>fd1 @ fd2</code> (inner product), <code>basis1 * basis2</code>.</li>
+<li><strong>One entry point per task.</strong> One <code>smooth()</code>, one <code>register()</code>, one <code>.plot()</code>.</li>
+<li><strong>Immutable objects.</strong> Every method returns a new object, so chaining is safe.</li>
+<li><strong>scikit-learn estimators.</strong> <code>Smoother</code>, <code>FPCA</code>, <code>FCCA</code>, <code>FRegress</code> and
+  <code>Registrator</code> implement <code>fit</code> / <code>transform</code> / <code>predict</code>.</li>
+</ul>
+<p>In the tables below, <code>fb</code> is <code>import fabel as fb</code>.</p>
+<h2 id="functional-data-objects-fd-fdata">Functional data objects (<code>fd</code> → <code>FData</code>)<a class="headerlink" href="#functional-data-objects-fd-fdata" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fd(coef, basisobj)</code></td>
+<td><code>fb.FData(coefs, basis)</code></td>
+</tr>
+<tr>
+<td><code>eval.fd</code></td>
+<td><code>fd(t, deriv=0)</code></td>
+</tr>
+<tr>
+<td><code>eval.monfd</code>, <code>eval.posfd</code>, <code>predict.monfd</code> (any derivative)</td>
+<td><code>result(t, deriv=n)</code> on a monotone or positive <code>SmoothResult</code> (exact, any order)</td>
+</tr>
+<tr>
+<td><code>eval.fd(t, fdobj, Lfdobj)</code></td>
+<td><code>fd(t, operator)</code> with an <code>LDO</code></td>
+</tr>
+<tr>
+<td><code>deriv.fd</code></td>
+<td><code>fd.derivative(n=1)</code></td>
+</tr>
+<tr>
+<td><code>mean.fd</code>, <code>sd.fd</code>, <code>stddev.fd</code>, <code>center.fd</code></td>
+<td><code>fd.mean()</code>, <code>fd.std()</code>, <code>fd.center()</code></td>
+</tr>
+<tr>
+<td><code>arithmetic.fd</code>, <code>sum.fd</code> (<code>+</code>, <code>-</code>, <code>*</code>, <code>^</code>)</td>
+<td><code>fd + fd</code>, <code>fd * 2</code>, <code>fd ** 2</code></td>
+</tr>
+<tr>
+<td><code>inprod</code>, <code>inprod.bspline</code></td>
+<td><code>fd1 @ fd2</code>, <code>fb.inprod(a, b, lfd1=, lfd2=)</code></td>
+</tr>
+<tr>
+<td><code>var.fd</code></td>
+<td><code>fd.cov()</code></td>
+</tr>
+<tr>
+<td><code>plot.fd</code>, <code>lines.fd</code>, <code>plotfit.fd</code></td>
+<td><code>fd.plot()</code>, <code>fd.plot_fit(y, t)</code></td>
+</tr>
+<tr>
+<td><code>[.fd</code>, <code>subscript.fd</code></td>
+<td><code>fd[i]</code>, <code>fd[i:j]</code></td>
+</tr>
+<tr>
+<td><code>fdlabels</code>, <code>norder</code>, <code>nbasis</code></td>
+<td><code>len(fd)</code>, <code>fd.n_curves</code>, <code>fd.domain</code>, <code>fd.basis</code></td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fd.to_numpy(t)</code>, <code>fd.to_torch(t)</code></td>
+</tr>
+<tr>
+<td><code>bifd</code>, <code>eval.bifd</code></td>
+<td><code>fb.BiFData(coefs, s_basis, t_basis)</code>, <code>bifd(s, t)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="basis-systems-createbasis-basis-subclasses">Basis systems (<code>create.*.basis</code> → <code>Basis</code> subclasses)<a class="headerlink" href="#basis-systems-createbasis-basis-subclasses" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create.bspline.basis</code></td>
+<td><code>fb.BSpline(domain=, n_basis=, order=, breaks=)</code></td>
+</tr>
+<tr>
+<td><code>create.fourier.basis</code></td>
+<td><code>fb.Fourier(domain=, n_basis=, period=)</code></td>
+</tr>
+<tr>
+<td><code>create.monomial.basis</code></td>
+<td><code>fb.Monomial(domain=, n_basis=)</code></td>
+</tr>
+<tr>
+<td><code>create.exponential.basis</code></td>
+<td><code>fb.Exponential(domain=, rates=)</code></td>
+</tr>
+<tr>
+<td><code>create.power.basis</code></td>
+<td><code>fb.Power(domain=, exponents=)</code></td>
+</tr>
+<tr>
+<td><code>create.constant.basis</code></td>
+<td><code>fb.Constant(domain=)</code></td>
+</tr>
+<tr>
+<td><code>create.polygonal.basis</code></td>
+<td><code>fb.Polygonal(argvals)</code></td>
+</tr>
+<tr>
+<td><code>eval.basis</code>, <code>getbasismatrix</code>, <code>bsplineS</code>, <code>fourier</code>, <code>expon</code>, <code>monomial</code>, <code>polyg</code>, <code>powerbasis</code></td>
+<td><code>basis(t, deriv=0)</code></td>
+</tr>
+<tr>
+<td><code>getbasispenalty</code>, <code>eval.penalty</code>, <code>bsplinepen</code>, <code>fourierpen</code>, <code>polygpen</code>, <code>powerpen</code>, <code>polynompen</code></td>
+<td><code>basis.penalty(op=2)</code></td>
+</tr>
+<tr>
+<td><code>basisfd.product</code></td>
+<td><code>basis1 * basis2</code></td>
+</tr>
+<tr>
+<td>internal <code>inprod</code> calls on a basis</td>
+<td><code>basis.gram()</code> (cached)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="linear-differential-operators-lfd-ldo">Linear differential operators (<code>Lfd</code> → <code>LDO</code>)<a class="headerlink" href="#linear-differential-operators-lfd-ldo" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int2Lfd(m)</code></td>
+<td><code>fb.LDO(m)</code></td>
+</tr>
+<tr>
+<td><code>vec2Lfd</code>, <code>Lfd</code></td>
+<td><code>fb.LDO(weights=[w0, w1, ...])</code></td>
+</tr>
+<tr>
+<td>harmonic acceleration <code>vec2Lfd(c(0, (2*pi/T)^2, 0), rng)</code></td>
+<td><code>fb.LDO.harmonic(period=T)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="smoothing-smooth-smooth">Smoothing (<code>smooth.*</code> → <code>smooth()</code>)<a class="headerlink" href="#smoothing-smooth-smooth" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>smooth.basis</code>, <code>smooth.basisPar</code>, <code>Data2fd</code></td>
+<td><code>fb.smooth(y, t, basis=, lam=, penalty=)</code></td>
+</tr>
+<tr>
+<td><code>smooth.monotone</code></td>
+<td><code>fb.smooth(y, t, constraint="monotone")</code></td>
+</tr>
+<tr>
+<td><code>smooth.pos</code></td>
+<td><code>fb.smooth(y, t, constraint="positive")</code></td>
+</tr>
+<tr>
+<td><code>smooth.morph</code></td>
+<td><code>fb.smooth(y, t, constraint="morph")</code></td>
+</tr>
+<tr>
+<td><code>lambda2gcv</code>, GCV search over λ</td>
+<td><code>fb.smooth(y, t, lam="gcv")</code>, <code>gcv_curve(...)</code></td>
+</tr>
+<tr>
+<td><code>df2lambda</code></td>
+<td><code>fb.smooth(y, t, lam="df=12")</code>, <code>df_to_lambda(...)</code></td>
+</tr>
+<tr>
+<td><code>lambda2df</code></td>
+<td><code>lambda_to_df(...)</code>, <code>result.df</code></td>
+</tr>
+<tr>
+<td><code>smooth.basis.sparse</code> (irregular sampling per curve)</td>
+<td><code>fb.smooth([y1, y2, ...], [t1, t2, ...])</code></td>
+</tr>
+<tr>
+<td><code>smooth.bibasis</code></td>
+<td><code>fb.smooth()</code> with a 2-D <code>y</code></td>
+</tr>
+<tr>
+<td>the returned list (<code>fd</code>, <code>df</code>, <code>gcv</code>, <code>SSE</code>, <code>penmat</code>, <code>y2cMap</code>)</td>
+<td><code>SmoothResult</code>: <code>.fd</code>, <code>.df</code>, <code>.gcv</code>, <code>.sse</code>, <code>.penalty_matrix</code>, <code>.y2c_map</code></td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fb.Smoother()</code>: scikit-learn transformer</td>
+</tr>
+</tbody>
+</table>
+<h2 id="decomposition-pcafd-ccafd-fpca-fcca">Decomposition (<code>pca.fd</code>, <code>cca.fd</code> → <code>FPCA</code>, <code>FCCA</code>)<a class="headerlink" href="#decomposition-pcafd-ccafd-fpca-fcca" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pca.fd(fdobj, nharm, harmfdPar)</code></td>
+<td><code>fb.FPCA(n=4, lam="gcv").fit(fd)</code></td>
+</tr>
+<tr>
+<td><code>pca.fd(...)$harmonics</code> / <code>$scores</code> / <code>$values</code> / <code>$varprop</code></td>
+<td><code>pca.harmonics</code>, <code>pca.scores</code>, <code>pca.values</code>, <code>pca.varprop</code></td>
+</tr>
+<tr>
+<td>scores of new curves</td>
+<td><code>pca.transform(fd)</code></td>
+</tr>
+<tr>
+<td><code>plot.pca.fd</code></td>
+<td><code>pca.harmonics.plot()</code></td>
+</tr>
+<tr>
+<td><code>varmx.pca.fd</code></td>
+<td><code>pca.rotate("varimax")</code></td>
+</tr>
+<tr>
+<td><code>cca.fd</code></td>
+<td><code>fb.FCCA(n=3).fit(fd1, fd2)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="regression-fregress-family-fregress-fregress">Regression (<code>fRegress</code> family → <code>fregress()</code> / <code>FRegress</code>)<a class="headerlink" href="#regression-fregress-family-fregress-fregress" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fRegress</code> (scalar or functional response)</td>
+<td><code>fb.fregress(y, x_list)</code></td>
+</tr>
+<tr>
+<td><code>fRegress.formula</code></td>
+<td><code>fb.fregress("temp ~ region + precip", data)</code></td>
+</tr>
+<tr>
+<td><code>predict.fRegress</code></td>
+<td><code>model.predict(x_new)</code></td>
+</tr>
+<tr>
+<td><code>fRegress.stderr</code></td>
+<td><code>model.stderr()</code></td>
+</tr>
+<tr>
+<td><code>fRegress.CV</code></td>
+<td><code>model.cv()</code></td>
+</tr>
+<tr>
+<td><code>Fperm.fd</code></td>
+<td><code>fb.stats.f_test(model, n_perm=1000)</code></td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fb.FRegress</code>: scikit-learn estimator</td>
+</tr>
+<tr>
+<td><code>linmod</code> (with <code>bifdPar</code> for the surface penalties)</td>
+<td><code>fb.linmod(y, x, s_basis=, t_basis=, lam_alpha=, lam_s=, lam_t=)</code> → <code>LinmodResult</code> (<code>.alpha</code>, <code>.beta</code>, <code>.fitted</code>, <code>.predict</code>)</td>
+</tr>
+<tr>
+<td>pointwise limits from <code>fRegress.stderr</code></td>
+<td><code>fb.stats.confidence_band(model)</code> (one band per term)</td>
+</tr>
+<tr>
+<td><code>plotbeta</code></td>
+<td><code>fb.stats.plot_beta(model)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="registration-registerfd-landmarkreg-register">Registration (<code>register.fd</code>, <code>landmarkreg</code> → <code>register()</code>)<a class="headerlink" href="#registration-registerfd-landmarkreg-register" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register.fd</code> (continuous registration to the mean)</td>
+<td><code>fb.register(fd)</code></td>
+</tr>
+<tr>
+<td><code>landmarkreg</code></td>
+<td><code>fb.register(fd, landmarks=lm)</code>, <code>fb.landmark_register(fd, landmarks)</code></td>
+</tr>
+<tr>
+<td><code>$regfd</code>, <code>$warpfd</code></td>
+<td><code>result.registered</code>, <code>result.warp</code></td>
+</tr>
+<tr>
+<td><code>AmpPhaseDecomp</code></td>
+<td><code>result.decompose()</code> → amplitude MSE, phase MSE, R²</td>
+</tr>
+<tr>
+<td><code>register.fd</code> on multivariate curves</td>
+<td><code>fb.register(fd, var_weights=...)</code> (one warp per curve; <code>var_weights=[1, 0, ...]</code> reproduces R, which uses the first variable only)</td>
+</tr>
+<tr>
+<td><code>landmarkreg</code> on multivariate curves</td>
+<td><code>fb.landmark_register(fd, landmarks)</code> (R rejects multivariate curves)</td>
+</tr>
+<tr>
+<td><code>register.newfd</code></td>
+<td><code>result.apply(new_fd)</code></td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fb.Registrator</code>: scikit-learn transformer</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dynamics-pdafd-pda">Dynamics (<code>pda.fd</code> → <code>PDA</code>)<a class="headerlink" href="#dynamics-pdafd-pda" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pda.fd</code></td>
+<td><code>fb.PDA(order=2).fit(fd)</code></td>
+</tr>
+<tr>
+<td><code>pda.overlay</code></td>
+<td><code>pda.plot_overlay()</code></td>
+</tr>
+<tr>
+<td><code>phaseplanePlot</code></td>
+<td><code>fb.phase_plane(fd)</code></td>
+</tr>
+<tr>
+<td><code>pda.fd(..., awtlist, ufdlist)</code> (forcing functions)</td>
+<td><code>fb.PDA(forcing_basis=, forcing_lam=).fit(fd, forcing=u)</code>, <code>pda.forcing_weights_</code></td>
+</tr>
+<tr>
+<td><code>eigen.pda</code></td>
+<td><code>pda.stability()</code> → <code>PDAStability</code> (<code>.eigenvalues</code>, <code>.limits</code>, <code>.plot()</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="statistics-fabelstats">Statistics (<code>fabel.stats</code>)<a class="headerlink" href="#statistics-fabelstats" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>var.fd</code></td>
+<td><code>fb.stats.cov(fd)</code></td>
+</tr>
+<tr>
+<td><code>cor.fd</code></td>
+<td><code>fb.stats.cor(fd1, fd2)</code></td>
+</tr>
+<tr>
+<td><code>fdepth</code></td>
+<td><code>fb.stats.depth(fd)</code></td>
+</tr>
+<tr>
+<td><code>fbplot</code>, <code>boxplot.fd</code></td>
+<td><code>fb.stats.boxplot(fd)</code></td>
+</tr>
+<tr>
+<td><code>Fperm.fd</code></td>
+<td><code>fb.stats.f_test(model, n_perm=)</code></td>
+</tr>
+<tr>
+<td><code>tperm.fd</code></td>
+<td><code>fb.stats.t_test(fd1, fd2, n_perm=)</code></td>
+</tr>
+<tr>
+<td>pointwise variance from <code>smooth.basis()$y2cMap</code></td>
+<td><code>fb.stats.confidence_band(smooth_result, t, sigma_e=)</code></td>
+</tr>
+<tr>
+<td><code>cycleplot.fd</code></td>
+<td><code>fb.stats.cycleplot(fd)</code></td>
+</tr>
+<tr>
+<td><code>plotscores</code></td>
+<td><code>fb.stats.plot_scores(pca, (0, 1))</code></td>
+</tr>
+<tr>
+<td><code>zerofind</code></td>
+<td>(private; used by <code>plot_beta</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sparse-longitudinal-data-pace-fabelsparse">Sparse longitudinal data (PACE → <code>fabel.sparse</code>)<a class="headerlink" href="#sparse-longitudinal-data-pace-fabelsparse" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>smooth.sparse.mean</code></td>
+<td><code>fb.sparse_mean(y, t, basis, lam=)</code></td>
+</tr>
+<tr>
+<td><code>covPACE</code></td>
+<td><code>fb.sparse_cov(y, t, mean=, basis=, lam=)</code> → <code>SparseCov</code> (<code>.cov</code>, <code>.sigma2</code>, <code>.variance</code>)</td>
+</tr>
+<tr>
+<td><code>pcaPACE</code></td>
+<td><code>fb.PACE(n=3, ...).fit(y, t=t)</code>: <code>.harmonics</code>, <code>.values</code>, <code>.varprop</code></td>
+</tr>
+<tr>
+<td><code>scoresPACE</code></td>
+<td><code>pace.transform(y, t)</code> (conditional expectation; R's <code>scoresPACE</code> is defective in 6.3.0)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="density-and-intensity-fabeldensity">Density and intensity (<code>fabel.density</code>)<a class="headerlink" href="#density-and-intensity-fabeldensity" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>density.fd</code> (no longer shipped in fda 6.3.0)</td>
+<td><code>fb.fit_density(x, basis=, lam=, penalty=)</code> → <code>DensityResult</code></td>
+</tr>
+<tr>
+<td><code>intensity.fd</code></td>
+<td><code>fb.fit_intensity(times, basis=, lam=, penalty=)</code> → <code>IntensityResult</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="ode-parameters-by-profiling-cstr-family-fabelprofiling">ODE parameters by profiling (CSTR family → <code>fabel.profiling</code>)<a class="headerlink" href="#ode-parameters-by-profiling-cstr-family-fabelprofiling" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CSTR2</code></td>
+<td><code>fb.profiling.cstr_model(condition, estimate=...)</code> or any <code>fb.ODEModel</code></td>
+</tr>
+<tr>
+<td><code>CSTR2in</code></td>
+<td><code>fb.profiling.cstr_inputs(t, condition)</code> (the 4 step scenarios)</td>
+</tr>
+<tr>
+<td><code>CSTRfitLS</code></td>
+<td><code>fb.ProfiledODE(...).residuals(coefs, theta)</code></td>
+</tr>
+<tr>
+<td><code>CSTRfn</code></td>
+<td><code>problem.fit_states(theta)</code></td>
+</tr>
+<tr>
+<td><code>CSTRres</code>, <code>CSTRsse</code> (+ <code>nls</code> / <code>optim</code>)</td>
+<td><code>fb.profile_ode(model, t, y, basis, lam=, theta0=)</code> / <code>problem.fit(theta0)</code></td>
+</tr>
+<tr>
+<td><code>quadset</code></td>
+<td><code>fb.profiling.simpson_rule(breaks, n_quad)</code></td>
+</tr>
+<tr>
+<td><code>lsoda(y, times, CSTR2, parms)</code></td>
+<td><code>model.simulate(...)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="datasets-data-fabeldatasets">Datasets (<code>data(...)</code> → <code>fabel.datasets</code>)<a class="headerlink" href="#datasets-data-fabeldatasets" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CanadianWeather</code></td>
+<td><code>fb.datasets.load_canadian_weather()</code></td>
+</tr>
+<tr>
+<td><code>growth</code></td>
+<td><code>fb.datasets.load_growth()</code></td>
+</tr>
+<tr>
+<td><code>gait</code></td>
+<td><code>fb.datasets.load_gait()</code></td>
+</tr>
+<tr>
+<td><code>handwrit</code>, <code>handwritTime</code></td>
+<td><code>fb.datasets.load_handwriting()</code></td>
+</tr>
+<tr>
+<td><code>pinch</code>, <code>pinchtime</code>, <code>pinchraw</code></td>
+<td><code>fb.datasets.load_pinch()</code></td>
+</tr>
+<tr>
+<td><code>melanoma</code></td>
+<td><code>fb.datasets.load_melanoma()</code></td>
+</tr>
+<tr>
+<td><code>refinery</code></td>
+<td><code>fb.datasets.load_refinery()</code></td>
+</tr>
+<tr>
+<td><code>seabird</code></td>
+<td><code>fb.datasets.load_seabird()</code></td>
+</tr>
+<tr>
+<td><code>ReginaPrecip</code></td>
+<td><code>fb.datasets.load_regina_precip()</code></td>
+</tr>
+<tr>
+<td><code>MontrealTemp</code></td>
+<td><code>fb.datasets.load_montreal_temp()</code></td>
+</tr>
+<tr>
+<td><code>daily</code></td>
+<td><code>fb.datasets.load_daily()</code></td>
+</tr>
+<tr>
+<td><code>infantGrowth</code></td>
+<td><code>fb.datasets.load_infant_growth()</code></td>
+</tr>
+<tr>
+<td><code>nondurables</code></td>
+<td><code>fb.datasets.load_nondurables()</code></td>
+</tr>
+<tr>
+<td><code>lip</code>, <code>lipmarks</code>, <code>liptime</code></td>
+<td><code>fb.datasets.load_lip()</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>growth</code>, <code>gait</code> and <code>pinch</code> ship inside the package. The others are
+downloaded once from the project's GitHub release, checked against a SHA-256
+checksum, and cached in <code>~/.cache/fabel</code> (override with <code>FABEL_DATA_DIR</code>).</p>
+<h2 id="ecosystem-io-and-deep-learning">Ecosystem I/O and deep learning<a class="headerlink" href="#ecosystem-io-and-deep-learning" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>R <code>fda</code></th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>readRDS</code> on a saved <code>fd</code>, <code>bifd</code> or <code>basisfd</code></td>
+<td><code>fb.read_rds("weather.rds")</code></td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fb.from_pandas(df, id_col, t_col, y_col)</code> (long format)</td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fd.to_pandas(t)</code>, <code>fd.to_xarray(t)</code></td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fb.nn.BasisLayer(basis)</code>: differentiable <code>fd(t)</code> for PyTorch</td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>fb.nn.FDataDataset(fd, labels)</code>: <code>DataLoader</code>-ready dataset</td>
+</tr>
+</tbody>
+</table>
+<h2 id="not-carried-over">Not carried over<a class="headerlink" href="#not-carried-over" title="Permanent link">&para;</a></h2>
+<ul>
+<li>R plotting quirks (<code>axisIntervals</code>, <code>matplot</code>): Fabel uses matplotlib defaults.</li>
+<li><code>readHMD</code> (Human Mortality Database scraper).</li>
+<li>Internal helpers (<code>wtcheck</code>, <code>symsolve</code>, <code>polintmat</code>, <code>lnsrch</code>, ...): private
+  in Fabel or replaced by SciPy.</li>
+</ul>
+<h2 id="behaviour-differences-from-r">Behaviour differences from R<a class="headerlink" href="#behaviour-differences-from-r" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>R <code>fda</code> 6.3.0</th>
+<th>Fabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Weights in <code>fRegress</code></td>
+<td><code>fRegress(y, xfdlist, betalist, wt = w)</code> fits by weighted least squares, scalar and functional response alike. The argument is <code>wt</code>: <code>wtvec = w</code> falls into <code>...</code> and is ignored without a warning, so R returns the unweighted fit.</td>
+<td><code>fb.fregress(y, x, weights=w)</code> fits by weighted least squares and agrees with R's <code>wt = w</code> to the accuracy of R's integration. Drop <code>weights</code> when porting a script that passed <code>wtvec</code> to <code>fRegress</code>.</td>
+</tr>
+<tr>
+<td>Weights in <code>linmod</code></td>
+<td><code>linmod(..., wtvec = w)</code> errors in 6.3.0.</td>
+<td><code>fb.linmod(y, x, weights=w)</code> fits by weighted least squares.</td>
+</tr>
+<tr>
+<td><code>eigen.pda</code> limits</td>
+<td><code>limvals</code> has a wrong sign (order 1), wrong entries (order 2) or loses forcing (systems).</td>
+<td><code>PDAStability.limits</code> is the true equilibrium −A(t)⁻¹f(t).</td>
+</tr>
+<tr>
+<td>Weights in <code>Fperm.fd</code></td>
+<td><code>Fperm.fd(..., wt = w)</code> accepts weights but ignores them: <code>Fobs</code> and the null distribution are the same as with no weights.</td>
+<td><code>fb.stats.f_test(model)</code> refits a weighted model with its weights under every permutation, so the statistic changes with the weights. Test a model fitted without <code>weights</code> to reproduce R. The raw form <code>f_test(y, x)</code> takes no weights.</td>
+</tr>
+</tbody>
+</table>
+<p>With a roughness penalty, only the relative size of the weights and <code>lam</code>
+matters: multiplying every weight by <code>c</code> has the same effect as dividing <code>lam</code>
+by <code>c</code>. With unit weights both functions give exactly the unweighted result.</p>
+<h2 id="where-fabel-and-r-disagree-on-purpose">Where Fabel and R disagree on purpose<a class="headerlink" href="#where-fabel-and-r-disagree-on-purpose" title="Permanent link">&para;</a></h2>
+<p>Fabel matches R to <code>rtol = 1e-8</code> (<code>1e-5</code> for iterative fits) on every golden
+case except a documented set where R is the less accurate side, for example
+<code>deriv.fd</code> re-projecting a spline derivative (1.3% error, Fabel is exact) or
+<code>times.fd</code> using a basis too smooth to hold the product (12.8% error). Each of
+these is a strict expected failure in the test suite with its measured reason;
+the full list is in <code>PARITY_REPORT.md</code> in the repository.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

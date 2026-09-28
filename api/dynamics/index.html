@@ -1,0 +1,3374 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Functional data analysis for Python — a clean-room rewrite of R's fda.">
+      
+      
+      
+        <link rel="canonical" href="https://hameddavodi.github.io/fabel/api/dynamics/">
+      
+      
+        <link rel="prev" href="../registration/">
+      
+      
+        <link rel="next" href="../stats/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Dynamics - Fabel</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dynamics" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fabel" class="md-header__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabel
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dynamics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fabel" class="md-nav__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabel
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../r-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA and CCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decomposition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decomposition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDAStability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDAStability
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PDAStability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDAStability.plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDA
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PDA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.fit_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit_transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.solve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        solve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.plot_overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot_overlay
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.dynamics.phase_plane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        phase_plane
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sparse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse data (PACE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../density/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density and intensity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling (ODE parameters)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyTorch layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input and output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDAStability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDAStability
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PDAStability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDAStability.plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDA
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PDA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.fit_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit_transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.solve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        solve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.dynamics.PDA.plot_overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot_overlay
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.dynamics.phase_plane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        phase_plane
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="dynamics">Dynamics<a class="headerlink" href="#dynamics" title="Permanent link">&para;</a></h1>
+<p><code>fabel.dynamics</code>: principal differential analysis with the <code>PDA</code> estimator
+(fit, ODE solve, overlay plot) and the <code>phase_plane()</code> plot.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Dynamics: principal differential analysis and phase-plane plots.</p>
+<p>Principal differential analysis (PDA, Ramsay &amp; Silverman chapter 19; Ramsay,
+Hooker &amp; Graves chapter 11) looks for the linear differential equation that a
+sample of curves satisfies as closely as possible.  For a single variable and
+order <code>m</code> it estimates weight functions :math:<code>\beta_0, \dots, \beta_{m-1}</code>
+such that</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>L x_n = D^m x_n + \sum_{j=0}^{m-1} \beta_j(t)\, D^j x_n \approx 0
+\qquad (n = 1, \dots, N),
+</code></pre></div>
+<p>by minimising</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>\frac{1}{N} \sum_{n=1}^{N} \int (L x_n)(t)^2 \, dt
++ \sum_{j} \lambda_j \int \bigl(K \beta_j\bigr)(t)^2 \, dt ,
+</code></pre></div>
+<p>where :math:<code>K</code> is a roughness operator on the weights.  Expanding each weight
+in a basis, :math:<code>\beta_j = \theta_j^{T} b_j</code>, makes this a linear least-squares
+problem in the stacked coefficients :math:<code>b</code>:</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>\Bigl(A + \operatorname{diag}_j \lambda_j R_j\Bigr) b = r , \quad
+A_{(j,a),(l,c)} = \frac{1}{N} \sum_n \int \theta_{ja}\theta_{lc}\,
+    D^j x_n\, D^l x_n , \quad
+r_{(j,a)} = -\frac{1}{N} \sum_n \int \theta_{ja}\, D^j x_n\, D^m x_n .
+</code></pre></div>
+<p>A system of <code>d</code> coupled variables is the same problem once per equation
+<code>i</code>, with the unknowns :math:<code>\beta_{ikj}</code> multiplying :math:<code>D^j x_k</code> for
+every variable <code>k</code>.</p>
+<p>Forcing functions :math:<code>u_1, \dots, u_K</code> (inputs from outside the system)
+enter an equation through weight functions :math:<code>\alpha_1, \dots,
+\alpha_K</code>,</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>D^m x = -\sum_{j} \beta_j D^j x + \sum_{k} \alpha_k u_k ,
+</code></pre></div>
+<p>so the residual becomes :math:<code>L x - \sum_k \alpha_k u_k</code> and each
+:math:<code>\alpha_k u_k</code> is one more regressor, :math:<code>-u_k</code>, in the same
+least-squares problem (fitted jointly with the :math:<code>\beta_j</code>).</p>
+<p>The fitted equation, written as a first-order system :math:<code>Dz = A(t) z +
+f(t)</code> in the state :math:<code>z = (x, Dx, \dots, D^{m-1} x)</code>, has a local
+stability picture: the eigenvalues of :math:<code>A(t)</code> (negative real parts
+decay, imaginary parts oscillate) and the equilibrium :math:<code>z^* = -A(t)^{-1}
+f(t)</code> the system is drawn towards (:meth:<code>PDA.stability</code>).</p>
+<p>Replaces R's <code>pda.fd</code> (:class:<code>PDA</code>, including <code>awtlist</code>/<code>ufdlist</code>),
+<code>eigen.pda</code> (:meth:<code>PDA.stability</code>), <code>pda.overlay</code>
+(:meth:<code>PDA.plot_overlay</code>) and <code>phaseplanePlot</code> (:func:<code>phase_plane</code>); the
+fitted equation is integrated with :func:<code>scipy.integrate.solve_ivp</code>
+(:meth:<code>PDA.solve</code>).</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">curves</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pda</span> <span class="o">=</span> <span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">curves</span><span class="p">)</span>  <span class="c1"># a sin t + b cos t solve D²x + x = 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">coefs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">pda</span><span class="o">.</span><span class="n">weights_</span><span class="p">]</span>
+<span class="go">[1.0, 0.0]</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.dynamics.PDAStability" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">PDAStability</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.dynamics.PDAStability" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">PDAStability</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">eigenvalues</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">limits</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Local stability of a fitted differential equation over time.</p>
+<p>Replaces the value of R's <code>eigen.pda</code>.  At each time <code>t</code> the fitted
+equations are written as the first-order system <code>Dz = A(t) z + f(t)</code> in
+the state <code>z = (x_1, Dx_1, …, D^{m-1}x_1, x_2, …)</code>, where <code>A(t)</code> is the
+companion matrix of the weights <code>β</code> and <code>f(t)</code> holds the forcing terms
+<code>Σ_k a_k(t) u_k(t)</code>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDAStability.t">t</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>(n_t,)</code> time points.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDAStability.eigenvalues">eigenvalues</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>(n_t, n_vars * order)</code> complex eigenvalues of <code>A(t)</code>, each row in
+decreasing modulus (a complex pair keeps its positive imaginary part
+first).  A negative real part means local exponential decay, a
+positive one growth, and a non-zero imaginary part oscillation with
+angular frequency <code>|Im λ|</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDAStability.limits">limits</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>(n_t, n_vars * order)</code> equilibrium states <code>z* = -A(t)⁻¹ f(t)</code>, the
+point the system is drawn to (when it is stable) if the weights and
+forcing were frozen at their value at <code>t</code>.  Zero for an unforced
+equation and <code>nan</code> where <code>A(t)</code> is exactly singular.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">stability</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">eigenvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.0</span>
+<span class="go">array([0.+1.j, 0.-1.j])</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.dynamics.PDAStability.plot" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">plot</span>
+
+
+<a href="#fabel.dynamics.PDAStability.plot" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Plot the real (solid) and imaginary (dashed) parts of the eigenvalues.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ax</code>
+            </td>
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Axes to draw on.  A new figure is created when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.plot</code> for every line.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on: one solid line per eigenvalue for its real part,
+then one dashed line per eigenvalue for its imaginary part.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">stability</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+<span class="go">5</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.dynamics.PDA" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">PDA</span>
+
+
+<a href="#fabel.dynamics.PDA" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">PDA</span><span class="p">(</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">weight_basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Basis</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">n_grid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">_R_GRID</span><span class="p">,</span>
+    <span class="n">forcing_basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">forcing_lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.TransformerMixin">TransformerMixin</span></code>, <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code></p>
+
+
+
+        <p>Principal differential analysis: fit a linear ODE to a sample of curves.</p>
+<p>Replaces R's <code>pda.fd</code>.  Estimates weight functions <code>β_j</code> so that
+<code>D^m x + Σ_j β_j D^j x</code> is as small as possible over the sample, in the
+mean integrated square, with an optional roughness penalty on each weight
+(see the module docstring for the criterion).  Curves with several
+variables (<code>n_vars = d &gt; 1</code>) define a system of <code>d</code> coupled equations.
+Forcing functions <code>u_k</code> passed to :meth:<code>fit</code> add terms <code>a_k u_k</code> to
+the right-hand side, <code>D^m x = -Σ_j β_j D^j x + Σ_k a_k u_k</code> (R's
+<code>awtlist</code>/<code>ufdlist</code>); their weights <code>a_k</code> are estimated jointly with
+the <code>β_j</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>order</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Order <code>m</code> of the equation.  Default <code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>weight_basis</code>
+            </td>
+            <td>
+                  <code>Basis or sequence of Basis</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis for the weight functions; one per derivative order <code>j</code> when a
+sequence of length <code>order</code>.  <code>None</code> (default) uses a constant
+basis, i.e. a constant-coefficient equation.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam</code>
+            </td>
+            <td>
+                  <code>float or sequence of float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness penalty on each weight function, per derivative order when a
+sequence.  Default <code>0.0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operator applied to the weights (<code>β</code> and <code>a</code>).  Default
+<code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_grid</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How the integrals are computed.  An integer is the number of equally
+spaced points of a trapezoidal rule; the default <code>501</code> is the rule
+R's <code>pda.fd</code> uses, so Fabel reproduces it.  (R raises its grid to
+five times the number of basis functions of the curves when that is
+larger; pass that number to reproduce R for curve bases of more than
+100 functions.)  The residual functions are then least-squares fits
+of the residual on the same grid.  <code>None</code> integrates exactly
+(composite Gauss-Legendre on the break points, exact for spline
+curves and weights) and projects the residuals in <code>L²</code>; it differs
+from R's rule by about <code>1e-5</code> relative on realistic data.</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="fabel.dynamics._R_GRID">_R_GRID</span></code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>forcing_basis</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Basis
+
+
+  
+      dataclass
+   (fabel.basis.Basis)" href="../basis/#fabel.basis.Basis">Basis</a> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis for the forcing weights <code>a</code>.  <code>None</code> (default) is a constant
+basis.  A single basis applies to every forcing function; otherwise one
+entry per forcing function (for a system: one entry per equation, each
+a basis or one basis per forcing function of that equation).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>forcing_lam</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness penalty on each forcing weight, spread like
+<code>forcing_basis</code>.  Default <code>0.0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDA.weights_">weights_</span></code></td>
+            <td>
+                  <code><span title="tuple">tuple</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>For one variable, <code>weights_[j]</code> is <code>β_j</code> as a one-curve
+:class:<code>~fabel.core.FData</code>.  For <code>d</code> variables, <code>weights_[i][k][j]</code>
+multiplies <code>D^j x_k</code> in equation <code>i</code>.  This mirrors the nesting of
+R's <code>bwtlist</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDA.forcing_weights_">forcing_weights_</span></code></td>
+            <td>
+                  <code><span title="tuple">tuple</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>For one variable, <code>forcing_weights_[k]</code> is <code>a_k</code>; for <code>d</code>
+variables, <code>forcing_weights_[i][k]</code> multiplies forcing function <code>k</code>
+of equation <code>i</code> (R's <code>awtlist</code>).  Empty when fitted without
+forcing.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDA.residuals_">residuals_</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>L x - Σ_k a_k u_k</code> for the fitted curves, in their basis.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDA.operator_">operator_</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The fitted operator <code>L</code> for one variable (so that <code>fd(t,
+pda.operator_)</code> evaluates <code>L x</code>); <code>None</code> for a system.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDA.n_vars_">n_vars_</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of variables of the fitted curves.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.dynamics.PDA.domain_">domain_</span></code></td>
+            <td>
+                  <code>tuple of float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Domain of the fitted curves.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.smoothing</span><span class="w"> </span><span class="kn">import</span> <span class="n">smooth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">fd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pda</span> <span class="o">=</span> <span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>  <span class="c1"># Dx + βx = 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pda</span><span class="o">.</span><span class="n">weights_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coefs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">6</span><span class="p">)</span>
+<span class="go">4.0</span>
+</code></pre></div>
+    <p>A forcing function: <code>x = 0.5 (1 - exp(-4t))</code> solves <code>Dx = -4x + 2u</code>
+for the constant input <code>u = 1</code>.</p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">t</span><span class="p">)),</span> <span class="n">t</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">fd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]),</span> <span class="n">fb</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pda</span> <span class="o">=</span> <span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">forcing</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pda</span><span class="o">.</span><span class="n">weights_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coefs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">6</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pda</span><span class="o">.</span><span class="n">forcing_weights_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coefs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">6</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">(4.0, 2.0)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.dynamics.PDA.fit" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fit</span>
+
+
+<a href="#fabel.dynamics.PDA.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fit</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">forcing</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PDA</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Estimate the weight functions from a sample of curves.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>X</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The curves; a multivariate :class:<code>~fabel.core.FData</code> (<code>n_vars &gt;
+1</code>) is fitted as a system of coupled equations.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ignored; present for scikit-learn compatibility.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>forcing</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forcing functions <code>u_k</code> (R's <code>ufdlist</code>).  For one equation an
+:class:<code>~fabel.core.FData</code> or a sequence of them; for a system one
+entry per equation, each <code>None</code>, an :class:<code>~fabel.core.FData</code> or
+a sequence of them.  Each has one variable and either one curve per
+curve of <code>X</code> or a single curve shared by all of them.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="PDA (fabel.dynamics.PDA)" href="#fabel.dynamics.PDA">PDA</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The fitted estimator.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>X</code> or a forcing function is not an :class:<code>~fabel.core.FData</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a parameter is invalid or the normal equations are singular.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">weights_</span><span class="p">)</span>
+<span class="go">2</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.dynamics.PDA.transform" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">transform</span>
+
+
+<a href="#fabel.dynamics.PDA.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">transform</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">forcing</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FData</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Apply the fitted equation to curves: return <code>L x - Σ a u</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>X</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Curves with the same number of variables and domain as the fitted
+ones.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>forcing</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forcing functions for <code>X</code>, structured as in :meth:<code>fit</code>; required
+exactly when the model was fitted with forcing.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The residual functions, in the basis of <code>X</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>X</code> is not an :class:<code>~fabel.core.FData</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>X</code> or <code>forcing</code> does not match the fitted model.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pda</span> <span class="o">=</span> <span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pda</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">new</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">))))</span> <span class="o">&lt;</span> <span class="mf">1e-10</span><span class="p">)</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.dynamics.PDA.fit_transform" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fit_transform</span>
+
+
+<a href="#fabel.dynamics.PDA.fit_transform" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fit_transform</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">forcing</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FData</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Fit to <code>X</code> (with its forcing) and return the residual functions.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>X</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The curves.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ignored; present for scikit-learn compatibility.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>forcing</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forcing functions, as in :meth:<code>fit</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>L x - Σ a u</code> for the fitted curves (equal to <code>residuals_</code>).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">n_curves</span>
+<span class="go">2</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.dynamics.PDA.solve" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">solve</span>
+
+
+<a href="#fabel.dynamics.PDA.solve" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">solve</span><span class="p">(</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">initial</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">forcing</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rtol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_ODE_RTOL</span><span class="p">,</span>
+    <span class="n">atol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_ODE_ATOL</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Integrate the fitted equation from an initial state.</p>
+<p>The equation is rewritten as a first-order system in <code>(x, Dx, ...,
+D^{m-1} x)</code> and integrated with :func:<code>scipy.integrate.solve_ivp</code>
+(method <code>DOP853</code>) from <code>t[0]</code>, forwards or backwards.  Without
+<code>forcing</code> this is the homogeneous equation <code>L x = 0</code> (the free
+response, also for a model fitted with forcing); with it, <code>L x =
+Σ a_k u_k</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Strictly monotone points inside the domain; the initial condition
+holds at <code>t[0]</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>initial</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>(x, Dx, ..., D^{m-1} x)</code> at <code>t[0]</code>: shape <code>(order,)</code> for one
+variable, <code>(n_vars, order)</code> for a system.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>forcing</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input functions, structured as in :meth:<code>fit</code>, one curve each.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>rtol</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Relative and absolute tolerances of the integrator.</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="fabel.dynamics._ODE_RTOL">_ODE_RTOL</span></code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>atol</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Relative and absolute tolerances of the integrator.</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="fabel.dynamics._ODE_RTOL">_ODE_RTOL</span></code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>x(t)</code>: shape <code>(n_t,)</code> for one variable, <code>(n_t, n_vars)</code> for a
+system.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>t</code> is empty, not monotone or outside the domain, if
+<code>initial</code> has the wrong shape, if <code>forcing</code> does not match the
+fitted model, or if the integrator fails.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pda</span> <span class="o">=</span> <span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">pda</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">))</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.dynamics.PDA.stability" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">stability</span>
+
+
+<a href="#fabel.dynamics.PDA.stability" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">stability</span><span class="p">(</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_R_GRID</span><span class="p">,</span>
+    <span class="n">forcing</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PDAStability</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Eigenvalues and equilibria of the fitted equation over time.</p>
+<p>Replaces R's <code>eigen.pda</code>.  At each time the equations are the
+first-order system <code>Dz = A(t) z + f(t)</code> in the state <code>z = (x_1,
+Dx_1, …, D^{m-1} x_1, x_2, …)</code>: <code>A(t)</code> has ones on the
+superdiagonal of each variable's block and <code>-β_{ikj}(t)</code> in the last
+row of block <code>i</code>, column <code>(k, j)</code>; <code>f(t)</code> holds <code>Σ_k a_k(t)
+u_k(t)</code> in the last row of each block.  See :class:<code>PDAStability</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Time points in the domain.  Defaults to <code>n_points</code> equally spaced
+points spanning it (R's <code>argvals</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_points</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of default time points.  Default <code>501</code>, as in R.</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="fabel.dynamics._R_GRID">_R_GRID</span></code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>forcing</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input functions, structured as in :meth:<code>fit</code>, one curve each.
+Defaults to the forcing the model was fitted with when every one of
+those functions has a single curve.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="PDAStability
+
+
+  
+      dataclass
+   (fabel.dynamics.PDAStability)" href="#fabel.dynamics.PDAStability">PDAStability</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Eigenvalues and equilibrium states at every time point.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>t</code> is invalid, or the forcing is missing or does not match
+the fitted model.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.smoothing</span><span class="w"> </span><span class="kn">import</span> <span class="n">smooth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">t</span><span class="p">)),</span> <span class="n">t</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">fd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]),</span> <span class="n">fb</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">forcing</span><span class="o">=</span><span class="n">u</span><span class="p">)</span><span class="o">.</span><span class="n">stability</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">eigenvalues</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">limits</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.0</span>
+<span class="go">(array([[-4.],</span>
+<span class="go">       [-4.],</span>
+<span class="go">       [-4.]]), array([[0.5],</span>
+<span class="go">       [0.5],</span>
+<span class="go">       [0.5]]))</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.dynamics.PDA.plot_overlay" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">plot_overlay</span>
+
+
+<a href="#fabel.dynamics.PDA.plot_overlay" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">plot_overlay</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_PLOT_POINTS</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Plot the weights of a second-order equation on its stability diagram.</p>
+<p>Replaces R's <code>pda.overlay</code>.  The trajectory <code>(β₁(t), β₀(t))</code> is drawn
+over the parabola <code>β₀ = β₁² / 4</code>: above it the characteristic roots of
+<code>D²x + β₁ Dx + β₀ x = 0</code> are complex (the system oscillates), below it
+they are real; <code>β₁ &gt; 0</code> damps and <code>β₁ &lt; 0</code> amplifies.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ax</code>
+            </td>
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Axes to draw on.  A new figure is created when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_points</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of time points on the trajectory.</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="fabel.dynamics._PLOT_POINTS">_PLOT_POINTS</span></code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>labels</code>
+            </td>
+            <td>
+                  <code>mapping of float to str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Text to write at the trajectory's position at given times.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.plot</code> for the trajectory.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on; <code>lines[0]</code> is the trajectory and <code>lines[1]</code>
+the parabola.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the model is not a single second-order equation.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">PDA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">plot_overlay</span><span class="p">()</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.dynamics.phase_plane" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">phase_plane</span>
+
+
+<a href="#fabel.dynamics.phase_plane" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">phase_plane</span><span class="p">(</span>
+    <span class="n">fd</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">deriv</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Plot one derivative of each curve against another.</p>
+<p>Replaces R's <code>phaseplanePlot</code>.  The default plots acceleration <code>D²x</code>
+against velocity <code>Dx</code>: kinetic energy grows with the horizontal distance
+from the origin and potential energy with the vertical one, so an
+oscillation traces a loop around the origin.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fd</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Single-variable curves.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points.  Defaults to 201 equally spaced points on the domain.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>deriv</code>
+            </td>
+            <td>
+                  <code>tuple of int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Derivative orders on the horizontal and vertical axes.  Default
+<code>(1, 2)</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>(1, 2)</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>labels</code>
+            </td>
+            <td>
+                  <code>mapping of float to str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Text written on every curve at its position at the given times, e.g.
+month names on a year of data.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ax</code>
+            </td>
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Axes to draw on.  A new figure is created when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.plot</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on, with one line per curve.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>fd</code> has more than one variable.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">phase_plane</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">phase_plane</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+<span class="go">1</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

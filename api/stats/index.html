@@ -1,0 +1,4775 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Functional data analysis for Python — a clean-room rewrite of R's fda.">
+      
+      
+      
+        <link rel="canonical" href="https://hameddavodi.github.io/fabel/api/stats/">
+      
+      
+        <link rel="prev" href="../dynamics/">
+      
+      
+        <link rel="next" href="../sparse/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Statistics - Fabel</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#statistics" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fabel" class="md-header__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabel
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Statistics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fabel" class="md-nav__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabel
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../r-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA and CCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decomposition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decomposition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.DepthResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DepthResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.BoxplotResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BoxplotResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BoxplotResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.stats.BoxplotResult.plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.PermutationTestResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PermutationTestResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.ConfidenceBand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ConfidenceBand
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ConfidenceBand">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.stats.ConfidenceBand.plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.cov" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cov
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.cor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        depth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.boxplot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        boxplot
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.t_test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        t_test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.f_test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        f_test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.confidence_band" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        confidence_band
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.plot_beta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot_beta
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.cycleplot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cycleplot
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.plot_scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot_scores
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sparse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse data (PACE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../density/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density and intensity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling (ODE parameters)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyTorch layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input and output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.DepthResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DepthResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.BoxplotResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BoxplotResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BoxplotResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.stats.BoxplotResult.plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.PermutationTestResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PermutationTestResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.ConfidenceBand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ConfidenceBand
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ConfidenceBand">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.stats.ConfidenceBand.plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.cov" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cov
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.cor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        depth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.boxplot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        boxplot
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.t_test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        t_test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.f_test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        f_test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.confidence_band" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        confidence_band
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.plot_beta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot_beta
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.cycleplot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cycleplot
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.stats.plot_scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plot_scores
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="statistics">Statistics<a class="headerlink" href="#statistics" title="Permanent link">&para;</a></h1>
+<p><code>fabel.stats</code>: covariance and correlation of functional data, functional
+depth, the functional boxplot, and permutation t and F tests.</p>
+<p><code>f_test</code> takes either raw regression inputs, <code>f_test(y, x, basis=, lam=,
+penalty=)</code> like R's <code>Fperm.fd</code>, or a model fitted by
+<a href="../regression/"><code>fregress</code></a>, <code>f_test(model, n_perm=1000)</code>, which refits that
+exact model (its terms, intercept included, coefficient settings and weights)
+under every permutation.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Functional statistics: covariance, correlation, depth, boxplots, tests and bands.</p>
+<p>Replaces R's <code>var.fd</code>, <code>cor.fd</code>, <code>fbplot</code>, <code>fdepth</code>, <code>tperm.fd</code>,
+<code>Fperm.fd</code>, the pointwise-variance use of <code>y2cMap</code>/<code>fRegress.stderr</code>,
+<code>plotbeta</code>, <code>plotscores</code> and <code>cycleplot.fd</code>.</p>
+<ul>
+<li>:func:<code>cov</code> and :func:<code>cor</code> give the (cross-)covariance surface and the
+  correlation matrix of one or two sets of curves.</li>
+<li>:func:<code>depth</code> orders curves from the centre outwards (modified band depth,
+  band depth or Fraiman--Muniz depth) and returns the deepest curve and a
+  trimmed mean; :func:<code>boxplot</code> builds the functional boxplot of Sun and
+  Genton (2011) on top of it.</li>
+<li>:func:<code>t_test</code> and :func:<code>f_test</code> are permutation tests whose statistic is
+  the largest pointwise two-sample <em>t</em> or regression <em>F</em> statistic.</li>
+<li>:func:<code>confidence_band</code> gives pointwise confidence limits of a smooth or of
+  regression coefficients; :func:<code>plot_beta</code> draws the latter.</li>
+<li>:func:<code>cycleplot</code> and :func:<code>plot_scores</code> draw bivariate cycles and
+  principal component score scatters.</li>
+</ul>
+<p>Depths and tests work on curve values sampled on a grid, so they return NumPy
+arrays whatever the input namespace; :func:<code>cov</code> and :func:<code>cor</code> stay in the
+namespace of their inputs.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">depth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depth</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">depth</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(9,)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.stats.DepthResult" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">DepthResult</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.stats.DepthResult" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">DepthResult</span><span class="p">(</span>
+    <span class="n">depth</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">median_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">median</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">trimmed_index</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">trimmed_mean</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Depth of every curve, with the deepest curve and a trimmed mean.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.DepthResult.depth">depth</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Depth of each curve, shape <code>(n_curves,)</code>; larger is more central.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.DepthResult.median_index">median_index</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Position of the deepest curve (the first one if several tie).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.DepthResult.median">median</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Values of the deepest curve at the evaluation points.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.DepthResult.trimmed_index">trimmed_index</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Positions, in increasing order, of the curves whose depth is at least
+the <code>trim</code> quantile of all depths.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.DepthResult.trimmed_mean">trimmed_mean</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise mean of the curves in <code>trimmed_index</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.DepthResult.t">t</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The evaluation points, or <code>None</code> when values were given without them.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">depth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depth</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">median_index</span>
+<span class="go">1</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.stats.BoxplotResult" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">BoxplotResult</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.stats.BoxplotResult" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">BoxplotResult</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">depth</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">median_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">median</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">outliers</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">central_lower</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">central_upper</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">fence_lower</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">fence_upper</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">whisker_lower</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">whisker_upper</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A functional boxplot: depth ordering, central region, fences and outliers.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.values">values</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The curves as sampled, shape <code>(n_points, n_curves)</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.t">t</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The evaluation points, or <code>None</code> when values were given without them.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.depth">depth</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Depth of each curve, shape <code>(n_curves,)</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.median_index">median_index</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Position of the deepest curve.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.median">median</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Values of the deepest curve.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.outliers">outliers</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Positions of the curves leaving the fences at some point, increasing.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.central_lower, central_upper">central_lower, central_upper</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise envelope of the central region, the <code>ceil(prob * n_curves)</code>
+deepest curves -- the box.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.fence_lower, fence_upper">fence_lower, fence_upper</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The box inflated by <code>factor</code> times its height on either side.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.BoxplotResult.whisker_lower, whisker_upper">whisker_lower, whisker_upper</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise envelope of every curve that is not an outlier.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">boxplot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">7.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">7.0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">40.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">boxplot</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">outliers</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[6]</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.stats.BoxplotResult.plot" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">plot</span>
+
+
+<a href="#fabel.stats.BoxplotResult.plot" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Draw the boxplot: central region, median, whiskers and outliers.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ax</code>
+            </td>
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Axes to draw on.  A new figure is created when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.plot</code> for the median curve.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on.  The median is the first line, then the upper
+and lower whiskers, then one line per outlier; the central region
+is the single filled collection.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">boxplot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">7.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">7.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">boxplot</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+<span class="go">3</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.stats.PermutationTestResult" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">PermutationTestResult</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.stats.PermutationTestResult" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">PermutationTestResult</span><span class="p">(</span>
+    <span class="n">statistic</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">null</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">pvalue</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">critical_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">pointwise</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">pointwise_null</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">pointwise_pvalue</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">pointwise_critical_value</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Outcome of a permutation test built on a pointwise statistic.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.statistic">statistic</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The observed statistic: the maximum of <code>pointwise</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.null">null</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The statistic recomputed under each permutation, shape <code>(n_perm,)</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.pvalue">pvalue</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Share of permutations whose statistic reaches the observed one.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.critical_value">critical_value</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>1 - q</code> quantile of <code>null</code> (R's <code>qval</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.pointwise">pointwise</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Observed statistic at each evaluation point, shape <code>(n_points,)</code>; a
+single entry for a scalar response.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.pointwise_null">pointwise_null</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise statistic under each permutation, <code>(n_perm, n_points)</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.pointwise_pvalue">pointwise_pvalue</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise permutation p-values.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.pointwise_critical_value">pointwise_critical_value</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise <code>1 - q</code> quantiles of the null.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.PermutationTestResult.t">t</span></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The evaluation points; <code>None</code> for a scalar response.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">t_test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span> <span class="o">+</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t_test</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n_perm</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">pvalue</span>
+<span class="go">0.0</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.stats.ConfidenceBand" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">ConfidenceBand</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.stats.ConfidenceBand" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ConfidenceBand</span><span class="p">(</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">estimate</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">stderr</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">lower</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">upper</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Pointwise confidence band of a smooth or of a regression coefficient.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.ConfidenceBand.t">t</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points, shape <code>(n_t,)</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.ConfidenceBand.estimate">estimate</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The estimate at <code>t</code>: <code>fd(t)</code> for a smooth (shape <code>(n_t, n_curves)</code>
+or <code>(n_t, n_curves, n_vars)</code>), <code>beta_j(t)</code> for a coefficient
+(shape <code>(n_t,)</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.ConfidenceBand.stderr">stderr</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise standard error, shape <code>(n_t,)</code>.  Every curve of a smooth
+shares it: the curves are fitted by the same linear map and share the
+error covariance.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.ConfidenceBand.lower, upper">lower, upper</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>estimate -/+ z * stderr</code> with <code>z</code> the <code>(1 + level) / 2</code> quantile
+of the standard normal distribution; shaped like <code>estimate</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.ConfidenceBand.level">level</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise coverage of the band.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.stats.ConfidenceBand.name">name</span></code></td>
+            <td>
+                  <code><span title="str">str</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Term name for a regression coefficient, <code>None</code> for a smooth.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.smoothing</span><span class="w"> </span><span class="kn">import</span> <span class="n">smooth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">confidence_band</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">6.0</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">lam</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">band</span> <span class="o">=</span> <span class="n">confidence_band</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]),</span> <span class="n">sigma_e</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">band</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">band</span><span class="o">.</span><span class="n">lower</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">((2,), (2, 1))</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.stats.ConfidenceBand.plot" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">plot</span>
+
+
+<a href="#fabel.stats.ConfidenceBand.plot" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Draw the estimate with its lower and upper limits.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ax</code>
+            </td>
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Axes to draw on.  A new figure is created when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.plot</code> for the estimate.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on.  The estimate lines come first, then the lower
+and the upper limits (dashed); a dotted zero line is added last
+when the band crosses zero.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfidenceBand</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">band</span> <span class="o">=</span> <span class="n">ConfidenceBand</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="n">t</span> <span class="o">-</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">band</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+<span class="go">4</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.cov" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">cov</span>
+
+
+<a href="#fabel.stats.cov" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">cov</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BiFData</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return the sample (cross-)covariance surface.</p>
+<p>Replaces R's <code>var.fd</code>.  With one argument this is :meth:<code>FData.cov</code>.  With
+two, it is the bivariate function</p>
+<p><code>c(s, t) = 1 / (n - 1) sum_i (x_i(s) - xbar(s)) (y_i(t) - ybar(t))</code></p>
+<p>expanded in <code>x.basis</code> along <code>s</code> and <code>y.basis</code> along <code>t</code>.  Both are
+exact: centring and the outer product act on the coefficients.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>First set of curves.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Second set of curves, paired with <code>x</code> curve by curve.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="BiFData
+
+
+  
+      dataclass
+   (fabel.core.BiFData)" href="../core/#fabel.core.BiFData">BiFData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The covariance surface.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If fewer than two curves are given, or <code>x</code> and <code>y</code> differ in their
+number of curves or domain, or carry several variables.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">cov</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cov</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">coefs</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(5, 4)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.cor" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">cor</span>
+
+
+<a href="#fabel.stats.cor" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">cor</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">s</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return the sample correlation of <code>x(s)</code> with <code>y(t)</code> on a grid.</p>
+<p>Replaces R's <code>cor.fd</code>.  Entry <code>[a, b]</code> is the correlation, across
+curves, of <code>x(s[a])</code> and <code>y(t[b])</code>; with <code>y</code> omitted it is the
+autocorrelation of <code>x</code>.  A correlation is a ratio of covariances, not a
+basis expansion, so it is returned as values rather than as a
+:class:<code>~fabel.core.BiFData</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>First set of curves.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Second set of curves, paired with <code>x</code>.  Defaults to <code>x</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>s</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points for <code>x</code> and <code>y</code>.  Each defaults to 101 equally
+spaced points over the domain.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points for <code>x</code> and <code>y</code>.  Each defaults to 101 equally
+spaced points over the domain.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Shape <code>(len(s), len(t))</code>.  When <code>y</code> is omitted and <code>x</code> holds
+several variables, each variable gets its own matrix, stacked on a
+trailing axis.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If fewer than two curves are given, or <code>x</code> and <code>y</code> cannot be paired.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">cor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">cor</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">grid</span><span class="p">)),</span> <span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[1.0, 1.0, 1.0]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.depth" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">depth</span>
+
+
+<a href="#fabel.stats.depth" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">depth</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"MBD"</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">trim</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DepthResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Rank curves from the centre outwards by a functional depth.</p>
+<p>Replaces R's <code>fdepth</code> (<code>type = "FM"</code>) and the depth half of <code>fbplot</code>.
+With <code>r_i(t)</code> the rank of <code>x_i(t)</code> among the <code>n</code> values at <code>t</code>
+(average ranks for ties):</p>
+<ul>
+<li><code>"MBD"</code> -- modified band depth (Lopez-Pintado and Romo, 2009): the
+  share of bands spanned by pairs of curves that contain <code>x_i(t)</code>,
+  averaged over the points, <code>mean_t [(r - 1)(n - r) + n - 1] / C(n, 2)</code>.</li>
+<li><code>"BD2"</code> -- the rank-based two-curve band depth of Sun, Genton and
+  Nychka (2012), <code>[(n - max_t r)(min_t r - 1) + n - 1] / C(n, 2)</code>.  It
+  equals the share of bands containing the whole curve when the curves do
+  not cross, and is what R's <code>fbplot(method = "BD2")</code> reports.</li>
+<li><code>"both"</code> -- band depth rounded to four decimals, ties broken by modified
+  band depth (<code>round(1e4 BD2) + MBD</code>), as <code>fbplot(method = "Both")</code>.</li>
+<li><code>"FM"</code> -- Fraiman and Muniz (2001) depth,
+  <code>mean_t [1 - |1/2 - F_n(x_i(t))|]</code> with <code>F_n</code> the empirical
+  distribution function at <code>t</code>.</li>
+</ul>
+<p>Averages over <code>t</code> weight every evaluation point equally.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Curves, or their values as an <code>(n_points, n_curves)</code> array.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>method</code>
+            </td>
+            <td>
+                  <code>(&#39;MBD&#39;, &#39;BD2&#39;, &#39;both&#39;, &#39;FM&#39;)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Depth notion, case-insensitive.  Defaults to <code>"MBD"</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;MBD&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points.  For :class:<code>FData</code> they default to 101 equally
+spaced points over the domain; for an array they are only recorded.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>trim</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Share of least deep curves left out of the trimmed mean: curves whose
+depth reaches the <code>trim</code> quantile are kept.  Default <code>0.25</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.25</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="DepthResult
+
+
+  
+      dataclass
+   (fabel.stats.DepthResult)" href="#fabel.stats.DepthResult">DepthResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Depths, the deepest curve and the trimmed mean.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>method</code> or <code>trim</code> is invalid, the values are not a finite
+two-dimensional array matching <code>t</code>, or a band depth is asked of fewer
+than two curves.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">depth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depth</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"FM"</span><span class="p">)</span><span class="o">.</span><span class="n">depth</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[0.75, 1.0, 0.75, 0.5]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.boxplot" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">boxplot</span>
+
+
+<a href="#fabel.stats.boxplot" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">boxplot</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"MBD"</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoxplotResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Build the functional boxplot of Sun and Genton (2011).</p>
+<p>Replaces R's <code>fbplot</code> and <code>boxplot.fd</code>.  Curves are ordered by
+:func:<code>depth</code>.  The central region is the pointwise envelope of the
+<code>ceil(prob * n_curves)</code> deepest curves; inflating it by <code>factor</code> times
+its height on both sides gives the fences, and a curve that leaves the
+fences anywhere is an outlier.  The whiskers are the envelope of the curves
+that are not outliers.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Curves, or their values as an <code>(n_points, n_curves)</code> array.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>method</code>
+            </td>
+            <td>
+                  <code>(&#39;MBD&#39;, &#39;BD2&#39;, &#39;both&#39;, &#39;FM&#39;)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Depth used to order the curves.  Defaults to <code>"MBD"</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;MBD&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points, as for :func:<code>depth</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>prob</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Share of curves in the central region.  Default <code>0.5</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>factor</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Fence inflation factor.  Default <code>1.5</code>, as in a classical boxplot.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1.5</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="BoxplotResult
+
+
+  
+      dataclass
+   (fabel.stats.BoxplotResult)" href="#fabel.stats.BoxplotResult">BoxplotResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Depths, median, envelopes and outliers; call <code>.plot()</code> to draw it.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>prob</code> is not in <code>(0, 1]</code>, <code>factor</code> is negative, or the data
+are invalid (see :func:<code>depth</code>).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">boxplot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">25.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">boxplot</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">outliers</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[4]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.t_test" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">t_test</span>
+
+
+<a href="#fabel.stats.t_test" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">t_test</span><span class="p">(</span>
+    <span class="n">x1</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">x2</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">n_perm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="n">RandomState</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PermutationTestResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Permutation test for a difference between two groups of curves.</p>
+<p>Replaces R's <code>tperm.fd</code>.  The pointwise statistic is Welch's</p>
+<p><code>T(t) = |xbar_1(t) - xbar_2(t)| / sqrt(s_1^2(t) / n_1 + s_2^2(t) / n_2)</code></p>
+<p>and the test statistic is its maximum over the evaluation points.  Its null
+distribution is obtained by pooling the curves, drawing a random
+permutation, and assigning the first <code>n_1</code> to the first group.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>x1</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The two groups, each with at least two curves, on one domain.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x2</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The two groups, each with at least two curves, on one domain.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_perm</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of permutations.  Default <code>200</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>200</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>q</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Upper-tail probability for the critical value: <code>critical_value</code> is
+the <code>1 - q</code> quantile of the null distribution.  Default <code>0.05</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.05</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points; 101 equally spaced points over the domain by default.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>random_state</code>
+            </td>
+            <td>
+                  <code>(<span title="int">int</span>, <span title="numpy.random.Generator">Generator</span> or None)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Seed or generator for the permutations; each one is drawn with the
+generator's <code>permutation(n)</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="PermutationTestResult
+
+
+  
+      dataclass
+   (fabel.stats.PermutationTestResult)" href="#fabel.stats.PermutationTestResult">PermutationTestResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Observed statistic, null distribution, p-value and pointwise detail.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a group has fewer than two curves, the groups differ in domain or
+carry several variables, or <code>n_perm</code> or <code>q</code> is out of range.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>random_state</code> is not a seed or a generator.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">t_test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">t_test</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n_perm</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">result</span><span class="o">.</span><span class="n">pvalue</span> <span class="o">&lt;=</span> <span class="mf">1.0</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.f_test" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">f_test</span>
+
+
+<a href="#fabel.stats.f_test" class="headerlink" title="Permanent link">&para;</a></h2>
+          <div class="doc-overloads">
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">f_test</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">FRegressResult</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">n_perm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="n">RandomState</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PermutationTestResult</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">f_test</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Basis</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">n_perm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="n">RandomState</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PermutationTestResult</span>
+</code></pre></div>          </div>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">f_test</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">FRegressResult</span> <span class="o">|</span> <span class="n">FData</span> <span class="o">|</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Basis</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_perm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="n">RandomState</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PermutationTestResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Permutation F test of no effect in a functional linear regression.</p>
+<p>Replaces R's <code>Fperm.fd</code>.  The regression is fitted by penalised least
+squares, then</p>
+<p><code>F(t) = var_i(yhat_i(t)) / mean_i((y_i(t) - yhat_i(t))^2)</code></p>
+<p>(the variance with denominator <code>n - 1</code>) is evaluated pointwise and the
+test statistic is its maximum.  The null distribution refits the model
+after randomly permuting the responses against fixed covariates.</p>
+<p>The model comes either from raw inputs, as in R's
+<code>Fperm.fd(yfdPar, xfdlist, betalist)</code>, or from a model fitted by
+:func:<code>fabel.regression.fregress</code> (<code>f_test(model)</code>).  In the raw form no
+intercept is added: include a vector of ones in <code>x</code> for one, as in R.  In
+the model form the test refits exactly the fitted model -- its response,
+terms (an intercept included), coefficient bases, smoothing parameters,
+penalty operators and observation weights -- so <code>x</code>, <code>basis</code>, <code>lam</code>
+and <code>penalty</code> must not be given.  Weights enter the fit only (a weighted
+least-squares refit under every permutation, the weights staying with the
+covariates); <code>F</code> itself is unweighted.</p>
+<p>Two models are supported:</p>
+<ul>
+<li>functional response (:class:<code>FData</code>): the concurrent model
+  <code>y_i(t) = sum_j x_ij(t) beta_j(t)</code>, where a scalar covariate is
+  constant in <code>t</code>, every <code>beta_j</code> is a curve in <code>basis[j]</code> (default
+  <code>y.basis</code>) and the penalty is <code>lam[j] * int (L_j beta_j)^2</code>;</li>
+<li>scalar response (1-D array): <code>y_i = sum_j int x_ij(t) beta_j(t) dt</code> for
+  functional covariates (<code>beta_j</code> in <code>basis[j]</code>, default the
+  covariate's basis) plus ordinary coefficients for scalar covariates, whose
+  <code>basis</code>, <code>lam</code> and <code>penalty</code> entries are ignored.  <code>F</code> is then a
+  single number.</li>
+</ul>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code>(<a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a>, <span title="array_like">array_like</span> or <a class="autorefs autorefs-internal" title="FRegressResult
+
+
+  
+      dataclass
+   (fabel.regression.FRegressResult)" href="../regression/#fabel.regression.FRegressResult">FRegressResult</a>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Response: <code>n</code> curves, or <code>n</code> numbers.  Or a fitted model returned by
+:func:<code>fabel.regression.fregress</code>, which supplies the response, the
+covariates and every coefficient setting.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code>array_like, FData or sequence of them</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Covariates, each a length-<code>n</code> vector or an :class:<code>FData</code> of <code>n</code>
+curves on the response domain.  A single covariate need not be wrapped
+in a list.  Required with a raw response; not allowed with a model.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>basis</code>
+            </td>
+            <td>
+                  <code>Basis or list of Basis</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis of each coefficient function: one shared value, or a list (or
+tuple) with one entry per covariate, <code>None</code> meaning the default.
+Raw form only.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam</code>
+            </td>
+            <td>
+                  <code>float or list of float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Smoothing parameter of each coefficient function, shared or one per
+covariate.  Default <code>0.0</code>.  Raw form only.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty</code>
+            </td>
+            <td>
+                  <code>int, LDO or list of them</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operator of each coefficient function, shared or one per
+covariate.  Default <code>2</code>.  Raw form only.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_perm</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of permutations.  Default <code>200</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>200</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>q</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Upper-tail probability: <code>critical_value</code> is the <code>1 - q</code> quantile of
+the null distribution.  Default <code>0.05</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.05</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array_like">array_like</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points for a functional response; 101 equally spaced points
+over the domain by default.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>random_state</code>
+            </td>
+            <td>
+                  <code>(<span title="int">int</span>, <span title="numpy.random.Generator">Generator</span> or None)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Seed or generator; each permutation is <code>permutation(n)</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="PermutationTestResult
+
+
+  
+      dataclass
+   (fabel.stats.PermutationTestResult)" href="#fabel.stats.PermutationTestResult">PermutationTestResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Observed statistic, null distribution, p-value and pointwise detail
+(<code>t</code> is <code>None</code> for a scalar response).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the covariates, bases or settings do not match the response, the
+normal equations are singular, or <code>n_perm</code> or <code>q</code> is out of range.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>random_state</code> is not a seed or a generator, <code>x</code> is missing with
+a raw response, or <code>x</code>, <code>basis</code>, <code>lam</code> or <code>penalty</code> is given
+with a fitted model.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>Weights differ from R.  <code>f_test(model)</code> on a model fitted with
+<code>fregress(..., weights=w)</code> refits it by weighted least squares under
+every permutation, so the statistic and the null distribution change with
+the weights (unit weights give the unweighted test).  R's
+<code>Fperm.fd(..., wt = w)</code> accepts weights but returns the same <code>Fobs</code> and
+null distribution as with no weights at all.  To reproduce an R
+<code>Fperm.fd</code> result, test a model fitted without <code>weights</code>.  The raw form
+<code>f_test(y, x, ...)</code> has no weights and matches R.</p>
+</details>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">FData</span><span class="p">,</span> <span class="n">Fourier</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">f_test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">group</span><span class="p">,</span> <span class="n">Fourier</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">f_test</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span> <span class="n">group</span><span class="p">],</span> <span class="n">lam</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">n_perm</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">pvalue</span> <span class="o">&lt;</span> <span class="mf">0.05</span>
+<span class="go">True</span>
+</code></pre></div>
+    <p>The same test on a fitted model, whose intercept term is part of the model:</p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="s2">"const"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"group"</span><span class="p">:</span> <span class="n">group</span><span class="p">},</span> <span class="n">lam</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">again</span> <span class="o">=</span> <span class="n">f_test</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n_perm</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">again</span><span class="o">.</span><span class="n">statistic</span> <span class="o">==</span> <span class="n">result</span><span class="o">.</span><span class="n">statistic</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.confidence_band" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">confidence_band</span>
+
+
+<a href="#fabel.stats.confidence_band" class="headerlink" title="Permanent link">&para;</a></h2>
+          <div class="doc-overloads">
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">confidence_band</span><span class="p">(</span>
+    <span class="n">fit</span><span class="p">:</span> <span class="n">SmoothResult</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">sigma_e</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">deriv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">y2c_map</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfidenceBand</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">confidence_band</span><span class="p">(</span>
+    <span class="n">fit</span><span class="p">:</span> <span class="n">FRegressResult</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">sigma_e</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">deriv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">y2c_map</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ConfidenceBand</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</code></pre></div>          </div>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">confidence_band</span><span class="p">(</span>
+    <span class="n">fit</span><span class="p">:</span> <span class="n">SmoothResult</span> <span class="o">|</span> <span class="n">FRegressResult</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">sigma_e</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">deriv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">y2c_map</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfidenceBand</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ConfidenceBand</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Pointwise confidence band of a smooth or of regression coefficients.</p>
+<p>Replaces the variance computations R users build from <code>smooth.basis</code>'s
+<code>y2cMap</code> and from <code>fRegress.stderr</code> (Ramsay, Hooker and Graves, 2009,
+sections 5.5 and 9.4).  Both fits are linear in the data, so the
+covariance of their coefficients follows from the error covariance <code>Σ</code>:</p>
+<ul>
+<li>a smooth has coefficients <code>c = S y</code> (<code>S</code> its <code>y2c_map</code>) and
+  <code>Var x(t) = φ(t)ᵀ S Σ Sᵀ φ(t)</code>, with <code>φ</code> the basis (or its
+  <code>deriv</code>-th derivative);</li>
+<li>a regression has coefficient covariance <code>V</code> from
+  :meth:<code>~fabel.regression.FRegressResult.stderr</code> and
+  <code>Var β_j(t) = θ_j(t)ᵀ V_jj θ_j(t)</code>, with <code>θ_j</code> the basis of the
+  <code>j</code>-th coefficient.</li>
+</ul>
+<p>The band is <code>estimate ± z · stderr</code> with <code>z</code> the <code>(1 + level) / 2</code>
+normal quantile.  It is pointwise: it covers the truth at each <code>t</code> with
+probability <code>level</code>, not along the whole curve at once, and it ignores
+the bias the roughness penalty introduces.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fit</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SmoothResult
+
+
+  
+      dataclass
+   (fabel.smoothing.SmoothResult)" href="../smoothing/#fabel.smoothing.SmoothResult">SmoothResult</a> or <a class="autorefs autorefs-internal" title="FRegressResult
+
+
+  
+      dataclass
+   (fabel.regression.FRegressResult)" href="../regression/#fabel.regression.FRegressResult">FRegressResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A fit from :func:<code>~fabel.smoothing.smooth</code> (unconstrained, with the
+observation points shared by every curve) or from
+:func:<code>~fabel.regression.fregress</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points.  Default: 101 equally spaced points over the domain
+(of each coefficient, for a regression).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sigma_e</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> or <span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Covariance <code>Σ</code> of the observation errors.  For a smooth: a number
+(<code>σ² I</code>), a vector of <code>n_obs</code> variances (a diagonal <code>Σ</code>, e.g. the
+pointwise residual variance across curves) or an <code>(n_obs, n_obs)</code>
+matrix; by default <code>σ² I</code> with <code>σ² = SSE / (N (n_obs - df))</code> for
+<code>N</code> curves.  For a regression it is passed to
+:meth:<code>~fabel.regression.FRegressResult.stderr</code>: optional for a scalar
+response (default <code>SSE / (n - df)</code>), required for a functional one.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>level</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise coverage, strictly between 0 and 1.  Default <code>0.95</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.95</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>deriv</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Derivative order of the band.  Default <code>0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y2c_map</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regression only: data-to-coefficient map of the response smooth,
+passed to :meth:<code>~fabel.regression.FRegressResult.stderr</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>ConfidenceBand or tuple of ConfidenceBand</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One band for a smooth; one band per term, in model order, for a
+regression.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>level</code> or <code>sigma_e</code> is invalid, the smooth is constrained or
+irregular, <code>y2c_map</code> is given for a smooth, or a functional-response
+regression lacks <code>sigma_e</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>fit</code> is neither a smooth nor a regression, or <code>deriv</code> is not an
+integer.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">confidence_band</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">9.0</span> <span class="o">*</span> <span class="n">z</span><span class="p">),</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">const</span><span class="p">,</span> <span class="n">slope</span> <span class="o">=</span> <span class="n">confidence_band</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">slope</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">slope</span><span class="o">.</span><span class="n">lower</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">slope</span><span class="o">.</span><span class="n">upper</span> <span class="o">&gt;</span> <span class="mf">2.0</span><span class="p">))</span>
+<span class="go">('x1', True)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.plot_beta" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">plot_beta</span>
+
+
+<a href="#fabel.stats.plot_beta" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">plot_beta</span><span class="p">(</span>
+    <span class="n">fit</span><span class="p">:</span> <span class="n">FRegressResult</span>
+    <span class="o">|</span> <span class="n">ConfidenceBand</span>
+    <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ConfidenceBand</span><span class="p">],</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">sigma_e</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">y2c_map</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Axes</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Axes</span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Plot regression coefficients with their pointwise confidence limits.</p>
+<p>Replaces R's <code>plotbeta</code>: one panel per coefficient, the estimate as a
+solid line, the limits dashed, and a dotted zero line when the band
+crosses zero (R's <code>zerofind</code>).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fit</code>
+            </td>
+            <td>
+                  <code>FRegressResult, ConfidenceBand or sequence of ConfidenceBand</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A fitted regression (its bands are computed with
+:func:<code>confidence_band</code>), or bands computed already.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Evaluation points, used when <code>fit</code> is a regression.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>level</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise coverage, used when <code>fit</code> is a regression.  Default
+<code>0.95</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.95</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sigma_e</code>
+            </td>
+            <td>
+                  <code><span title="optional">optional</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :func:<code>confidence_band</code> when <code>fit</code> is a regression.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y2c_map</code>
+            </td>
+            <td>
+                  <code><span title="optional">optional</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :func:<code>confidence_band</code> when <code>fit</code> is a regression.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>axes</code>
+            </td>
+            <td>
+                  <code>sequence of matplotlib.axes.Axes</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One axes per band.  A new figure with stacked panels when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.plot</code> for the estimates.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>list of matplotlib.axes.Axes</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on, one per band, each titled with its term name.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>axes</code> does not hold one axes per band.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_beta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">z</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">9.0</span> <span class="o">*</span> <span class="n">z</span><span class="p">),</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">get_title</span><span class="p">()</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">plot_beta</span><span class="p">(</span><span class="n">model</span><span class="p">)]</span>
+<span class="go">['x0', 'x1']</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.cycleplot" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">cycleplot</span>
+
+
+<a href="#fabel.stats.cycleplot" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">cycleplot</span><span class="p">(</span>
+    <span class="n">fd</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">201</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Plot the cycles of a bivariate functional observation (R's <code>cycleplot.fd</code>).</p>
+<p>Each curve traces <code>(x(t), y(t))</code> over its domain, so a periodic pair --
+hip against knee angle over a gait cycle, temperature against
+precipitation over a year -- draws one closed loop per curve.  To see the
+cycles one at a time, pass <code>fd[i]</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fd</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Curves with two variables, or the first coordinate when <code>y</code> is given.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The second coordinate, with one variable and as many curves as <code>fd</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ax</code>
+            </td>
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Axes to draw on.  A new figure is created when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_points</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Size of the evaluation grid over the domain.  Default <code>201</code>, as in R.</p>
+              </div>
+            </td>
+            <td>
+                  <code>201</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.plot</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on, with one line per curve.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the curves are not bivariate, <code>fd</code> and <code>y</code> disagree in their
+number of curves or domain, or <code>n_points &lt; 2</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">FData</span><span class="p">,</span> <span class="n">Fourier</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">cycleplot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">Fourier</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coefs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">coefs</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">cycleplot</span><span class="p">(</span><span class="n">FData</span><span class="p">(</span><span class="n">coefs</span><span class="p">,</span> <span class="n">basis</span><span class="p">))</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+<span class="go">2</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.stats.plot_scores" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">plot_scores</span>
+
+
+<a href="#fabel.stats.plot_scores" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">plot_scores</span><span class="p">(</span>
+    <span class="n">scores</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">components</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Scatter two principal component scores against each other (R's <code>plotscores</code>).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>scores</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FPCA (fabel.decomposition.FPCA)" href="../decomposition/#fabel.decomposition.FPCA">FPCA</a> or <span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A fitted :class:<code>~fabel.decomposition.FPCA</code> (its <code>scores</code> are used,
+and its <code>varprop</code> labels the axes) or a score matrix of shape
+<code>(n_curves, n_components)</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>components</code>
+            </td>
+            <td>
+                  <code>tuple of int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Zero-based indices of the two components.  Default <code>(0, 1)</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>(0, 1)</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ax</code>
+            </td>
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Axes to draw on.  A new figure is created when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>labels</code>
+            </td>
+            <td>
+                  <code><span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One label per curve, written next to its point.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Passed to :meth:<code>matplotlib.axes.Axes.scatter</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.axes.Axes">Axes</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The axes drawn on; the points are its single collection.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the scores are not a matrix, a component index is out of range, or
+<code>labels</code> has the wrong length.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_scores</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plot_scores</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_offsets</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3, 2)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1523 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Functional data analysis for Python — a clean-room rewrite of R's fda.">
+      
+      
+      
+        <link rel="canonical" href="https://hameddavodi.github.io/fabel/dev/reviews/phase1-review/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Phase 1 review — _backend, _linalg, _operator, basis, core, _plot - Fabel</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phase-1-review-_backend-_linalg-_operator-basis-core-_plot" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabel" class="md-header__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabel
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Phase 1 review — _backend, _linalg, _operator, basis, core, _plot
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabel" class="md-nav__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabel
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../r-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA and CCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/decomposition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decomposition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sparse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse data (PACE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/density/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density and intensity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling (ODE parameters)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/nn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyTorch layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input and output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#gate-results-raw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gate results (raw)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-r_fda_defects-verdict-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. R_FDA_DEFECTS verdict table
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-confirmed-bugs-with-reproducers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Confirmed bugs (with reproducers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Confirmed bugs (with reproducers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#b1-fdata-1-silently-returns-an-empty-object-high" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B1 — FData[-1] silently returns an empty object (High)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b2-derivative-crashes-on-splines-with-repeated-interior-knots-high" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B2 — derivative() crashes on splines with repeated interior knots (High)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b3-autograd-is-cut-in-inprod-fd-fd-fd-p-fdstd-high-vs-spec-52-gradients-flow-through-inner-products" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B3 — Autograd is cut in inprod, fd * fd, fd ** p, fd.std() (High vs SPEC §5.2 "Gradients flow through … inner products")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b4-fd-scalar-fd-scalar-silently-wrong-when-the-basis-cannot-represent-a-constant-high" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B4 — fd + scalar / fd - scalar silently wrong when the basis cannot represent a constant (High)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b5-fallback-product-basis-is-a-16-approximation-presented-as-an-operator-result-medium" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B5 — Fallback product basis is a 1–6 % approximation presented as an operator result (Medium)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b6-cov-std-with-3-d-coefficients-silently-mix-variables-into-replications-medium" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B6 — cov() / std() with 3-D coefficients silently mix variables into replications (Medium)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b7-no-torch-tests-for-anything-except-fdt-medium-eval-coverage-finding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B7 — No torch tests for anything except fd(t) (Medium; eval-coverage finding)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-suggestions-ranked-by-severity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Suggestions ranked by severity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-things-checked-and-found-correct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Things checked and found correct
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="phase-1-review-_backend-_linalg-_operator-basis-core-_plot">Phase 1 review — <code>_backend</code>, <code>_linalg</code>, <code>_operator</code>, <code>basis</code>, <code>core</code>, <code>_plot</code><a class="headerlink" href="#phase-1-review-_backend-_linalg-_operator-basis-core-_plot" title="Permanent link">&para;</a></h1>
+<p>Date: 2026-09-06. Reviewer: fable (read-only). Scope per task brief.
+Scratch scripts: <code>/private/tmp/claude-501/-Users-hamed-work-fda/52508ebb-3a0a-404d-8463-dc23ca129132/scratchpad/{verify_basis.py,verify_core.py,core_r.R,probe.py}</code>.</p>
+<h2 id="gate-results-raw">Gate results (raw)<a class="headerlink" href="#gate-results-raw" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>.venv/bin/pytest -q            -&gt; 545 passed, 24 xfailed in 5.59s   (exit 0)
+ruff check . ; ruff format --check . ; mypy --strict src/fabel
+                               -&gt; All checks passed! / 20 files already formatted / Success: no issues found in 7 source files
+coverage (unit+parity)         -&gt; basis 96%, core 96%, _linalg 93%, _backend 93%, _operator 100%, _plot 97%, TOTAL 96%
+</code></pre></div>
+<h2 id="1-r_fda_defects-verdict-table">1. <code>R_FDA_DEFECTS</code> verdict table<a class="headerlink" href="#1-r_fda_defects-verdict-table" title="Permanent link">&para;</a></h2>
+<p>Method: exact rational integrals via sympy (Bernstein Gram), <code>scipy.integrate.quad</code> at 1e-13/1e-14 tolerances (Fourier / power / inprod), symbolic derivatives (monomial / power), central finite differences (polygonal, order-6 D²), and pointwise products of factor curves evaluated by <strong>both</strong> Fabel and R <code>eval.fd</code> on a 2001-point grid (<code>times.fd</code>, <code>^.fd</code>). R live values were regenerated with <code>Rscript</code> and match the golden files to 0.0 relative.</p>
+<p>"rel" = max|a − b| / max|b|.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Verdict</th>
+<th>Numbers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bspline_penalty_k4_n4_dom0_1_L0</code></td>
+<td><strong>R wrong</strong> (not a convention difference)</td>
+<td>exact Bernstein Gram [0,0] = 1/7; Fabel rel 7.8e-16; R rel 6.0. R's matrix is exactly the monomial Gram (Hilbert, rel 0.0). R's own <code>eval.basis</code> on this basis returns Bernstein values (0.421875 = 0.75³ at t = 0.25) and R's own <code>inprod(b, b)</code> returns 1/7 in [0,0] — R's <code>eval.penalty</code> is inconsistent with R's own basis functions.</td>
+</tr>
+<tr>
+<td><code>..._L1</code></td>
+<td><strong>R wrong</strong></td>
+<td>exact [0,0] = 9/5; Fabel rel 8.6e-16; R rel 1.33 (first row zero).</td>
+</tr>
+<tr>
+<td><code>..._L2</code></td>
+<td><strong>R wrong</strong></td>
+<td>exact [0,0] = 12; Fabel rel 7.9e-16; R rel 1.0.</td>
+</tr>
+<tr>
+<td><code>fourier_periodmismatch_penalty_L0</code></td>
+<td><strong>R wrong (quadrature error)</strong></td>
+<td>Fabel rel 4.4e-16; R rel 1.38e-6; R[7,7] = 0.499999308 vs exact 0.5.</td>
+</tr>
+<tr>
+<td><code>..._L1</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel rel 3.6e-16; R rel 1.38e-6 (max abs 1.1e-4).</td>
+</tr>
+<tr>
+<td><code>..._L2</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel rel 4.4e-16; R rel 1.38e-6 (max abs 1.7e-2; R[7,7] 12468.3464 vs 12468.3637).</td>
+</tr>
+<tr>
+<td><code>monomial_eval_n3_d2</code></td>
+<td><strong>R wrong</strong></td>
+<td>D²tᵉ = e(e−1)tᵉ⁻²; Fabel rel 0; R rel 1.0 (R gives 0 for e = 2).</td>
+</tr>
+<tr>
+<td><code>monomial_eval_n4_d2</code> / <code>n5</code> / <code>n6</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel rel 0; R rel 0.5 / 0.33 / 0.25 (R coefficient e(e−2) confirmed: e = 5 gives 15 instead of 20).</td>
+</tr>
+<tr>
+<td><code>monomial_customexp_eval_d2</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel rel 0; R rel 0.25.</td>
+</tr>
+<tr>
+<td><code>power_cfg1_eval_d1</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel rel 0; R rel 1.0 (R zeroes e = 0.5 and e = 1, returns 4t for e = 2).</td>
+</tr>
+<tr>
+<td><code>power_cfg2_eval_d1</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel rel 0; R rel 1.0 (R returns all zeros).</td>
+</tr>
+<tr>
+<td><code>power_cfg2_penalty_L0</code></td>
+<td><strong>R wrong</strong></td>
+<td>exact [0,1] = ln 6 = 1.791759469; Fabel matches to 2e-16; R NaN at [0,1],[1,0]; R's other entries rel 2e-16.</td>
+</tr>
+<tr>
+<td><code>polygonal_n5_eval_d1</code> / <code>n11</code> / <code>n20</code></td>
+<td><strong>R wrong</strong></td>
+<td>R d1 output == d0 values (rel 0 / 1e-16 / 1e-16); Fabel d1 vs central FD of d0 rel 3e-11; R d1 vs FD rel ≈ 1.1. R's own <code>eval.penalty(polyg, 1)</code> uses true slopes (±4 for h = 0.25).</td>
+</tr>
+<tr>
+<td><code>fd_mul_bspline</code></td>
+<td><strong>R wrong</strong></td>
+<td>truth = R <code>eval.fd(f1)·eval.fd(f2)</code> (Fabel factor evals agree with R to 6e-16). Fabel product (order 7, n = 31, multiplicity-4 knots) rel 7.5e-15. R <code>times.fd</code> (order 7, n = 13) rel 1.28e-1 (max abs 0.254, scale 1.99). Least-squares projection of truth onto R's own basis is 6.1e-2 away from R's coefficients — R is not even the projection.</td>
+</tr>
+<tr>
+<td><code>fd_power2</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel rel 1.9e-14; R rel 5.67e-5.</td>
+</tr>
+<tr>
+<td><code>inprod_fourier_L0_0</code> / <code>L1_1</code> / <code>L2_2</code></td>
+<td><strong>R wrong (Romberg)</strong></td>
+<td>vs quad: Fabel 7e-16 / 4e-16 / 1e-16; R golden 4.3e-5 / 1.2e-4 / 2.0e-4. R's own <code>t(C) %*% eval.penalty(b, L) %*% C</code> matches quad to 4e-16 — R's <code>inprod</code> disagrees with R's own exact Gram.</td>
+</tr>
+<tr>
+<td><code>inprod_basis_bspline_x_fourier</code></td>
+<td><strong>R wrong (Romberg)</strong></td>
+<td>Fabel rel 9.7e-16; R rel 5.7e-5.</td>
+</tr>
+<tr>
+<td><code>deriv_fd_bspline_order6_L2</code></td>
+<td><strong>R wrong</strong></td>
+<td>Fabel D² (order-4 basis) vs central FD rel 3.5e-7 (h = 1e-4); vs Fabel <code>fd(t, 2)</code> 3.9e-16; vs R <code>eval.fd(t, f, 2)</code> 3.9e-16. R <code>deriv.fd</code> vs R's own <code>eval.fd(t, f, 2)</code> rel 1.29e-2 (max abs 60, scale 4655).</td>
+</tr>
+</tbody>
+</table>
+<p>All 24 <code>xfail(strict=True)</code> entries are justified. No convention difference found; in every case R's stated result is inconsistent with another R entry point on the same object. Reason strings are accurate (the two R-side numbers quoted — 12.8% / 0.254 / 1.99, 1.3% / 59.9 / 4655, 5.7e-5, ~1.4e-6, ~1.3e-4 — all reproduce).</p>
+<p>One nit in a reason string: <code>power_cfg1_eval_d1</code> says R "returns 4t" for e = 2; observed values are 4t (0.4 at t = 0.1) — correct.</p>
+<h2 id="2-confirmed-bugs-with-reproducers">2. Confirmed bugs (with reproducers)<a class="headerlink" href="#2-confirmed-bugs-with-reproducers" title="Permanent link">&para;</a></h2>
+<h3 id="b1-fdata-1-silently-returns-an-empty-object-high">B1 — <code>FData[-1]</code> silently returns an empty object (High)<a class="headerlink" href="#b1-fdata-1-silently-returns-an-empty-object-high" title="Permanent link">&para;</a></h3>
+<p><code>src/fabel/core.py:270</code> — <code>self.coefs[:, index : index + 1, ...]</code> with <code>index = -1</code> is <code>slice(-1, 0)</code> → shape <code>(n_basis, 0)</code>. No error, downstream ops return empty arrays.
+<div class="highlight"><pre><span></span><code><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">24.0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">));</span> <span class="n">fd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coefs</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># (8, 0)</span>
+</code></pre></div>
+Fix: normalise <code>index = range(self.n_curves)[index]</code> (raises IndexError when out of range), then slice. Also accept <code>numpy.integer</code> (<code>fd[np.int64(1)]</code> currently raises <code>TypeError: 'numpy.int64' object is not iterable</code>): test <code>isinstance(index, (int, np.integer))</code> via <code>operator.index</code>.</p>
+<h3 id="b2-derivative-crashes-on-splines-with-repeated-interior-knots-high">B2 — <code>derivative()</code> crashes on splines with repeated interior knots (High)<a class="headerlink" href="#b2-derivative-crashes-on-splines-with-repeated-interior-knots-high" title="Permanent link">&para;</a></h3>
+<p><code>src/fabel/basis.py:504-517</code> — <code>_derivative_map</code> builds <code>BSpline(order=order-n, breaks=self.breaks)</code>; <code>_clean_breaks</code> rejects multiplicity <code>&gt; order-n</code>. Fabel's own exact product (<code>fd * fd</code> → order 7, multiplicity 4) therefore cannot be differentiated 4 or more times, and a discontinuous spline (multiplicity = order) cannot be differentiated at all.
+<div class="highlight"><pre><span></span><code><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">24.0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">))</span>
+<span class="p">(</span><span class="n">fd</span> <span class="o">*</span> <span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">derivative</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>   <span class="c1"># ValueError: break 0.2 repeats 4 times, which exceeds the order 3</span>
+<span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">breaks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">.5</span><span class="p">,</span> <span class="mf">.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">derivative</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># ValueError</span>
+<span class="n">BSpline</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">breaks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">.5</span><span class="p">,</span> <span class="mf">.5</span><span class="p">,</span> <span class="mf">.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">_derivative_map</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>           <span class="c1"># ValueError</span>
+</code></pre></div>
+Fix: the derivative of a multiplicity-m knot in order k is multiplicity min(m, k−n) in order k−n (the delta from a jump is dropped); the rows of <code>operator</code> to drop are the ones sitting on the now-degenerate spans, which is not <code>operator[n:-n]</code> when interior spans also collapse — derive the kept rows from the reduced knot vector instead of assuming only the end rows vanish. Add a unit test that differentiates a product basis down to order 1 and compares with finite differences.</p>
+<h3 id="b3-autograd-is-cut-in-inprod-fd-fd-fd-p-fdstd-high-vs-spec-52-gradients-flow-through-inner-products">B3 — Autograd is cut in <code>inprod</code>, <code>fd * fd</code>, <code>fd ** p</code>, <code>fd.std()</code> (High vs SPEC §5.2 "Gradients flow through … inner products")<a class="headerlink" href="#b3-autograd-is-cut-in-inprod-fd-fd-fd-p-fdstd-high-vs-spec-52-gradients-flow-through-inner-products" title="Permanent link">&para;</a></h3>
+<p><code>core.py:648-652</code> (<code>to_numpy(first.coefs)</code>), <code>core.py:558</code> (<code>to_numpy(self(nodes))</code>), <code>core.py:616</code>, <code>core.py:462</code>. Verified: torch coefs with <code>requires_grad=True</code> → <code>inprod(fd, fd).requires_grad is False</code>; <code>(fd*fd).coefs.requires_grad is False</code>; <code>fd.std().coefs</code> is a NumPy array.
+<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">inprod</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">requires_grad</span>   <span class="c1"># False</span>
+</code></pre></div>
+Fix: <code>_cross_gram</code> is a constant → keep it NumPy, but do the coefficient contractions in <code>result_namespace(first.coefs, second.coefs)</code> via <code>as_backend(matrix, like)</code> <strong>before</strong> multiplying. For products: evaluate <code>self(nodes)</code> in the coefs' namespace (nodes converted with <code>asarray(nodes, xp)</code>), keep <code>_project</code> backend-agnostic (<code>solve_spd</code> already dispatches to torch). Also <code>core.py:543 float(other)</code> on a tensor scalar warns and drops that scalar's gradient — multiply directly when <code>other</code> is an array.</p>
+<h3 id="b4-fd-scalar-fd-scalar-silently-wrong-when-the-basis-cannot-represent-a-constant-high">B4 — <code>fd + scalar</code> / <code>fd - scalar</code> silently wrong when the basis cannot represent a constant (High)<a class="headerlink" href="#b4-fd-scalar-fd-scalar-silently-wrong-when-the-basis-cannot-represent-a-constant-high" title="Permanent link">&para;</a></h3>
+<p><code>core.py:503-509</code> <code>_constant</code> L2-projects the constant; on <code>Monomial(exponents=[1,2])</code>, <code>Power</code> without 0, <code>Exponential</code> without rate 0 the result is a different function with no warning.
+<div class="highlight"><pre><span></span><code><span class="n">m</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">Monomial</span><span class="p">(</span><span class="n">exponents</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]));</span> <span class="n">s</span> <span class="o">=</span> <span class="n">m</span> <span class="o">+</span> <span class="mf">1.0</span>
+<span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">m</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>   <span class="c1"># 1.0   (Exponential(rates=[1,2]) + 1 → 0.153)</span>
+</code></pre></div>
+Fix: check the projection residual (<code>values - basis(nodes) @ coefs</code>) against a tolerance and raise <code>ValueError("basis cannot represent a constant")</code>; or short-circuit for bases with an exact constant (B-spline: partition of unity → coefs = value; Fourier: <code>value*sqrt(P)</code> on const; Monomial/Power with exponent 0; Exponential rate 0).</p>
+<h3 id="b5-fallback-product-basis-is-a-16-approximation-presented-as-an-operator-result-medium">B5 — Fallback product basis is a 1–6 % approximation presented as an operator result (Medium)<a class="headerlink" href="#b5-fallback-product-basis-is-a-16-approximation-presented-as-an-operator-result-medium" title="Permanent link">&para;</a></h3>
+<p><code>basis.py:1509-1510</code> — non-matching families fall back to <code>BSpline(order=8, n_basis=max(n1+n2, 8))</code>. Measured: <code>BSpline(10) * Fourier(9)</code> product rel error <strong>1.3e-2</strong>; <code>Fourier(9, period=1) * Fourier(9, period=2)</code> rel error <strong>5.9e-2</strong>. CLAUDE.md "parity is law, 1e-8" — an operator that returns 1 % error with no signal violates that. Fix: either refine the fallback until the projection residual is below tolerance (residual check in <code>_project</code>), or raise/warn for non-closed products. Same residual check fixes B4.</p>
+<h3 id="b6-cov-std-with-3-d-coefficients-silently-mix-variables-into-replications-medium">B6 — <code>cov()</code> / <code>std()</code> with 3-D coefficients silently mix variables into replications (Medium)<a class="headerlink" href="#b6-cov-std-with-3-d-coefficients-silently-mix-variables-into-replications-medium" title="Permanent link">&para;</a></h3>
+<p><code>core.py:486-489</code> flattens <code>(n_basis, n_curves, n_vars)</code> to <code>(n_basis, n_curves*n_vars)</code> and divides by <code>n_curves-1</code> → returns a single <code>(n_basis, n_basis)</code> sum over variables, not a covariance. <code>std()</code> returns <code>(n_basis, n_vars)</code> which <code>FData</code> then reads as <code>n_curves = n_vars</code>.
+<div class="highlight"><pre><span></span><code><span class="n">fd3</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">));</span> <span class="n">fd3</span><span class="o">.</span><span class="n">cov</span><span class="p">()</span><span class="o">.</span><span class="n">coefs</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># (8, 8); fd3.std().n_curves  # 2</span>
+</code></pre></div>
+Fix: either raise for <code>n_vars &gt; 1</code> (as <code>inprod</code> does) or return the <code>(n_basis, n_basis, n_vars, n_vars)</code> cross-covariance R's <code>var.fd</code> returns.</p>
+<h3 id="b7-no-torch-tests-for-anything-except-fdt-medium-eval-coverage-finding">B7 — No torch tests for anything except <code>fd(t)</code> (Medium; eval-coverage finding)<a class="headerlink" href="#b7-no-torch-tests-for-anything-except-fdt-medium-eval-coverage-finding" title="Permanent link">&para;</a></h3>
+<p><code>tests/torch/</code> is empty; the only torch test is <code>tests/unit/test_core.py:88</code>. B3 would have been caught by a 5-line test on <code>inprod</code>/<code>*</code>/<code>std</code>. Add <code>tests/torch/test_autograd.py</code> covering <code>basis(t)</code>, <code>fd(t)</code>, <code>derivative</code>, <code>inprod</code>, <code>*</code>, <code>**</code>, <code>mean/center/std</code>, <code>penalty(xp=torch)</code>, and a numpy-coefs/torch-t mixed case.</p>
+<h2 id="3-suggestions-ranked-by-severity">3. Suggestions ranked by severity<a class="headerlink" href="#3-suggestions-ranked-by-severity" title="Permanent link">&para;</a></h2>
+<ol>
+<li>(High) B1, B2, B3, B4 above.</li>
+<li>(Medium) B5, B6, B7.</li>
+<li>(Medium) <code>core.py:641</code> <code>inprod</code> compares domains with exact <code>!=</code>, while <code>Basis.__mul__</code> uses <code>_same_domain</code> with <code>_TOL</code>; <code>BSpline(domain=(0, 1+1e-12))</code> vs <code>(0, 1)</code> raises in <code>inprod</code> but multiplies fine. Use one helper.</li>
+<li>(Low) <code>core.py:645-650</code> the <code>len(coefs.shape) != 2</code> guard runs after <code>_cross_gram</code> — move it first (wasted quadrature before the error).</li>
+<li>(Low) <code>basis.py:240</code> <code>Basis.__call__</code> silently flattens any 2-D <code>t</code> — a <code>(n, m)</code> matrix of points becomes <code>n*m</code> rows with no error; accept only 1-D or <code>(n, 1)</code>.</li>
+<li>(Low) <code>core.py:543</code> <code>float(other)</code> in <code>__mul__</code>: rejects a per-curve scalar vector and, for tensor scalars, emits a warning and detaches. Branch on <code>is_array_api_obj</code>.</li>
+<li>(Low) <code>core.py:93</code> <code>_refined_spline</code> does a function-local <code>from fabel.basis import BSpline</code> although <code>fabel.basis</code> is already imported at module top — no cycle exists; hoist it.</li>
+<li>(Low) <code>_linalg.cached_gram</code> eviction pops the oldest inserted key (FIFO) but the docstring calls it "memoise"; fine, but note it is process-global and unbounded in key size (an <code>LDO</code> with an <code>FData</code> weight is a distinct identity key per object → cache pollution on repeated <code>penalty(LDO(weights=[fd]))</code> calls). Consider excluding non-hashable-by-value operators from the cache.</li>
+<li>(Low) <code>basis.py:1490-1494</code> <code>_product_basis</code> for <code>Fourier × Fourier</code> with matching period gives <code>n = 2*max(n1, n2) − 1</code>, exact — fine; but a <code>Fourier</code> whose domain is not a whole number of periods multiplied by a <code>BSpline</code> hits the fallback (B5).</li>
+<li>(Nit) <code>_bspline_matrix</code> is dense in <code>(n_t, n_knots)</code> through every recursion level; fine for Phase 1, but SPEC §6 promises banded/LRU-cached evaluation — flag for the benchmark task.</li>
+</ol>
+<h2 id="4-things-checked-and-found-correct">4. Things checked and found correct<a class="headerlink" href="#4-things-checked-and-found-correct" title="Permanent link">&para;</a></h2>
+<ul>
+<li>No <code>numpy</code> import in <code>basis.py</code>, <code>core.py</code> (typing block only), <code>_operator.py</code>, <code>_plot.py</code>; torch imported only lazily in <code>to_torch</code>. Conventions satisfied.</li>
+<li>Immutability: all public objects <code>frozen=True</code>; every method returns a new object.</li>
+<li>Order-1 splines: partition of unity holds, <code>deriv=1</code> returns zeros. <code>deriv &gt;= order</code> returns zeros. <code>deriv = order−1</code> at the right endpoint returns 0 — matches R (<code>eval.basis(1, b, 3)</code> row is 0 in R 4.6.1 / fda 6.3.0).</li>
+<li>Repeated interior knots: evaluation sums to 1 to 2e-16; product of two cubics on a common break yields multiplicity 4 in order 7 and reproduces the pointwise product to 7.5e-15.</li>
+<li>Extrapolation: B-spline/polygonal raise <code>ValueError</code>; Fourier/monomial/power/exponential evaluate (consistent with R).</li>
+<li>Gradient does flow through <code>basis(t)</code> w.r.t. <code>t</code> (max error vs finite differences 6.6e-11), through <code>fd(t)</code> w.r.t. both <code>t</code> and coefficients, and through <code>derivative()</code> / <code>mean()</code> — including numpy coefficients with a torch <code>t</code>.</li>
+<li><code>LDO</code> with functional weights works in both <code>fd(t, LDO)</code> and <code>basis.penalty(LDO)</code>.</li>
+<li><code>Fourier</code> even <code>n_basis</code> bumped to odd, matching R.</li>
+<li>Parity harness (<code>compare</code>) scales <code>atol</code> by matrix norm — sensible and documented.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

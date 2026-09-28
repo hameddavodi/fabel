@@ -1,0 +1,4156 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Functional data analysis for Python — a clean-room rewrite of R's fda.">
+      
+      
+      
+        <link rel="canonical" href="https://hameddavodi.github.io/fabel/api/regression/">
+      
+      
+        <link rel="prev" href="../decomposition/">
+      
+      
+        <link rel="next" href="../registration/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Regression - Fabel</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#regression" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fabel" class="md-header__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabel
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Regression
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fabel" class="md-nav__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabel
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../r-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA and CCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decomposition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decomposition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressStderr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegressStderr
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressCV" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegressCV
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegressResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FRegressResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.functional_response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        functional_response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.coefficients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        coefficients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.stderr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stderr
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.cv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.LinmodResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LinmodResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LinmodResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.LinmodResult.residuals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        residuals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.LinmodResult.predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegress
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FRegress">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegress.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegress.predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.fregress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fregress
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.linmod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        linmod
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sparse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse data (PACE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../density/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density and intensity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling (ODE parameters)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyTorch layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input and output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressStderr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegressStderr
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressCV" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegressCV
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegressResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FRegressResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.functional_response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        functional_response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.coefficients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        coefficients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.stderr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stderr
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegressResult.cv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.LinmodResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LinmodResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LinmodResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.LinmodResult.residuals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        residuals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.LinmodResult.predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.FRegress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRegress
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FRegress">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegress.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.regression.FRegress.predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.fregress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fregress
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.regression.linmod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        linmod
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="regression">Regression<a class="headerlink" href="#regression" title="Permanent link">&para;</a></h1>
+<p><code>fabel.regression</code>: <code>fregress()</code> for scalar and functional responses with
+scalar and functional covariates (model type read from the arguments, or an
+R-style formula), with <code>predict()</code>, <code>stderr()</code> and <code>cv()</code> on the result, and
+the scikit-learn <code>FRegress</code> estimator.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Functional linear regression: :func:<code>fregress</code> and the :class:<code>FRegress</code> estimator.</p>
+<p>One entry point replaces R <code>fda</code>'s <code>fRegress</code> family (<code>fRegress</code>,
+<code>fRegress.formula</code>, <code>fRegress.fd</code>, <code>fRegress.double</code>, <code>predict.fRegress</code>,
+<code>fRegress.stderr</code> and <code>fRegress.CV</code>).  The kind of model is read off the
+arguments:</p>
+<ul>
+<li><strong>scalar response</strong> (<code>y</code> a vector of <code>n</code> numbers).  Each covariate enters
+  as a scalar <code>z_ij β_j</code> or, when it is a curve, as <code>∫ x_ij(t) β_j(t) dt</code>:</li>
+</ul>
+<p>.. math:: y_i = \sum_j \int x_{ij}(t)\,\beta_j(t)\,dt + \varepsilon_i .</p>
+<ul>
+<li><strong>functional response</strong> (<code>y</code> an :class:<code>~fabel.core.FData</code> of <code>n</code>
+  curves).  Scalar covariates give the function-on-scalar model and curves give
+  the concurrent model; the two mix freely:</li>
+</ul>
+<p>.. math:: y_i(t) = \sum_j x_{ij}(t)\,\beta_j(t) + \varepsilon_i(t) .</p>
+<p>Writing every coefficient function in its own basis, <code>β_j = θ_jᵀ b_j</code>, both
+models are penalised least-squares problems (Ramsay, Hooker &amp; Graves 2009,
+chapters 9-10) whose normal equations <code>C b = D</code> stack one block per term:</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>C_{jk} = \sum_i w_i \int x_{ij} x_{ik}\,\theta_j \theta_k^{T}\,dt
+         + \delta_{jk}\,\lambda_j R_j ,
+\qquad
+D_j = \sum_i w_i \int x_{ij}\,y_i\,\theta_j\,dt
+</code></pre></div>
+<p>for a functional response, and <code>C = ZᵀWZ + diag(λ_j R_j)</code>, <code>D = ZᵀWy</code> with
+<code>Z_i = (∫ x_ij θ_j)_j</code> for a scalar one.  <code>R_j = ∫ (Lθ_j)(Lθ_j)ᵀ</code> is the
+roughness penalty of the <code>j</code>-th coefficient.  Every integral is computed
+exactly (Gauss-Legendre on the break points of the bases involved), whereas R
+approximates them -- see <code>tests/parity/test_regression.py</code> for the measured
+consequences.</p>
+<p>:func:<code>linmod</code> fits the fully functional model with a bivariate coefficient
+(R's <code>linmod</code>), <code>y_i(t) = alpha(t) + ∫ x_i(s) β(s, t) ds + ε_i(t)</code>, where a
+response value depends on the whole covariate curve.</p>
+<p>Both entry points compute in the array namespace of their inputs: PyTorch
+coefficients, covariates or weights give PyTorch results, and gradients flow
+back to the inputs.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">coefs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">beta</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[1.0, 2.0]</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.regression.FRegressStderr" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">FRegressStderr</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.regression.FRegressStderr" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">FRegressStderr</span><span class="p">(</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FData</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">fitted</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cov</span><span class="p">:</span> <span class="n">Array</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Sampling variability of a fitted functional regression.</p>
+<p>Replaces the output of R's <code>fRegress.stderr</code>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressStderr.beta">beta</span></code></td>
+            <td>
+                  <code>tuple of FData</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise standard error <code>sqrt(θ_j(t)ᵀ V_jj θ_j(t))</code> of each
+coefficient function, projected (in L2) onto the coefficient's basis.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressStderr.fitted">fitted</span></code></td>
+            <td>
+                  <code><span title="array">array</span> or <a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Standard error of the fitted values: a vector for a scalar response,
+curves in the response basis for a functional one.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressStderr.cov">cov</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Covariance <code>V</code> of the stacked coefficient vector <code>b</code> (R's <code>bvar</code>).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">7.0</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">se</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">stderr</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">se</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(2, 2)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.regression.FRegressCV" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">FRegressCV</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.regression.FRegressCV" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">FRegressCV</span><span class="p">(</span><span class="n">sse</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Leave-one-out cross-validation of a functional regression.</p>
+<p>Replaces the output of R's <code>fRegress.CV</code>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressCV.sse">sse</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sum over observations of the squared leave-one-out error (integrated
+over the domain for a functional response).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressCV.errors">errors</span></code></td>
+            <td>
+                  <code><span title="array">array</span> or <a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>y_i - ŷ_i^{(-i)}</code>, the error of the model fitted without observation
+<code>i</code>: a vector for a scalar response, curves in the response basis for a
+functional one.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cv</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">z</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">cv</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">sse</span> <span class="o">&lt;</span> <span class="mf">1e-20</span><span class="p">)</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.regression.FRegressResult" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">FRegressResult</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.regression.FRegressResult" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">FRegressResult</span><span class="p">(</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FData</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">fitted</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">names</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">terms</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_Term</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">cmat</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">dmat</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">df</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">gcv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ocv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">y2c_map</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A fitted functional linear model, as returned by :func:<code>fregress</code>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.beta">beta</span></code></td>
+            <td>
+                  <code>tuple of FData</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Estimated coefficient function of every term, one curve each (R's
+<code>betaestlist</code>).  The coefficient of a scalar term in a scalar-response
+model lives in a :class:<code>~fabel.basis.Constant</code> basis.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.fitted">fitted</span></code></td>
+            <td>
+                  <code><span title="array">array</span> or <a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Fitted values <code>ŷ</code>: a vector for a scalar response, curves expressed in
+the response basis for a functional one (R's <code>yhatfdobj</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.names">names</span></code></td>
+            <td>
+                  <code>tuple of str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Term names, in model order.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.y">y</span></code></td>
+            <td>
+                  <code><span title="array">array</span> or <a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The response.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.terms">terms</span></code></td>
+            <td>
+                  <code><span title="tuple">tuple</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The covariates with their coefficient bases, smoothing parameters and
+penalty operators, as used in the fit.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.weights">weights</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Observation weights.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.cmat, dmat">cmat, dmat</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The normal equations <code>C b = D</code> (R's <code>Cmat</code> and <code>Dmat</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.df">df</span></code></td>
+            <td>
+                  <code><span title="float">float</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Degrees of freedom <code>tr H</code> of the hat matrix (scalar response only).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.gcv">gcv</span></code></td>
+            <td>
+                  <code><span title="float">float</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>SSE / (n - df)²</code> (scalar response only).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.ocv">ocv</span></code></td>
+            <td>
+                  <code><span title="float">float</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ordinary cross-validation score, the sum of squared leave-one-out
+residuals (scalar response only).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegressResult.y2c_map">y2c_map</span></code></td>
+            <td>
+                  <code><span title="array">array</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Data-to-coefficient map of the response smooth, kept when <code>y</code> was a
+:class:<code>~fabel.smoothing.SmoothResult</code>; used by :meth:<code>stderr</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">12</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="s2">"const"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"group"</span><span class="p">:</span> <span class="n">group</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">names</span>
+<span class="go">('const', 'group')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">fitted</span><span class="o">.</span><span class="n">n_curves</span>
+<span class="go">12</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="fabel.regression.FRegressResult.functional_response" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">functional_response</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#fabel.regression.FRegressResult.functional_response" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">functional_response</span><span class="p">:</span> <span class="nb">bool</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Whether the response is a set of curves.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>True</code> for a functional response, <code>False</code> for a scalar one.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fregress</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">5.0</span><span class="p">),</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">])</span><span class="o">.</span><span class="n">functional_response</span>
+<span class="go">False</span>
+</code></pre></div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="fabel.regression.FRegressResult.coefficients" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">coefficients</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#fabel.regression.FRegressResult.coefficients" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>The stacked coefficient vector <code>b</code> solving <code>C b = D</code>.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Vector of length <code>sum_j n_basis_j</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fregress</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]),</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">])</span><span class="o">.</span><span class="n">coefficients</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[2.0]</span>
+</code></pre></div>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.regression.FRegressResult.predict" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">predict</span>
+
+
+<a href="#fabel.regression.FRegressResult.predict" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Predict the response for new covariates (R's <code>predict.fRegress</code>).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code>(<span title="mapping">mapping</span>, <span title="sequence">sequence</span> or <span title="covariate">covariate</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>New covariates, laid out like those passed to :func:<code>fregress</code>: a
+mapping keyed by term name, or a sequence in term order.  Numbers
+are broadcast.  <code>None</code> returns the fitted values.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="array">array</span> or <a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Predictions: a vector for a scalar response, curves in the response
+basis for a functional one.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>x</code> does not supply one covariate per term, or a covariate has
+the wrong kind or size.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">z</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])]),</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[1.0, 7.0]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.regression.FRegressResult.stderr" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">stderr</span>
+
+
+<a href="#fabel.regression.FRegressResult.stderr" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">stderr</span><span class="p">(</span>
+    <span class="n">sigma_e</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y2c_map</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FRegressStderr</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return the standard errors of the coefficients (R's <code>fRegress.stderr</code>).</p>
+<p>The coefficients are linear in the data, <code>b = M y</code>, so their covariance
+is <code>V = M Σ Mᵀ</code>.  For a functional response <code>y</code> enters through the
+coefficients of its smooth, <code>c_i = S y_i</code> (<code>S</code> the <code>y2c_map</code> of the
+smoothing step) and the curves are independent, so
+<code>V = C⁻¹ (Σ_i M_i S Σ Sᵀ M_iᵀ) C⁻¹</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>sigma_e</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> or <span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Residual covariance <code>Σ</code>.  A number means <code>σ² I</code>.  For a scalar
+response it defaults to <code>SSE / (n - df) · I</code>; for a functional
+response it is the <code>(n_t, n_t)</code> covariance of the residuals at the
+observation points and must be given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y2c_map</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Map from observations to response coefficients.  The identity for a
+scalar response.  For a functional response it defaults to the map
+stored when <code>y</code> was a :class:<code>~fabel.smoothing.SmoothResult</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FRegressStderr
+
+
+  
+      dataclass
+   (fabel.regression.FRegressStderr)" href="#fabel.regression.FRegressStderr">FRegressStderr</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Pointwise standard-error curves, fitted-value standard errors and the
+coefficient covariance.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a functional response lacks <code>sigma_e</code> or <code>y2c_map</code>, or the
+shapes do not match.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">9.0</span> <span class="o">*</span> <span class="n">z</span><span class="p">),</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">se</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">stderr</span><span class="p">(</span><span class="n">sigma_e</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">se</span><span class="o">.</span><span class="n">cov</span><span class="p">),</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cmat</span><span class="p">))))</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.regression.FRegressResult.cv" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">cv</span>
+
+
+<a href="#fabel.regression.FRegressResult.cv" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">cv</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FRegressCV</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Leave-one-out cross-validation (R's <code>fRegress.CV</code>).</p>
+<p>Each observation is removed in turn, the model is refitted on the rest
+with the same bases and smoothing parameters, and the held-out
+observation is predicted.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FRegressCV
+
+
+  
+      dataclass
+   (fabel.regression.FRegressCV)" href="#fabel.regression.FRegressCV">FRegressCV</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The summed squared errors and the individual errors.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">20.0</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cv</span><span class="p">()</span><span class="o">.</span><span class="n">sse</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">ocv</span><span class="p">))</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.regression.LinmodResult" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">LinmodResult</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.regression.LinmodResult" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">LinmodResult</span><span class="p">(</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="n">BiFData</span><span class="p">,</span>
+    <span class="n">fitted</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LDO</span><span class="p">,</span> <span class="n">LDO</span><span class="p">,</span> <span class="n">LDO</span><span class="p">],</span>
+    <span class="n">cmat</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">dmat</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A fitted fully functional linear model, as returned by :func:<code>linmod</code>.</p>
+<p>Replaces the list R's <code>linmod</code> returns.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.alpha">alpha</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The intercept function <code>alpha(t)</code>, one curve (R's <code>beta0estfd</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.beta">beta</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="BiFData
+
+
+  
+      dataclass
+   (fabel.core.BiFData)" href="../core/#fabel.core.BiFData">BiFData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The regression surface <code>β(s, t)</code> on the tensor basis <code>θ_s ⊗ θ_t</code>
+(R's <code>beta1estbifd</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.fitted">fitted</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Fitted curves <code>ŷ_i(t) = alpha(t) + ∫ x_i(s) β(s, t) ds</code>, projected onto
+the response basis (R's <code>yhatfdobj</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.y">y</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The response curves.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.x">x</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The covariate curves.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.weights">weights</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Observation weights.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.lam">lam</span></code></td>
+            <td>
+                  <code>tuple of float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Smoothing parameters <code>(λ_alpha, λ_s, λ_t)</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.penalty">penalty</span></code></td>
+            <td>
+                  <code>tuple of LDO</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operators <code>(L_alpha, L_s, L_t)</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.LinmodResult.cmat, dmat">cmat, dmat</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The normal equations <code>C b = D</code>; <code>b</code> stacks the intercept
+coefficients and the surface coefficients row by row.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">linmod</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">20</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">20</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">linmod</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lam_s</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">lam_t</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">coefs</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(6, 6)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">residuals</span><span class="o">.</span><span class="n">n_curves</span>
+<span class="go">20</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="fabel.regression.LinmodResult.residuals" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">residuals</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#fabel.regression.LinmodResult.residuals" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">residuals</span><span class="p">:</span> <span class="n">FData</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>The residual curves <code>y_i - ŷ_i</code> in the response basis.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One residual curve per observation.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">linmod</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">linmod</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lam_s</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">lam_t</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">fitted</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">residuals</span><span class="p">)</span><span class="o">.</span><span class="n">coefs</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">coefs</span><span class="p">))</span>
+<span class="go">True</span>
+</code></pre></div>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.regression.LinmodResult.predict" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">predict</span>
+
+
+<a href="#fabel.regression.LinmodResult.predict" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FData</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Predict response curves for new covariate curves.</p>
+<p>R has no predict method for <code>linmod</code>; this evaluates the fitted model
+<code>alpha(t) + ∫ x(s) β(s, t) ds</code> for the new curves.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <a class="autorefs autorefs-internal" title="SmoothResult
+
+
+  
+      dataclass
+   (fabel.smoothing.SmoothResult)" href="../smoothing/#fabel.smoothing.SmoothResult">SmoothResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>New covariate curves on the domain of <code>s</code>, in any basis.  <code>None</code>
+returns the fitted values.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Predicted curves in the response basis, one per new curve.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>x</code> is not a set of curves.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>x</code> lives on another domain or carries a variable axis.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">linmod</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">linmod</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lam_s</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">lam_t</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">n_curves</span>
+<span class="go">3</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.regression.FRegress" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">FRegress</span>
+
+
+<a href="#fabel.regression.FRegress" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">FRegress</span><span class="p">(</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">fit_intercept</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.RegressorMixin">RegressorMixin</span></code>, <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code></p>
+
+
+
+        <p>Functional linear regression as a scikit-learn regressor.</p>
+<p><code>X</code> is either a numeric matrix of scalar covariates (one column per
+covariate), a single :class:<code>FData</code> covariate, or a list of covariates as
+accepted by :func:<code>fregress</code>.  <code>y</code> is a vector (scalar response) or an
+:class:<code>FData</code> (functional response).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>beta</code>
+            </td>
+            <td>
+                  <code><span title="mapping">mapping</span> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Coefficient specification per covariate, as in :func:<code>fregress</code>.  With
+<code>fit_intercept</code> the intercept is the first term, named <code>const</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Default smoothing parameter.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Default roughness operator.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>fit_intercept</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Prepend the constant covariate <code>1</code>.  Default <code>True</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegress.result_">result_</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FRegressResult
+
+
+  
+      dataclass
+   (fabel.regression.FRegressResult)" href="#fabel.regression.FRegressResult">FRegressResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The fitted model.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegress.coef_">coef_</span></code></td>
+            <td>
+                  <code>tuple of FData</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The estimated coefficient functions (<code>result_.beta</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.regression.FRegress.n_features_in_">n_features_in_</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of columns seen during <code>fit</code> when <code>X</code> was a matrix.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRegress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">50</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">X</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">FRegress</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">y</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[0.0, 0.0]</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.regression.FRegress.fit" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fit</span>
+
+
+<a href="#fabel.regression.FRegress.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fit</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FRegress</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Fit the model.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>X</code>
+            </td>
+            <td>
+                  <code>array of shape (n_samples, n_features), FData or list</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Covariates.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code>array of shape (n_samples,), FData or SmoothResult</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Response.  A numeric <code>y</code> must be finite; a column vector is
+flattened with a <code>DataConversionWarning</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FRegress (fabel.regression.FRegress)" href="#fabel.regression.FRegress">FRegress</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The fitted estimator.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>y</code> is missing or not finite, <code>X</code> and <code>y</code> hold different
+numbers of samples, or there is only one sample.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRegress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">FRegress</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">coefs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">]</span>
+<span class="go">[1.0, 2.0]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.regression.FRegress.predict" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">predict</span>
+
+
+<a href="#fabel.regression.FRegress.predict" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Predict the response for new covariates.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>X</code>
+            </td>
+            <td>
+                  <code>array of shape (n_samples, n_features), FData or list</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Covariates laid out as in :meth:<code>fit</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="array">array</span> or <a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Predicted response.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.regression.fregress" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fregress</span>
+
+
+<a href="#fabel.regression.fregress" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fregress</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FRegressResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Fit a functional linear model; the model type follows from the arguments.</p>
+<p>Replaces R's <code>fRegress</code> (including <code>fRegress.formula</code>, <code>fRegress.fd</code>
+and <code>fRegress.double</code>).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code>(<span title="array">array</span>, <a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a>, <a class="autorefs autorefs-internal" title="SmoothResult
+
+
+  
+      dataclass
+   (fabel.smoothing.SmoothResult)" href="../smoothing/#fabel.smoothing.SmoothResult">SmoothResult</a> or <span title="str">str</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The response: <code>n</code> numbers (scalar response), an :class:<code>FData</code> of
+<code>n</code> curves (functional response), or a
+:class:<code>~fabel.smoothing.SmoothResult</code> whose <code>y2c_map</code> is then kept for
+:meth:<code>FRegressResult.stderr</code>.  A string is a formula
+<code>"response ~ a + b"</code>, evaluated against the mapping <code>x</code>: the
+intercept <code>const</code> is included unless the formula has <code>- 1</code> or
+<code>+ 0</code>, and a covariate given as labels (strings) is expanded into
+treatment-coded indicators <code>name.level</code>, first sorted level dropped,
+as in R.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code>(<span title="mapping">mapping</span>, <span title="sequence">sequence</span> or <span title="covariate">covariate</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The covariates, each either an :class:<code>FData</code> of <code>n</code> curves, <code>n</code>
+numbers, or a single number broadcast to all observations (<code>1.0</code> is
+an intercept).  A mapping names the terms; a sequence names them
+<code>x0, x1, ...</code>.  The data mapping of a formula.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>beta</code>
+            </td>
+            <td>
+                  <code><span title="mapping">mapping</span> or <span title="sequence">sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Coefficient specification per term (by name or position): <code>None</code>, a
+:class:<code>~fabel.basis.Basis</code>, <code>(basis, lam)</code> or
+<code>(basis, lam, penalty)</code>.  A mapping may also be keyed by the variable a
+formula term came from.  The default basis is the response basis for a
+functional response, and for a scalar response the covariate's own basis
+(curves) or a :class:<code>~fabel.basis.Constant</code> (numbers).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Smoothing parameter applied to every term that does not give its own.
+Default <code>0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operator for every term that does not give its own; an integer
+means <code>D^penalty</code>.  Default <code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>weights</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Positive observation weights, one per observation.  The fit is then
+weighted least squares; see Notes.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FRegressResult
+
+
+  
+      dataclass
+   (fabel.regression.FRegressResult)" href="#fabel.regression.FRegressResult">FRegressResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Coefficient functions, fitted values and fit diagnostics, with
+:meth:<code>~FRegressResult.predict</code>, :meth:<code>~FRegressResult.stderr</code> and
+:meth:<code>~FRegressResult.cv</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the covariates disagree with the response in size or domain, a
+scalar-on-scalar term is given a non-constant basis, or the formula is
+malformed.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a formula names a variable missing from the data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>With <code>weights</code> the coefficients minimise the penalised weighted
+criterion :math:<code>\sum_i w_i \|y_i - \hat y_i\|^2 + \text{penalties}</code>, for a
+scalar and a functional response alike.  This is what R's
+<code>fRegress(..., wt = w)</code> computes, and the two agree to the accuracy of
+R's numerical integration.  R has a trap here: its weight argument is
+called <code>wt</code>, and <code>fRegress(..., wtvec = w)</code> (the name R's smoothing
+functions use) is swallowed by <code>...</code> without a warning, so R returns the
+<em>unweighted</em> fit.  Scripts that pass <code>wtvec</code> to <code>fRegress</code> must drop
+<code>weights</code> when ported, or they will get a different answer in Fabel.
+Only the relative weights matter when there is no penalty; with a penalty,
+scaling every weight by <code>c</code> acts like dividing <code>lam</code> by <code>c</code>.  R's
+<code>Fperm.fd</code> ignores weights, while :func:<code>fabel.stats.f_test</code> on a
+weighted model does not -- see its Notes.</p>
+</details>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p>Scalar response on a functional covariate:</p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">fregress</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="mi">40</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">fb</span><span class="o">.</span><span class="n">inprod</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">basis</span><span class="p">)))[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">fregress</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">beta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coefs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[-1.0, -0.666667, -0.333333, 0.0, 0.333333, 0.666667, 1.0]</span>
+</code></pre></div>
+    <p>The formula interface with a categorical covariate:</p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">region</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"north"</span><span class="p">,</span> <span class="s2">"south"</span><span class="p">,</span> <span class="s2">"north"</span><span class="p">,</span> <span class="s2">"east"</span><span class="p">,</span> <span class="s2">"south"</span><span class="p">,</span> <span class="s2">"east"</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">yf</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fregress</span><span class="p">(</span><span class="s2">"temp ~ region"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"temp"</span><span class="p">:</span> <span class="n">yf</span><span class="p">,</span> <span class="s2">"region"</span><span class="p">:</span> <span class="n">region</span><span class="p">})</span><span class="o">.</span><span class="n">names</span>
+<span class="go">('const', 'region.north', 'region.south')</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.regression.linmod" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">linmod</span>
+
+
+<a href="#fabel.regression.linmod" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">linmod</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">alpha_basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">s_basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">t_basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lam_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">lam_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">lam_t</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">penalty_alpha</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">penalty_s</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">penalty_t</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinmodResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Fit the fully functional linear model with a bivariate coefficient.</p>
+<p>Replaces R's <code>linmod</code>.  Each response curve is explained by a whole
+covariate curve:</p>
+<p>.. math:: y_i(t) = \alpha(t) + \int x_i(s)\,\beta(s, t)\,ds + e_i(t) ,</p>
+<p>where <code>s</code> and <code>t</code> may live on different intervals.  The intercept is
+<code>alpha = φ_alphaᵀ a</code> and the surface is <code>β(s, t) = θ_s(s)ᵀ B θ_t(t)</code>; <code>a</code> and
+<code>B</code> minimise</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>\sum_i w_i \int (y_i - \hat y_i)^2\,dt
++ \lambda_\alpha \int (L_\alpha \alpha)^2\,dt
++ \lambda_s \iint (L_s \beta)^2\,ds\,dt
++ \lambda_t \iint (L_t \beta)^2\,ds\,dt ,
+</code></pre></div>
+<p><code>L_s</code> acting on <code>s</code> and <code>L_t</code> on <code>t</code>.  This is R's <code>linmod</code> with
+<code>betaList = list(fdPar(alpha_basis, penalty_alpha, lam_alpha),
+bifdPar(bifd(0, s_basis, t_basis), penalty_s, penalty_t, lam_s, lam_t))</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <a class="autorefs autorefs-internal" title="SmoothResult
+
+
+  
+      dataclass
+   (fabel.smoothing.SmoothResult)" href="../smoothing/#fabel.smoothing.SmoothResult">SmoothResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>n</code> response curves.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <a class="autorefs autorefs-internal" title="SmoothResult
+
+
+  
+      dataclass
+   (fabel.smoothing.SmoothResult)" href="../smoothing/#fabel.smoothing.SmoothResult">SmoothResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>n</code> covariate curves.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>alpha_basis</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Basis
+
+
+  
+      dataclass
+   (fabel.basis.Basis)" href="../basis/#fabel.basis.Basis">Basis</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis of the intercept <code>alpha(t)</code>.  Defaults to the response basis.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>s_basis</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Basis
+
+
+  
+      dataclass
+   (fabel.basis.Basis)" href="../basis/#fabel.basis.Basis">Basis</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis of <code>β</code> in <code>s</code> (the covariate's argument).  Defaults to the
+covariate basis.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>t_basis</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Basis
+
+
+  
+      dataclass
+   (fabel.basis.Basis)" href="../basis/#fabel.basis.Basis">Basis</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis of <code>β</code> in <code>t</code> (the response's argument).  Defaults to the
+response basis.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam_alpha</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Smoothing parameters of the intercept and of the surface in <code>s</code> and in
+<code>t</code> (R's <code>lambda</code>, <code>lambdas</code> and <code>lambdat</code>).  Default <code>0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam_s</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Smoothing parameters of the intercept and of the surface in <code>s</code> and in
+<code>t</code> (R's <code>lambda</code>, <code>lambdas</code> and <code>lambdat</code>).  Default <code>0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam_t</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Smoothing parameters of the intercept and of the surface in <code>s</code> and in
+<code>t</code> (R's <code>lambda</code>, <code>lambdas</code> and <code>lambdat</code>).  Default <code>0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty_alpha</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operators matching the three smoothing parameters; an integer
+means <code>D^penalty</code>.  Default <code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty_s</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operators matching the three smoothing parameters; an integer
+means <code>D^penalty</code>.  Default <code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty_t</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operators matching the three smoothing parameters; an integer
+means <code>D^penalty</code>.  Default <code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>weights</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Positive observation weights, one per curve.  Default: all <code>1</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="LinmodResult
+
+
+  
+      dataclass
+   (fabel.regression.LinmodResult)" href="#fabel.regression.LinmodResult">LinmodResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The intercept, the surface, the fitted curves and the normal equations,
+with :meth:<code>~LinmodResult.predict</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>x</code> or <code>y</code> is not a set of curves.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>x</code> and <code>y</code> hold different numbers of curves, a basis lives on
+the wrong domain, a smoothing parameter is negative or not finite, or a
+weight is not positive.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>Every integral is exact (Gauss-Legendre on the break points of the bases
+involved) and the fitted curves are the exact L2 projection onto the
+response basis.  R's <code>linmod</code> integrates numerically and fits <code>ŷ</code> by
+least squares on 201 points, so the two agree to the accuracy of R's
+quadrature: to rounding when R's integrals are exact (polynomial bases),
+about <code>1e-6</code> on the weather data, <code>1e-4</code> on cubic B-splines.  R's
+<code>linmod(..., wtvec = w)</code> stops with an error in fda 6.3.0; Fabel's
+<code>weights</code> give the weighted least-squares fit.</p>
+<p>PyTorch coefficients (in <code>x</code>, <code>y</code> or <code>weights</code>) make the whole fit run
+in PyTorch, so gradients flow back to the inputs.</p>
+</details>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p>A surface that the data determine exactly is recovered:</p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">linmod</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sbasis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tbasis</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">)),</span> <span class="n">sbasis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surface</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">fb</span><span class="o">.</span><span class="n">inprod</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sbasis</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">FData</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">surface</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">tbasis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">linmod</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">coefs</span><span class="p">,</span> <span class="n">surface</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]))[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[1.0, 1.0]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

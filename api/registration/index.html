@@ -1,0 +1,3384 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Functional data analysis for Python — a clean-room rewrite of R's fda.">
+      
+      
+      
+        <link rel="canonical" href="https://hameddavodi.github.io/fabel/api/registration/">
+      
+      
+        <link rel="prev" href="../regression/">
+      
+      
+        <link rel="next" href="../dynamics/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Registration - Fabel</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#registration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fabel" class="md-header__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabel
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Registration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fabel" class="md-nav__button md-logo" aria-label="Fabel" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabel
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hameddavodi/fabel" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hameddavodi/fabel
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../r-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from R fda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA and CCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decomposition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decomposition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.AmpPhaseDecomposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AmpPhaseDecomposition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegistrationResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RegistrationResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult.warp_values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warp_values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult.apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        apply
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult.decompose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decompose
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.Registrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registrator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registrator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.Registrator.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.Registrator.transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.landmark_register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        landmark_register
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sparse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse data (PACE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../density/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density and intensity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling (ODE parameters)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyTorch layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input and output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.AmpPhaseDecomposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AmpPhaseDecomposition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegistrationResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RegistrationResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult.warp_values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warp_values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult.apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        apply
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.RegistrationResult.decompose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decompose
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.Registrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registrator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registrator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.Registrator.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabel.registration.Registrator.transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fabel.registration.landmark_register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        landmark_register
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="registration">Registration<a class="headerlink" href="#registration" title="Permanent link">&para;</a></h1>
+<p><code>fabel.registration</code>: continuous registration <code>register()</code>, landmark
+registration (<code>register(..., landmarks=...)</code> or <code>landmark_register()</code>), the
+amplitude/phase decomposition <code>RegistrationResult.decompose()</code>, and the
+scikit-learn <code>Registrator</code> transformer.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Curve registration: remove phase variation by warping the time axis.</p>
+<p>A single entry point, :func:<code>register</code>, replaces R <code>fda</code>'s <code>register.fd</code>
+(continuous registration), <code>landmarkreg</code> (landmark registration),
+<code>register.newfd</code> and <code>AmpPhaseDecomp</code> (via
+:meth:<code>RegistrationResult.decompose</code>).</p>
+<p>Every warping function is strictly increasing by construction.  It is built
+from an unconstrained latent function <code>W</code> exactly as a monotone smooth is
+(see :func:<code>fabel.smoothing.smooth</code> with <code>constraint="morph"</code>):</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>h(t) = a + (b - a)\,\frac{\int_a^t e^{W(u)}\,du}{\int_a^b e^{W(u)}\,du},
+\qquad W(u) = \sum_k c_k \varphi_k(u),
+</code></pre></div>
+<p>so <code>h(a) = a</code>, <code>h(b) = b</code> and <code>h' &gt; 0</code>.  The registered curve is
+<code>x(h(t))</code> (<code>x(h(t) + δ)</code> with a per-curve shift <code>δ</code> for periodic data).</p>
+<p>Continuous registration chooses <code>c</code> for each curve by minimising, on the
+uniform grid <code>t_1 .. t_n</code> with <code>n = max(201, 10 K + 1)</code> points (<code>K</code> the
+size of the curves' basis), either the least-squares criterion</p>
+<p>.. math:: F_1 = \frac1n \sum_j \big(x_0(t_j) - x(h(t_j))\big)^2</p>
+<p>or the minimum-eigenvalue criterion of Ramsay &amp; Silverman (2005, §7.6),</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>F_2 = 2\,\mu_{\min}\!\begin{pmatrix}
+    \overline{x_0^2} &amp; \overline{x_0\,x\circ h} \\
+    \overline{x_0\,x\circ h} &amp; \overline{(x\circ h)^2}
+\end{pmatrix},
+</code></pre></div>
+<p>where the bar is the grid mean, plus the roughness penalty <code>λ cᵀRc</code>.  These are
+the discretisations R <code>fda</code> 6.3.0 uses, so <code>lam</code> means the same thing in
+both.</p>
+<p>Multivariate curves (<code>n_vars &gt; 1</code>, such as the hip and knee angles of the
+gait data, or the <code>x</code> and <code>y</code> coordinates of handwriting) get one warp per
+curve, shared by all variables: the fitting criterion is the weighted sum
+<code>Σ_v w_v F(x_{0v}, x_v∘h)</code> of the criteria of the variables (Ramsay &amp;
+Silverman 2005, §7.6), with equal weights by default.  R <code>fda</code> 6.3.0's
+<code>register.fd</code> accepts multivariate curves but fits their warps to the first
+variable alone (measured, black box); <code>var_weights=[1, 0, ...]</code> reproduces
+that.  The first coefficient is pinned to zero, which removes the one exactly
+flat direction (<code>W -&gt; W + s</code> leaves <code>h</code> unchanged).  The minimisation is a
+safeguarded Newton iteration with the exact Hessian: the first and second
+derivatives of <code>h</code> with respect to <code>c</code> are cumulative integrals of
+<code>φ_k e^W</code> and <code>φ_k φ_l e^W</code>, computed by Gauss-Legendre quadrature.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shifts</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.42</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">curves</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">t</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">curves</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wbasis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s2">"least_squares"</span><span class="p">,</span> <span class="n">warp_basis</span><span class="o">=</span><span class="n">wbasis</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peaks</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">registered</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.registration.AmpPhaseDecomposition" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AmpPhaseDecomposition</span>
+
+
+<a href="#fabel.registration.AmpPhaseDecomposition" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="typing.NamedTuple">NamedTuple</span></code></p>
+
+
+
+        <p>Amplitude/phase split of the variation in a set of curves.</p>
+<p>Replaces the list returned by R's <code>AmpPhaseDecomp</code>.  Being a named tuple it
+unpacks as <code>amp_mse, phase_mse, rsq, c = res.decompose()</code>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.AmpPhaseDecomposition.amp_mse">amp_mse</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mean squared error due to amplitude variation (R <code>MS.amp</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.AmpPhaseDecomposition.phase_mse">phase_mse</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mean squared error due to phase variation (R <code>MS.pha</code>).  It can be
+negative when the registration does not improve the alignment.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.AmpPhaseDecomposition.rsq">rsq</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Share of the total variation that is due to phase,
+<code>phase_mse / (amp_mse + phase_mse)</code> (R <code>RSQR</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.AmpPhaseDecomposition.c">c</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The constant of the decomposition (R <code>C</code>); it equals one when the warp
+derivatives are uncorrelated with the squared registered curves.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">AmpPhaseDecomposition</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AmpPhaseDecomposition</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">rsq</span>
+<span class="go">0.75</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.registration.RegistrationResult" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">RegistrationResult</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#fabel.registration.RegistrationResult" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">RegistrationResult</span><span class="p">(</span>
+    <span class="n">registered</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">warp</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">unregistered</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">latent</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">warp_inverse</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Outcome of :func:<code>register</code>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.registered">registered</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The registered curves <code>x_i(h_i(t))</code> (R <code>regfd</code>), in the basis of the
+input curves: the least-squares fit to the warped values on the
+registration grid.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.warp">warp</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The warping functions <code>h_i</code> (R <code>warpfd</code>).  For continuous
+registration they are expressed in the warp basis and include the shift
+of a periodic registration; for landmark registration they are expressed
+in the basis of the curves.  Both are least-squares fits on the
+registration grid, as in R.  :meth:<code>warp_values</code> evaluates the exact
+warps.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.unregistered">unregistered</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input curves (R <code>yfd</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.latent">latent</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The latent functions <code>W_i</code> that define the warps (R <code>Wfd</code>).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.shift">shift</span></code></td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Per-curve time shift <code>δ_i</code> of a periodic registration; zeros otherwise.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.target">target</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The target curve(s) of a continuous registration; <code>None</code> for landmarks.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.warp_inverse">warp_inverse</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The inverse warps <code>h_i⁻¹</code> of a landmark registration (R <code>warpinvfd</code>),
+in the basis of the curves; <code>None</code> for continuous registration.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.criterion">criterion</span></code></td>
+            <td>
+                  <code><span title="array">array</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final value of the fitting criterion per curve (continuous only).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.RegistrationResult.n_iter">n_iter</span></code></td>
+            <td>
+                  <code><span title="array">array</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Newton iterations used per curve (continuous only).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>For multivariate curves <code>registered</code>, <code>unregistered</code> and <code>target</code>
+keep their variables (coefficients <code>(n_basis, n_curves, n_vars)</code>), while
+<code>warp</code>, <code>latent</code>, <code>shift</code> and <code>warp_inverse</code> hold one warp per
+curve, shared by its variables.</p>
+</details>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">landmarks</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.4</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">n_curves</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">warp_inverse</span><span class="o">.</span><span class="n">n_curves</span>
+<span class="go">(3, 3)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.registration.RegistrationResult.warp_values" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">warp_values</span>
+
+
+<a href="#fabel.registration.RegistrationResult.warp_values" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">warp_values</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Evaluate the exact warping functions <code>h_i(t) + δ_i</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Points in the domain of the curves, shape <code>(n_points,)</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Warp values of shape <code>(n_points, n_curves)</code>: a tensor (constant,
+on the device of the result) for a registration of tensors or for
+tensor <code>t</code>, a NumPy array otherwise.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">landmarks</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.45</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.55</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">warp_values</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.registration.RegistrationResult.apply" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">apply</span>
+
+
+<a href="#fabel.registration.RegistrationResult.apply" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply</span><span class="p">(</span><span class="n">fd</span><span class="p">:</span> <span class="n">FData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FData</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Warp new curves with the warps of this registration.</p>
+<p>Replaces R's <code>register.newfd</code>: curve <code>i</code> of <code>fd</code> becomes
+<code>x_i(h_i(t) + δ_i)</code> with the exact warp <code>h_i</code> and shift <code>δ_i</code>
+estimated here (warped times wrap around the domain when the shifts of
+a periodic registration are not all zero).  The result is the
+least-squares fit of those values, on the registration grid of <code>fd</code>'s
+basis, in <code>fd</code>'s basis -- the same projection :func:<code>register</code> uses,
+so <code>res.apply(res.unregistered)</code> reproduces <code>res.registered</code>.  A
+typical use is carrying warps estimated on one set of curves over to
+derived or companion curves (derivatives, other variables).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fd</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Curves to warp, univariate or multivariate, with one curve per warp
+and on the domain of the warps.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The warped curves in <code>fd</code>'s basis, with <code>fd</code>'s variables.  With
+:class:<code>torch.Tensor</code> coefficients the result holds a tensor of the
+same dtype and device, differentiable with respect to
+<code>fd.coefs</code> (the warps are constants).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>fd</code> has a different number of curves than there are warps,
+lies on another domain, or has NaN or infinite coefficients.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">landmarks</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.4</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">coefs</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">coefs</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fd</span><span class="o">.</span><span class="n">derivative</span><span class="p">())</span><span class="o">.</span><span class="n">n_curves</span>
+<span class="go">3</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.registration.RegistrationResult.decompose" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">decompose</span>
+
+
+<a href="#fabel.registration.RegistrationResult.decompose" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">decompose</span><span class="p">(</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AmpPhaseDecomposition</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Split the variation of the curves into amplitude and phase parts.</p>
+<p>Replaces R's <code>AmpPhaseDecomp</code> (Kneip &amp; Ramsay 2008).  With <code>x_i</code> the
+unregistered curves, <code>y_i</code> the registered ones and <code>h_i</code> the warps,</p>
+<p>.. math::</p>
+<div class="highlight"><pre><span></span><code>C = 1 + \frac{\frac{1}{N-1}\sum_i \int (Dh_i - \overline{Dh})
+              (y_i^2 - \overline{y^2})}{\frac1N \sum_i \int y_i^2},
+\quad
+\text{amp} = \frac{C}{N}\sum_i \int (y_i - \bar y)^2,
+\quad
+\text{phase} = C\int \bar y^2 - \int \bar x^2 ,
+</code></pre></div>
+<p>and <code>rsq = phase / (amp + phase)</code>.  The integrals use the trapezoidal
+rule on <code>max(201, 10 K + 1)</code> equally spaced points, <code>K</code> being the size
+of the basis of the unregistered curves, which is the rule R uses.  For
+multivariate curves the squares are squared Euclidean norms over the
+variables (every integral is summed over the variables); R's
+<code>AmpPhaseDecomp</code> rejects multivariate curves.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>domain</code>
+            </td>
+            <td>
+                  <code>tuple of float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sub-interval over which to decompose.  Defaults to the whole domain.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="AmpPhaseDecomposition (fabel.registration.AmpPhaseDecomposition)" href="#fabel.registration.AmpPhaseDecomposition">AmpPhaseDecomposition</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>(amp_mse, phase_mse, rsq, c)</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If fewer than two curves are registered, or <code>domain</code> is not inside
+the domain of the curves.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">amp</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">rsq</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">landmarks</span><span class="o">=</span><span class="p">[[</span><span class="mf">0.4</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.45</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.55</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">]])</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">rsq</span> <span class="o">-</span> <span class="n">phase</span> <span class="o">/</span> <span class="p">(</span><span class="n">amp</span> <span class="o">+</span> <span class="n">phase</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-12</span><span class="p">)</span>
+<span class="go">True</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="fabel.registration.Registrator" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">Registrator</span>
+
+
+<a href="#fabel.registration.Registrator" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">Registrator</span><span class="p">(</span>
+    <span class="n">warp_basis</span><span class="p">:</span> <span class="n">BSpline</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"eigen"</span><span class="p">,</span>
+    <span class="n">periodic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">,</span>
+    <span class="n">basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.TransformerMixin">TransformerMixin</span></code>, <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code></p>
+
+
+
+        <p>Continuous registration as a scikit-learn transformer.</p>
+<p><code>fit</code> registers the training curves to their mean and keeps that mean as
+the target; <code>transform</code> registers new curves to the same target and returns
+the coefficients of the registered curves, one row per curve.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>warp_basis</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="BSpline
+
+
+  
+      dataclass
+   (fabel.basis.BSpline)" href="../basis/#fabel.basis.BSpline">BSpline</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis of the latent warp functions, as in :func:<code>register</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness weight on the warps.  Default <code>0</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operator on the warps.  Default <code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>criterion</code>
+            </td>
+            <td>
+                  <code>(&#39;eigen&#39;, &#39;least_squares&#39;)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Registration criterion.  Default <code>"eigen"</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;eigen&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>periodic</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Estimate a periodic time shift as well.  Default <code>False</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>max_iter</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Newton iterations per curve.  Default <code>100</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>100</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tol</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Convergence tolerance.  Default <code>1e-10</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1e-10</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>basis</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Basis
+
+
+  
+      dataclass
+   (fabel.basis.Basis)" href="../basis/#fabel.basis.Basis">Basis</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis to attach to a plain coefficient matrix; ignored for FData input.
+<code>None</code> builds a cubic B-spline on <code>(0, 1)</code> with one function per
+column.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>Being a scikit-learn transformer it works on univariate curves (one row
+of coefficients per curve); multivariate FData raise <code>ValueError</code>.</p>
+</details>
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.Registrator.target_">target_</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The registration target (mean of the training curves).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.Registrator.result_">result_</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="RegistrationResult
+
+
+  
+      dataclass
+   (fabel.registration.RegistrationResult)" href="#fabel.registration.RegistrationResult">RegistrationResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The registration of the training curves.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.Registrator.n_features_in_">n_features_in_</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of basis coefficients per curve seen during <code>fit</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="fabel.registration.Registrator.n_iter_">n_iter_</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Largest number of Newton iterations used by a training curve.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registrator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Registrator</span><span class="p">(</span><span class="n">criterion</span><span class="o">=</span><span class="s2">"least_squares"</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(5, 9)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.registration.Registrator.fit" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fit</span>
+
+
+<a href="#fabel.registration.Registrator.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fit</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Registrator</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Register the training curves to their mean.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>X</code>
+            </td>
+            <td>
+                  <code>FData or array of shape (n_samples, n_basis)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Curves, or their basis coefficients one curve per row.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code><span title="ignored">ignored</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Present for API compatibility.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Registrator (fabel.registration.Registrator)" href="#fabel.registration.Registrator">Registrator</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The fitted estimator.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="fabel.registration.Registrator.transform" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">transform</span>
+
+
+<a href="#fabel.registration.Registrator.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">transform</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Register curves to the fitted target and return their coefficients.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>X</code>
+            </td>
+            <td>
+                  <code>FData or array of shape (n_samples, n_basis)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Curves in the basis seen during <code>fit</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Registered coefficients of shape <code>(n_samples, n_basis)</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.registration.register" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">register</span>
+
+
+<a href="#fabel.registration.register" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">register</span><span class="p">(</span>
+    <span class="n">fd</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">FData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">landmarks</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_landmarks</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">warp_basis</span><span class="p">:</span> <span class="n">Basis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LDO</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"eigen"</span><span class="p">,</span>
+    <span class="n">periodic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">init</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">init_shift</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">,</span>
+    <span class="n">var_weights</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RegistrationResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Register curves by warping their time axis.</p>
+<p>Without <code>landmarks</code> this is continuous registration (R <code>register.fd</code>):
+each curve is warped to minimise its distance to <code>target</code> (the mean curve
+by default).  With <code>landmarks</code> it is landmark registration (R
+<code>landmarkreg</code>): each curve is warped so that its landmark times move to
+<code>target_landmarks</code> (the mean landmark times by default).</p>
+<p>Multivariate curves get one warp per curve, shared by all their
+variables; the continuous criterion is then the sum over the variables,
+weighted by <code>var_weights</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fd</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The curves to register, univariate or multivariate.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One target curve, or one per curve, with the variables of <code>fd</code>.
+Defaults to <code>fd.mean()</code>.  Ignored for landmark registration.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>landmarks</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Landmark times, shape <code>(n_curves, n_landmarks)</code> (or <code>(n_curves,)</code>
+for one landmark), strictly inside the domain and increasing per curve.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_landmarks</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Where the landmarks should land, shape <code>(n_landmarks,)</code>.  Defaults to
+the mean landmark times.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>warp_basis</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Basis
+
+
+  
+      dataclass
+   (fabel.basis.Basis)" href="../basis/#fabel.basis.Basis">Basis</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>B-spline basis for the latent functions <code>W</code>.  Defaults to the linear
+two-function basis for continuous registration (R's default) and to a
+cubic spline with knots at the target landmarks otherwise.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lam</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness weight on <code>W</code>.  Defaults to <code>0</code> for continuous registration
+(R's default) and to <code>1e-4</code> for landmark registration, where the
+latent coefficients outnumber the landmarks.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>penalty</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or <a class="autorefs autorefs-internal" title="LDO
+
+
+  
+      dataclass
+   (fabel._operator.LDO)" href="../core/#fabel.core.LDO">LDO</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Roughness operator on <code>W</code>.  Default <code>2</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>criterion</code>
+            </td>
+            <td>
+                  <code>(&#39;eigen&#39;, &#39;least_squares&#39;)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Continuous criterion: the minimum-eigenvalue criterion (R <code>crit=2</code>,
+the default) or least squares (R <code>crit=1</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;eigen&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>periodic</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Treat the curves as periodic over their domain and estimate a time shift
+per curve as well as the warp (R <code>periodic=TRUE</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>init</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a> or <span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Starting latent functions: an FData on the warp basis (whose basis then
+is the warp basis), or a <code>(K,)</code> / <code>(K, n_curves)</code> coefficient array.
+Defaults to zero, the identity warp.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>init_shift</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> or <span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Starting shifts of a periodic registration.  Default zero.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>max_iter</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum Newton iterations per curve.  <code>0</code> returns the warps defined by
+<code>init</code> without optimising.  Default <code>100</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>100</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tol</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Convergence tolerance on the largest gradient component, relative to
+<code>max(1, criterion)</code>.  Default <code>1e-10</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1e-10</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>var_weights</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Non-negative weight of each variable in the continuous criterion of
+multivariate curves, shape <code>(n_vars,)</code>, at least one positive.
+Defaults to ones: the criteria of the variables are summed.  R
+<code>fda</code> 6.3.0's <code>register.fd</code> fits multivariate warps to the first
+variable only, which <code>var_weights=[1, 0, ...]</code> reproduces.  Ignored
+for landmark registration.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="RegistrationResult
+
+
+  
+      dataclass
+   (fabel.registration.RegistrationResult)" href="#fabel.registration.RegistrationResult">RegistrationResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The registered curves, warps, latent functions and shifts.  With
+PyTorch input (see Notes) every array and coefficient matrix in it is a
+tensor of the input's dtype and device.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>On a non-B-spline warp basis, badly shaped landmarks or targets, a
+target whose number of variables differs from <code>fd</code>'s, invalid
+<code>var_weights</code>, an unknown criterion, a negative <code>lam</code>, or NaN or
+infinite values in <code>fd</code>, <code>target</code>, <code>init</code> or <code>init_shift</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Warns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeWarning">RuntimeWarning</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If some curve has not converged after <code>max_iter</code> iterations.  This
+includes a criterion without a finite minimum: with <code>lam=0</code> the
+eigenvalue criterion can keep decreasing as the warp squeezes a curve
+into a vanishing stretch of the domain, and <code>W</code> grows without bound.
+The line search rejects steps at which the criterion or its
+derivatives overflow and a failed eigendecomposition of the Hessian
+falls back to steepest descent, so such curves stop at the last finite
+iterate (an increasing warp) with this warning rather than an
+exception.  A positive <code>lam</code> keeps <code>W</code> bounded.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p><strong>PyTorch input.</strong>  When <code>fd</code> (or, for continuous registration, an FData
+<code>target</code>) has :class:<code>torch.Tensor</code> coefficients, the result holds
+tensors in the dtype and on the device of that input, and <code>registered</code>
+is differentiable with respect to the input coefficients.  Continuous
+registration then evaluates the criterion in PyTorch and takes its
+gradient and Hessian by automatic differentiation instead of the analytic
+formulas; the safeguarded Newton iteration, the line search and the
+stopping rules are the same, so both paths reach the same optimum.  The
+optimisation always runs in float64 on the CPU (a registration needs
+<code>tol</code>-level accuracy, and some devices have no float64).  Gradients flow
+through the final evaluation <code>x_i(h_i(t))</code> with the optimal warps held
+fixed: the dependence of the optimum on the curves (the implicit
+gradient) is not propagated.  Landmark registration needs no optimisation;
+its warps depend only on the landmarks, so the gradient of <code>registered</code>
+with respect to the coefficients is exact.  <code>warp</code>, <code>latent</code>,
+<code>warp_inverse</code>, <code>shift</code>, <code>criterion</code> and <code>n_iter</code> are constant
+tensors.  Multivariate tensor curves work the same way.  <code>import
+fabel</code> never imports torch; this path imports it on first use.</p>
+</details>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">basis</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">n_basis</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">curves</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">curves</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peaks</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">curves</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">landmarks</span><span class="o">=</span><span class="n">peaks</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">warp_values</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">peaks</span><span class="o">.</span><span class="n">mean</span><span class="p">())),</span> <span class="n">peaks</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">))</span>
+<span class="go">True</span>
+</code></pre></div>
+    <p>Multivariate curves (here two variables that share their phase) get one
+warp per curve:</p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">both</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">fd</span><span class="o">.</span><span class="n">coefs</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">fd</span><span class="o">.</span><span class="n">coefs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">basis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">multi</span> <span class="o">=</span> <span class="n">register</span><span class="p">(</span><span class="n">both</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s2">"least_squares"</span><span class="p">,</span> <span class="n">warp_basis</span><span class="o">=</span><span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">multi</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">coefs</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">multi</span><span class="o">.</span><span class="n">latent</span><span class="o">.</span><span class="n">coefs</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">((12, 3, 2), (4, 3))</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="fabel.registration.landmark_register" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">landmark_register</span>
+
+
+<a href="#fabel.registration.landmark_register" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">landmark_register</span><span class="p">(</span>
+    <span class="n">fd</span><span class="p">:</span> <span class="n">FData</span><span class="p">,</span>
+    <span class="n">landmarks</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">target_landmarks</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RegistrationResult</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Landmark registration; shorthand for <code>register(fd, landmarks=...)</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fd</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="FData
+
+
+  
+      dataclass
+   (fabel.core.FData)" href="../core/#fabel.core.FData">FData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The curves to register, univariate or multivariate (one warp per
+curve, shared by its variables).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>landmarks</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Landmark times, shape <code>(n_curves, n_landmarks)</code> or <code>(n_curves,)</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_landmarks</code>
+            </td>
+            <td>
+                  <code><span title="array">array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Target landmark times; the mean landmark times by default.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>warp_basis</code>, <code>lam</code> and <code>penalty</code>, as in :func:<code>register</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="RegistrationResult
+
+
+  
+      dataclass
+   (fabel.registration.RegistrationResult)" href="#fabel.registration.RegistrationResult">RegistrationResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>As returned by :func:<code>register</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span><span class="p">,</span> <span class="n">FData</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fabel.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">landmark_register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">FData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">BSpline</span><span class="p">(</span><span class="n">n_basis</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">landmark_register</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span><span class="o">.</span><span class="n">latent</span><span class="o">.</span><span class="n">n_curves</span>
+<span class="go">2</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Hamed Davodi — BSD-3-Clause
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
