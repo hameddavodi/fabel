@@ -12,11 +12,13 @@ from hypothesis import strategies as st
 
 from fabel import LDO, BSpline, FData, Fourier, inprod
 from fabel.regression import fregress
+from fabel.smoothing import SmoothResult, smooth
 from fabel.stats import (
     BoxplotResult,
     DepthResult,
     PermutationTestResult,
     boxplot,
+    confidence_band,
     cor,
     cov,
     depth,
@@ -721,3 +723,238 @@ def test_f_test_on_a_model_rejects_raw_settings() -> None:
         f_test(model, n_perm=0)
     with pytest.raises(TypeError, match="covariates"):
         untyped(y)
+
+
+# --------------------------------------------------------------------------- #
+# confidence bands
+# --------------------------------------------------------------------------- #
+
+#: Two-sided 95% normal quantile, qnorm(0.975) in R.
+Z95 = 1.959963984540054
+
+
+def _band_data(n_curves: int = 4, seed: int = 3) -> tuple[np.ndarray, np.ndarray]:
+    rng = np.random.default_rng(seed)
+    t = np.linspace(0.0, 1.0, 30)
+    y = np.sin(2.0 * np.pi * t)[:, None] + 0.2 * rng.normal(size=(30, n_curves))
+    return t, y
+
+
+def _band_fit(n_curves: int = 4, lam: float = 1e-4) -> SmoothResult:
+    t, y = _band_data(n_curves)
+    return smooth(y, t, basis=BSpline(domain=(0.0, 1.0), n_basis=9), lam=lam)
+
+
+def _brute_stderr(fit: SmoothResult, t: np.ndarray, sigma: np.ndarray, deriv: int = 0) -> Any:
+    amap = fit.fd.basis(t, deriv) @ np.asarray(fit.y2c_map)
+    return np.sqrt(np.diag(amap @ sigma @ amap.T))
+
+
+def test_smooth_band_matches_the_full_sandwich() -> None:
+    fit = _band_fit()
+    t = np.linspace(0.0, 1.0, 13)
+    rng = np.random.default_rng(0)
+    root = rng.normal(size=(30, 30))
+    sigma = root @ root.T / 30.0
+    band = confidence_band(fit, t, sigma_e=sigma)
+    np.testing.assert_allclose(band.stderr, _brute_stderr(fit, t, sigma), rtol=1e-12)
+    np.testing.assert_allclose(band.estimate, fit.fd(t), rtol=1e-14)
+    np.testing.assert_allclose(band.t, t)
+    assert band.level == 0.95
+    assert band.name is None
+
+
+def test_smooth_band_scalar_vector_and_matrix_sigma_agree() -> None:
+    fit = _band_fit()
+    t = np.linspace(0.0, 1.0, 7)
+    scalar = confidence_band(fit, t, sigma_e=0.04).stderr
+    vector = confidence_band(fit, t, sigma_e=np.full(30, 0.04)).stderr
+    matrix = confidence_band(fit, t, sigma_e=0.04 * np.eye(30)).stderr
+    integer = confidence_band(fit, t, sigma_e=1).stderr
+    np.testing.assert_allclose(vector, scalar, rtol=1e-12)
+    np.testing.assert_allclose(matrix, scalar, rtol=1e-12)
+    np.testing.assert_allclose(integer, scalar / 0.2, rtol=1e-12)
+
+
+def test_smooth_band_default_sigma_is_pooled_residual_variance() -> None:
+    fit = _band_fit()
+    t = np.linspace(0.0, 1.0, 9)
+    sigma2 = fit.sse / (4 * (30 - fit.df))
+    np.testing.assert_allclose(
+        confidence_band(fit, t).stderr, confidence_band(fit, t, sigma_e=sigma2).stderr, rtol=1e-14
+    )
+
+
+def test_smooth_band_limits_and_level() -> None:
+    fit = _band_fit()
+    band = confidence_band(fit, np.array([0.1, 0.5]), sigma_e=0.01)
+    margin = np.broadcast_to(Z95 * band.stderr[:, None], band.estimate.shape)
+    np.testing.assert_allclose(band.upper - band.estimate, margin, rtol=1e-12)
+    np.testing.assert_allclose(band.estimate - band.lower, margin, rtol=1e-12)
+    wide = confidence_band(fit, np.array([0.1, 0.5]), sigma_e=0.01, level=0.99)
+    assert np.all(wide.upper - wide.lower > band.upper - band.lower)
+    assert wide.level == 0.99
+
+
+def test_smooth_band_derivative() -> None:
+    fit = _band_fit()
+    t = np.linspace(0.0, 1.0, 11)
+    band = confidence_band(fit, t, sigma_e=0.04, deriv=1)
+    np.testing.assert_allclose(
+        band.stderr, _brute_stderr(fit, t, 0.04 * np.eye(30), deriv=1), rtol=1e-12
+    )
+    np.testing.assert_allclose(band.estimate, fit.fd(t, 1), rtol=1e-14)
+
+
+def test_smooth_band_default_grid_and_multivariate_shapes() -> None:
+    t, y = _band_data(3)
+    fit = smooth(np.stack([y, 2.0 * y], axis=2), t, basis=BSpline(n_basis=8), lam=1e-4)
+    band = confidence_band(fit)
+    assert band.t.shape == (101,)
+    assert band.estimate.shape == (101, 3, 2)
+    assert band.lower.shape == (101, 3, 2)
+    assert band.stderr.shape == (101,)
+    pooled = fit.sse / (6 * (30 - fit.df))
+    np.testing.assert_allclose(band.stderr, confidence_band(fit, sigma_e=pooled).stderr, rtol=1e-14)
+
+
+def test_smooth_band_covers_the_smoothed_truth_at_the_nominal_rate() -> None:
+    """Monte Carlo: the pointwise band covers E[x_hat(t)] = phi(t)' S f in ~95% of draws."""
+    rng = np.random.default_rng(11)
+    t = np.linspace(0.0, 1.0, 40)
+    truth = np.cos(3.0 * t)
+    sigma = 0.3
+    y = truth[:, None] + sigma * rng.normal(size=(40, 4000))
+    fit = smooth(y, t, basis=BSpline(n_basis=10), lam=1e-5)
+    grid = np.linspace(0.0, 1.0, 9)
+    band = confidence_band(fit, grid, sigma_e=sigma**2)
+    target = fit.fd.basis(grid) @ (np.asarray(fit.y2c_map) @ truth)
+    covered = (band.lower <= target[:, None]) & (target[:, None] <= band.upper)
+    assert abs(float(covered.mean()) - 0.95) < 0.01
+
+
+@settings(max_examples=25, deadline=None)
+@given(
+    scale=st.floats(min_value=1e-3, max_value=1e3),
+    low=st.floats(min_value=0.05, max_value=0.9),
+    gap=st.floats(min_value=0.01, max_value=0.09),
+)
+def test_smooth_band_scales_with_sigma_and_widens_with_level(
+    scale: float, low: float, gap: float
+) -> None:
+    fit = _band_fit()
+    t = np.linspace(0.0, 1.0, 5)
+    base = confidence_band(fit, t, sigma_e=1.0, level=low)
+    scaled = confidence_band(fit, t, sigma_e=scale, level=low)
+    np.testing.assert_allclose(scaled.stderr, np.sqrt(scale) * base.stderr, rtol=1e-10)
+    wider = confidence_band(fit, t, sigma_e=1.0, level=low + gap)
+    assert np.all(wider.upper - wider.lower > base.upper - base.lower)
+
+
+def test_smooth_band_rejects_bad_input() -> None:
+    fit = _band_fit()
+    untyped: Any = confidence_band
+    with pytest.raises(ValueError, match="sigma_e"):
+        confidence_band(fit, sigma_e=np.ones(7))
+    with pytest.raises(ValueError, match="level"):
+        confidence_band(fit, level=1.0)
+    with pytest.raises(ValueError, match="level"):
+        confidence_band(fit, level=0.0)
+    with pytest.raises(ValueError, match="deriv"):
+        confidence_band(fit, deriv=-1)
+    with pytest.raises(TypeError, match="deriv"):
+        untyped(fit, deriv=1.5)
+    with pytest.raises(TypeError, match="deriv"):
+        untyped(fit, deriv=True)
+    with pytest.raises(ValueError, match="y2c_map"):
+        confidence_band(fit, y2c_map=np.eye(3))
+    with pytest.raises(TypeError, match="SmoothResult"):
+        untyped(fit.fd)
+
+
+def test_smooth_band_needs_residual_degrees_of_freedom() -> None:
+    t = np.linspace(0.0, 1.0, 6)
+    fit = smooth(np.sin(t), t, basis=BSpline(n_basis=6), lam=0.0)
+    with pytest.raises(ValueError, match="degrees of freedom"):
+        confidence_band(fit)
+    assert confidence_band(fit, sigma_e=0.1).stderr.shape == (101,)
+
+
+def test_smooth_band_rejects_constrained_and_irregular_fits() -> None:
+    t = np.linspace(0.0, 1.0, 20)
+    positive = smooth(np.exp(t), t, constraint="positive", lam=1e-6)
+    with pytest.raises(ValueError, match="linear"):
+        confidence_band(positive)
+    irregular = smooth([np.sin(t), np.cos(t[:15])], [t, t[:15]], basis=BSpline(n_basis=6), lam=1e-4)
+    with pytest.raises(ValueError, match="irregular"):
+        confidence_band(irregular)
+
+
+def test_smooth_band_keeps_torch_tensors() -> None:
+    torch = pytest.importorskip("torch")
+    t, y = _band_data(2)
+    fit = smooth(torch.as_tensor(y), torch.as_tensor(t), basis=BSpline(n_basis=8), lam=1e-4)
+    band = confidence_band(fit, torch.linspace(0.0, 1.0, 5, dtype=torch.float64), sigma_e=0.04)
+    assert isinstance(band.stderr, torch.Tensor)
+    assert isinstance(band.lower, torch.Tensor)
+    reference = confidence_band(
+        smooth(y, t, basis=BSpline(n_basis=8), lam=1e-4), np.linspace(0.0, 1.0, 5), sigma_e=0.04
+    )
+    np.testing.assert_allclose(band.stderr.numpy(), reference.stderr, rtol=1e-10)
+
+
+def test_regression_bands_scalar_response() -> None:
+    rng = np.random.default_rng(5)
+    z = np.linspace(-1.0, 1.0, 25)
+    model = fregress(1.0 + 2.0 * z + 0.3 * rng.normal(size=25), {"const": 1.0, "z": z})
+    const, slope = confidence_band(model, np.array([0.2, 0.7]))
+    cov_b = model.stderr().cov
+    assert (const.name, slope.name) == ("const", "z")
+    np.testing.assert_allclose(slope.stderr, np.sqrt(cov_b[1, 1]), rtol=1e-12)
+    np.testing.assert_allclose(const.stderr, np.sqrt(cov_b[0, 0]), rtol=1e-12)
+    np.testing.assert_allclose(slope.estimate, model.beta[1].coefs[0, 0], rtol=1e-12)
+    np.testing.assert_allclose(slope.upper - slope.lower, 2 * Z95 * slope.stderr, rtol=1e-12)
+    given_sigma = confidence_band(model, np.array([0.5]), sigma_e=4.0)[1]
+    np.testing.assert_allclose(
+        given_sigma.stderr, np.sqrt(model.stderr(sigma_e=4.0).cov[1, 1]), rtol=1e-12
+    )
+
+
+def test_regression_bands_functional_coefficient_and_derivative() -> None:
+    rng = np.random.default_rng(8)
+    basis = BSpline(domain=(0.0, 1.0), n_basis=8)
+    x = FData(rng.normal(size=(8, 40)), basis)
+    beta_basis = BSpline(domain=(0.0, 1.0), n_basis=5)
+    y = np.asarray(inprod(x, FData(np.arange(5.0)[:, None], beta_basis)))[:, 0]
+    model = fregress(y + 0.1 * rng.normal(size=40), [1.0, x], beta=[None, (beta_basis, 1e-4)])
+    t = np.linspace(0.0, 1.0, 9)
+    bands = confidence_band(model, t, deriv=1)
+    block = model.stderr().cov[1:, 1:]
+    theta = beta_basis(t, 1)
+    np.testing.assert_allclose(
+        bands[1].stderr, np.sqrt(np.sum((theta @ block) * theta, axis=1)), rtol=1e-12
+    )
+    np.testing.assert_allclose(bands[1].estimate, model.beta[1](t, 1)[:, 0], rtol=1e-12)
+    np.testing.assert_allclose(bands[0].stderr, 0.0, atol=1e-15)
+    default = confidence_band(model)
+    assert default[1].t.shape == (101,)
+
+
+def test_regression_bands_functional_response() -> None:
+    t, y = _band_data(12)
+    fit = smooth(y, t, basis=BSpline(domain=(0.0, 1.0), n_basis=7), lam=1e-4)
+    group = np.repeat([0.0, 1.0], 6)
+    model = fregress(fit, {"const": 1.0, "group": group})
+    with pytest.raises(ValueError, match="sigma_e"):
+        confidence_band(model)
+    grid = np.linspace(0.0, 1.0, 6)
+    const, effect = confidence_band(model, grid, sigma_e=0.04)
+    cov_b = model.stderr(sigma_e=0.04).cov
+    theta = fit.fd.basis(grid)
+    block = cov_b[7:, 7:]
+    np.testing.assert_allclose(
+        effect.stderr, np.sqrt(np.sum((theta @ block) * theta, axis=1)), rtol=1e-12
+    )
+    assert const.estimate.shape == (6,)
+    with pytest.raises(ValueError, match="level"):
+        confidence_band(model, sigma_e=0.04, level=2.0)
