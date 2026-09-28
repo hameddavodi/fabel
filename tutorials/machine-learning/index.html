@@ -1421,7 +1421,8 @@ variance of each harmonic in the best model:</p>
 <p><code>Smoother</code>, <code>FPCA</code>, <code>FCCA</code>, <code>Registrator</code>, <code>FRegress</code> and <code>PDA</code> all follow
 this API.</p>
 <h2 id="4-pytorch-a-dataset-of-curves">4. PyTorch: a dataset of curves<a class="headerlink" href="#4-pytorch-a-dataset-of-curves" title="Permanent link">&para;</a></h2>
-<p>The rest of this page needs the <code>torch</code> extra: <code>pip install fdatools[torch]</code>.
+<p>The rest of this page needs the <code>torch</code> extra:
+<code>uv add "fdatools[torch] @ git+https://github.com/hameddavodi/fdatools@v1.1.0"</code>.
 <code>import fdatools</code> never imports PyTorch; <code>fdatools.nn</code> loads it on first use.</p>
 <p><code>FDataDataset</code> serves the curves of an <code>FData</code> to a PyTorch <code>DataLoader</code>.
 Each item is one curve's coefficients (or its values on a grid, with <code>t=</code>)
