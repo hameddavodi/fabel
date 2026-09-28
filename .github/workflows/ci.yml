@@ -178,7 +178,7 @@ jobs:
       - run: uv pip install --python /tmp/smoke/bin/python dist/*.whl
       - working-directory: /tmp
         run: >
-          /tmp/smoke/bin/python -c "import importlib.resources as r, numpy as np, fdatools as fb;
+          /tmp/smoke/bin/python -c "import importlib.resources as r, numpy as np, fdatools as fdt;
           g = fdt.datasets.load_growth(); b = fdt.BSpline(domain=(1.0, 18.0), n_basis=12);
           c = np.linalg.lstsq(b(g.age), g.hgtf, rcond=None)[0];
           assert fdt.FData(c, b).n_curves == 54;
