@@ -63,6 +63,11 @@ Run from the repo root on the tagged commit (`git checkout v1.0.0`).
 - Not renamed on purpose: `tests/golden/` (never edited; contains no old name), the history in this file and the CHANGELOG 1.0.0 entry (they describe the release published as `fabel`).
 - Gate on the renamed tree: full suite 2126 passed, 5 skipped, 211 strict xfail; parity 724 passed, 211 xfail; doctests 217; ruff, `mypy --strict src/fdatools` clean; `mkdocs build --strict` clean; both notebooks pass under nbmake; `python -m build` gives `fdatools-1.0.0` wheel + sdist, `twine check` PASSED; fresh-venv smoke test imports `fdatools` without torch.
 
+## Release 1.1.0 (2026-09-28)
+- First release named `fdatools`. GATE 5 green (`make gate5`, now also runs the tour notebook): 2126 passed, 5 skipped, 211 strict xfail; parity 724 passed; mypy, ruff, mkdocs clean; `twine check` PASSED. CI 16/16 green on 95b693a.
+- Annotated tag `v1.1.0` on 95b693a; GitHub release "fdatools 1.1.0" (latest) with `fdatools-1.1.0-py3-none-any.whl` (sha256 97a2f77e...) and `fdatools-1.1.0.tar.gz` (sha256 0db3ad4f...), the same files as `dist/`. The v1.0.0 release notes now start with a pointer to v1.1.0; data-v1 retitled "fdatools dataset assets v1". Installing the wheel from the release URL and downloading a dataset works in a fresh venv.
+- PyPI: not uploaded yet (needs the user's PyPI credentials or a trusted publisher).
+
 ## Remaining work
 - **Cleanup wave (next):**
   - Done 2026-09-28: ownership set to the personal owner `hameddavodi` (author Hamed Davodi <hamed.davodi94@gmail.com>) in pyproject.toml, README.md, mkdocs.yml, CITATION.cff, LICENSE, docs/dev/data-release.md and fabel.datasets._RELEASE_URL.
