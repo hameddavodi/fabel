@@ -196,4 +196,6 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --extra dev --extra pandas --extra plot --extra io --extra torch
-      - run: uv run pip-audit
+      # Skip the project itself (it is not on PyPI) and use the OSV database, so the
+      # audit does not depend on pypi.org being up.
+      - run: uv run pip-audit --skip-editable --vulnerability-service osv
